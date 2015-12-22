@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: for
+# key: for
+# binding: direct-keybinding
+# --
+for {set ${1:i} 0} {\$$1 < ${2:10}} {${3:incr $1}} {
+    $0
+}

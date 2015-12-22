@@ -1,0 +1,9 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: header
+# key: header
+# binding: direct-keybinding
+# --
+###############################################################################
+## Author: ${1:Yang Wen}
+## Date: ${$$(calendar-current-date)}
+###############################################################################

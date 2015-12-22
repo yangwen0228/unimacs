@@ -1,0 +1,14 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: namespace with export
+# key: ns_e
+# binding: direct-keybinding
+# --
+catch {namespace delete $1}
+
+## @b namespace $1 --- Summary:$2
+namespace eval $1 {
+    namespace export -clear {[a-z]*}
+}
+# Public APIs: procname's first letter should be lower case
+$0
+# Private APIs: procname's first letter should be upper case

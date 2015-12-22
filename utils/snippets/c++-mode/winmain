@@ -1,0 +1,82 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: WinMain
+# key: WinMain
+# binding: direct-keybinding
+# --
+
+HINSTANCE main_instance;
+HWND main_window_handle;
+
+int WINAPI WinMain( HINSTANCE hinstance,
+                    HINSTANCE hprevinstance,
+                    LPSTR     lpcmdline,
+                    int       ncmdshow)
+{
+    // this is the winmain function
+    WNDCLASSEX    winclass; // this will hold the class we create
+    HWND        hwnd;     // generic window handle
+    MSG         msg;      // generic message
+    HDC         hdc;      // generic dc
+    PAINTSTRUCT ps;       // generic paintstruct
+
+    // first fill in the window class stucture
+    winclass.bcSize        = sizeof(WNDCLASSEX);
+    winclass.style         = CS_DBLCLKS | CS_OWNDC |
+                             CS_HREDRAW | CS_VREDRAW;
+    winclass.lpfnWndProc   = WindowProc;
+    winclass.cbClsExtra    = 0;
+    winclass.cbWndExtra    = 0;
+    winclass.hInstance     = hinstance;
+    winclass.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+    winclass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    winclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    winclass.lpszMenuName  = NULL;
+    winclass.lpszClassName = WINDOW_CLASS_NAME;
+    winclass.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+
+    // register the window class
+    if (!RegisterClassEx(&winclass))
+        return(0);
+
+    // create the window, note the use of WS_POPUP
+    if (!(hwnd = CreateWindowEx(NULL, // extended style
+                WINDOW_CLASS_NAME,    // class
+                "Window title",       // title
+                WS_POPUP | WS_VISIBLE,
+                0,0,               // initial x,y
+                GetSystemMetrics(SM_CXSCREEN),  // intial width
+                GetSystemMetrics(SM_CYSCREEN),  // initial height
+                NULL,         // handle to parent
+                NULL,         // handle to menu
+                hinstance,    // instance
+                NULL)))       // creation parms
+        return(0);
+
+    // save the window handle and instance in a global
+    main_window_handle = hwnd;
+    main_instance      = hinstance;
+
+    // enter main event loop
+    while(1)
+	{
+        if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
+		{
+            // test if this is a quit
+            if (msg.message == WM_QUIT)
+                break;
+
+            // translate any accelerator keys
+            TranslateMessage(&msg);
+
+            // send the message to the window proc
+            DispatchMessage(&msg);
+		} // end if
+
+        // main process goes here
+        $0
+    } // end while
+
+    // return to Windows like this
+    return(msg.wParam);
+
+} // end WinMain

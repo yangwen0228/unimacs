@@ -1,0 +1,23 @@
+# contributor: Chen Bin <chenbin DOT sh AT gmail>
+# name: <!DOCTYPE html><html>...</html>
+# key: html5
+# --
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="" />
+    <title>${1:mytitle}</title>
+    <style type="text/css"></style>
+  </head>
+  <body>
+    $0
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript">!window.jQuery && document.write('<script src="http://code.jquery.com/jquery-1.4.2.min.js"><\/script>');</script>
+    <script type="text/javascript">
+      $(document).ready(function (){
+        alert("jquery is working");
+      });
+    </script>
+  </body>
+</html>

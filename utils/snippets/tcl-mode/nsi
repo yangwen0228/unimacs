@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: nsi
+# key: nsi
+# binding: direct-keybinding
+# --
+namespace import {$0::[a-z]*}

@@ -1,0 +1,5 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: current namespace
+# key: cns
+# --
+`(save-excursion (if (string-match "namespace\\s-\+eval\\s-\+\\([^ \t]+\\)" (buffer-string)) (let ((ns (match-string 1 (buffer-string)))) (if (string-match-p "::$" ns) ns (concat ns "::")))))`

@@ -1,0 +1,4 @@
+# -*- mode: snippet -*-
+#name : println (...)
+# --
+println("${1:var}" + $1);

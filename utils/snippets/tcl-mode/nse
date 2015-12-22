@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: nse
+# key: nse
+# binding: direct-keybinding
+# --
+namespace export -clear {[a-z]*}$0

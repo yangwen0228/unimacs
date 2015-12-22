@@ -1,0 +1,9 @@
+*tempfiles
+*packages/elpa
+*packages/vendor
+*~
+/GTAGS
+/GRTAGS
+/GPATH
+*/custom.e
+*.elc

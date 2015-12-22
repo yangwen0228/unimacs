@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: fore
+# key: fore
+# binding: direct-keybinding
+# --
+foreach ${1:item} ${2:\$lst_Items} {
+    $0
+}

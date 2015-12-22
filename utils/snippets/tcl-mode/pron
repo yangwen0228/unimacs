@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: proc with namespace
+# key: pron
+# --
+proc `(save-excursion (if (string-match "namespace\\s-\+eval\\s-\+\\([^ \t]+\\)" (buffer-string)) (let ((ns (match-string 1 (buffer-string)))) (if (string-match-p "::$" ns) ns (concat ns "::")))))`${1:name} {${2:args}} {
+    $0
+}

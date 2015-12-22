@@ -1,0 +1,4 @@
+# name: hm_createmark
+# key: hm_createmark
+# --
+hm_createmark ${1:elems} ${2:1} "${3:$$(yas-choose-value '("by id only" "by name only"))}" $0;

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name : init-file standard format
+# key : init
+# --
+;;; ${1:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`}.el --- ${2:Summary}
+;;; Commentary:
+;; ${3:comments}
+
+;;; Code:
+$0
+
+(provide '$1)
+;;; $1.el ends here

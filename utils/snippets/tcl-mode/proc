@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: proc
+# key: proc
+# --
+proc ${1:name} {${2:args}} {
+    $0
+}

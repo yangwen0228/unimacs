@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: nsc
+# key: nsc
+# binding: direct-keybinding
+# --
+`(if (eq (char-before) ?\[) "namespace current" "[namespace current]::")`$0
