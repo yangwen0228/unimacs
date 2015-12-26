@@ -1,0 +1,5 @@
+Installation:	Instructions are included at the beginning of the 
+                tcl-hm-mode.el file.
+
+Documentation:	An online documentation is included in Tcl DC Mode which can
+		be displayed within Emacs by typing C-c C-h.
