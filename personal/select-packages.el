@@ -30,6 +30,7 @@
 ;;----------------------------------------------------------------------------
 ;; interface
 ;;----------------------------------------------------------------------------
+
 (require-and-configure 'init-linum-mode)
 (require-and-configure 'init-flx)
 (require-and-configure 'init-projectile)
@@ -54,6 +55,7 @@
 ;;----------------------------------------------------------------------------
 ;; editing
 ;;----------------------------------------------------------------------------
+;; (require-and-configure 'init-mmm)
 (require-and-configure 'init-avy)
 ;;(require-and-configure 'init-ace-jump-mode)
 
@@ -61,15 +63,13 @@
 ;;(require-and-configure 'init-evil-matchit)
 ;;(require-and-configure 'init-evil-mc 'evil-mc)
 ;;(require-and-configure 'init-surround)
-;;(require-and-configure 'init-paredit)
 
+(require-and-configure 'init-multiple-cursors)
 (require-and-configure 'init-undo-tree)
 (require-and-configure 'init-smartparens)
-;;----------------------------------------------------------------------------
-;; evil replacement
-;;----------------------------------------------------------------------------
-(require-and-configure 'init-multiple-cursors)
+(require-and-configure 'init-align)
 
+;; evil replacement
 (require-and-configure 'init-origami) ;  folding
 (require-and-configure 'init-origami-tcl)
 (require-and-configure 'init-hideshowvis)
@@ -100,7 +100,6 @@
 ;; (require-and-configure 'init-csharp-mode)
 ;; (require-and-configure 'init-clojure-cider)
 ;; (require-and-configure 'init-cmake-mode)
-;; (require-and-configure 'init-lisp)
 ;; (require-and-configure 'init-lua-mode)
 ;; (require-and-configure 'init-javascript)
 ;; (require-and-configure 'init-html)
@@ -133,13 +132,12 @@
 ;; (require-and-configure 'init-gnus)
 ;; (require-and-configure 'init-gud)
 ;; (require-and-configure 'init-gui-frames)
-;; (require-and-configure 'init-hippie-expand)
 ;; (require-and-configure 'init-spelling)
 ;; (require-and-configure 'init-keyfreq)
 ;; (require-and-configure 'init-ledger)
 
 
-;; (require-and-configure 'init-mmm)
+
 ;; (require-and-configure 'init-osx-keys)
 ;; (require-and-configure 'init-popwin)
 ;; (require-and-configure 'init-proxies)
@@ -185,5 +183,5 @@
 ;; (require-and-configure 'init-sunrise-commander)
 (require-and-configure 'init-fonts)
 (require-and-configure 'init-maxframe)
-
+(require-and-configure 'init-diminish)
 ;;; personal-init.el ends here

@@ -20,7 +20,7 @@
                     "GNU/bin"
                     "w3m0.5.2/bin"
                     "ag/bin"
-                    "checkers"
+                    "msys64/bin"
                     ))
       (let ((full-path (expand-file-name path my-extra-bin-dir)))
         (setenv "PATH" (concat (replace-regexp-in-string "\/" "\\\\" full-path) ";" (getenv "PATH")))

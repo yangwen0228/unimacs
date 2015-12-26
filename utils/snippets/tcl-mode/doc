@@ -1,0 +1,28 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name : doxygen proc doc
+# key : doc
+# group : doxygen
+# type : command
+# --
+ # name: python-doxygen
+ # key: pydox
+ # type: command
+ # --
+(let* ((next-func-alist (doxymacs-find-next-func))
+       (func-name (cdr (assoc 'func next-func-alist)))
+       (params-list (cdr (assoc 'args next-func-alist)))
+       (return-name (cdr (assoc 'return next-func-alist))) ;; broken in python
+       (snippet-text "")
+       (idx 1))
+  (setq snippet-text (format "## ${1:%s}\n" func-name))
+  (setq idx 2)
+  (dolist (param params-list)
+    (setq snippet-text (concat snippet-text
+                               (format "# \\param %s ${%d: (optional, default=${%d:None}) ${%d:?}}\n"
+                                       param idx (1+ idx) (+ 2
+                                                             idx))))
+    (setq idx (+ 3 idx)))
+  (setq snippet-text (concat snippet-text
+                             (format "# \\return ${%d:%s}"
+                                     idx "None")))
+  (yas/expand-snippet snippet-text))

@@ -1,0 +1,16 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: itcl class
+# key: iclass
+# group: itcl
+# binding: direct-keybinding
+# --
+package require Itcl
+
+namespace eval ${1:ns} {}
+
+catch {::itcl::delete class $1::${2:name}}
+
+## @b $3
+::itcl::class $1::$2 {
+    $0
+}

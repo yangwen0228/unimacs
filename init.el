@@ -93,6 +93,10 @@
 ;; We don't add the tempfiles folders to git, so we need to create it at the first time.
 (unless (file-exists-p prelude-tempfiles-dir)
   (make-directory prelude-tempfiles-dir))
+(unless (file-exists-p prelude-elpa-dir)
+  (make-directory prelude-elpa-dir))
+(unless (file-exists-p prelude-vendor-dir)
+  (make-directory prelude-vendor-dir))
 
 (defun prelude-add-subfolders-to-load-path (parent-dir)
  "Add all level PARENT-DIR subdirs to the `load-path'."
