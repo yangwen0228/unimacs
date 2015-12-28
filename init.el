@@ -32,12 +32,14 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
+(setq my-benchmark nil)
 ;; (setq max-lisp-eval-depth 5000)
 ;; (setq debug-on-error t)
+(setq inhibit-default-init t) ; bug @ ido.el about 'seq
 
 ;; reduce the frequency of garbage collection by making it happen on
-;; each 10MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold (* 10 1024 1024))
+;; each 50MB of allocated data (the default is on every 0.76MB)
+(setq gc-cons-threshold (* 50 1024 1024))
 
 ;;----------------------------------------------------------------------------
 ;; Which functionality to enable (use t or nil for true and false)
@@ -115,6 +117,10 @@
 (add-to-list 'load-path prelude-vendor-dir)
 (prelude-add-subfolders-to-load-path prelude-elpa-dir)
 (prelude-add-subfolders-to-load-path prelude-vendor-dir)
+(when my-benchmark
+  (require 'benchmark-init)
+  (benchmark-init/activate)
+  )
 
 ;; preload the personal settings from `prelude-personal-preload-dir'
 (when (file-exists-p prelude-personal-preload-dir)
@@ -146,6 +152,9 @@
   (mapc 'load (directory-files prelude-personal-dir 't "^[^#].*el$")))
 
 (message "Prelude rocks, Master %s!" current-user)
-
+(when my-benchmark
+  (benchmark-init/deactivate)
+  (benchmark-init/show-durations-tree)
+  )
 
 ;;; init.el ends here

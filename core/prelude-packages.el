@@ -36,59 +36,39 @@
 (require 'package)
 
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
-;; set package-user-dir to be relative to Prelude install path
+             '("melpa" . "http://melpa.milkbox.net/packages/") t) ; not stable in China mainland
+
+;; (add-to-list 'package-archives
+;;              '("popkit" . "http://elpa.popkit.org/packages/")) ; China mainland fast, but has incomprehensible buffer bug.
+;; ;; set package-user-dir to be relative to Prelude install path
 (setq package-user-dir prelude-elpa-dir)
+
 (package-initialize)
 
+;; some packages must be loaded, and should not be maintained by selectpackages.el
 (defvar prelude-packages
-  '(anzu
-    browse-kill-ring
-    company
+  '(
+    ;; libs:
     dash
+    f
+    s
+    ;; packages:
+    anzu
+    browse-kill-ring
     discover-my-major
-    diff-hl
-    diminish
-    easy-kill
+    diff-hl                ;display svn git status at the left margin
+    easy-kill              ; mark and copy whole lines, like V in Vim.
     elisp-slime-nav
     epl
-    expand-region
-    flycheck
-    gist
-    gitconfig-mode
-    gitignore-mode
-    grizzl
+    gitconfig-mode gitignore-mode
+    google-c-style
     guru-mode
-    projectile
     magit
     move-text
     rainbow-mode
-    smartparens
-    undo-tree
     volatile-highlights
-
-    ;; my packages:
-    ;; auctex
-    ;; color-theme
-    flycheck-irony
-    god-mode
-    ;; irony
-    irony-eldoc
     popup
-    google-c-style
-    helm
-    helm-flycheck
-    helm-descbinds
-    helm-swoop
-    helm-projectile
-    helm-ag
-    f
-    s
-    rainbow-delimiters
-    yasnippet
-    flx
-    flx-ido
-    flx-isearch
+    use-package
 )
   "A list of packages to ensure are installed at launch.")
 
@@ -210,15 +190,15 @@ PACKAGE is installed only if not already present.  The file is opened in MODE."
 
 (defun is-older-version (file-name all-folders)
   (cl-block checked
-    (let ((pattern "\\(.+?\\)-\\([0-9]+\\)"))
+    (let ((pattern "^\\(.+?\\)-\\([0-9]+.[0-9]+\\)$"))
       (if (string-match pattern file-name)
           (let ((name (match-string 1 file-name))
                 (time (match-string 2 file-name)))
             (dolist (file-name1 all-folders)
-              (if  (string-match pattern file-name1)
+              (if (string-match pattern file-name1)
                   (let ((name1 (match-string 1 file-name1))
                         (time1 (match-string 2 file-name1)))
-                     (if (and (string= name name1) (string< time time1))
+                    (if (and (string= name name1) (string< time time1))
                         (return-from checked t)))))))
       nil)))
 (defun delete-old-duplicate-versions ()

@@ -84,6 +84,7 @@
 (require-and-configure 'init-yasnippet)
 (require-and-configure 'init-auto-yasnippet)
 (require-and-configure 'init-flycheck)
+(require-and-configure 'init-flyspell)
 
 ;;----------------------------------------------------------------------------
 ;; programming languages

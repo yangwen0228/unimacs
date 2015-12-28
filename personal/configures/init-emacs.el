@@ -5,7 +5,7 @@
 ;;; Code:
 
 ;; Files:
-(setq inhibit-default-init t)
+(setq inhibit-default-init t) ; bug @ ido.el about 'seq
 (setq make-backup-files nil)
 ;; Hide/Show:
 (require 'hideshow)
@@ -32,8 +32,8 @@
  (*win32*
   ;; (setq default-buffer-file-coding-system 'cp936-dos)
   ;; (prefer-coding-system 'cp936-dos))
-  (setq default-buffer-file-coding-system 'utf-8-dos)
-  (prefer-coding-system 'utf-8-dos)
+  (setq default-buffer-file-coding-system 'utf-8-unix)
+  (prefer-coding-system 'utf-8-unix)
   )
  (t
   (setq default-buffer-file-coding-system 'utf-8-unix)

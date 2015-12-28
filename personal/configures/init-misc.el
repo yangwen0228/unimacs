@@ -200,7 +200,7 @@
   version-control t  ;use versioned backups
   )
 ;; Make backups of files, even when they're in version control
-(setq vc-make-backup-files t)
+(setq vc-make-backup-files nil)
 
 ; from RobinH
 ;Time management
@@ -234,14 +234,6 @@
 
   )
 
-;; M-x ct ENTER
-(defun ct (dir-name)
-  "Create tags file."
-  (interactive "DDirectory: ")
-  (shell-command
-   (format "ctags -f %s/TAGS -e -R %s" dir-name (directory-file-name dir-name)))
-  )
-
 ; @see http://xahlee.blogspot.com/2012/01/emacs-tip-hotkey-for-repeat-complex.html
 (global-set-key [f2] 'repeat-complex-command)
 
@@ -266,9 +258,7 @@
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    (while (search-forward "\n" nil t) (replace-match "\r\n"))
-    )
-  )
+    (while (search-forward "\n" nil t) (replace-match "\r\n"))))
 
 ;show ascii table
 (defun ascii-table ()
@@ -283,7 +273,6 @@
            (insert (format "%4d %c\n" i i))))
   (beginning-of-buffer))
 
-
 ;; I'm in Australia now, so I set the locale to "en_AU"
 (defun insert-date (prefix)
     "Insert the current date. With prefix-argument, use ISO format. With
@@ -296,11 +285,10 @@
           )
       (insert (format-time-string format))))
 
-(defun insert-blog-version ()
-  "insert version of my blog post"
+(defun insert-plain-date ()
+  "insert plain date like 20150101"
   (interactive)
-  (insert (format-time-string "%Y%m%d"))
-  )
+  (insert (format-time-string "%Y%m%d")))
 
 ;;compute the length of the marked region
 (defun region-length ()
