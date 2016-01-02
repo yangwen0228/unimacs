@@ -7,7 +7,7 @@
 (defun my-byte-compile-configures-dir ()
   "Byte-compile all your configures."
   (interactive)
-  (byte-recompile-directory prelude-configures-dir 0 t))
+  (byte-recompile-directory unimacs-configures-dir 0 t))
 
 (defun my-remove-elc-on-save ()
   "If you're saving an elisp file, likely the .elc is no longer valid."
@@ -20,7 +20,7 @@
 
 (add-hook 'emacs-lisp-mode-hook 'my-remove-elc-on-save)
 
-(add-hook 'kill-emacs-hook (lambda () (byte-recompile-directory prelude-configures-dir 0)))
+(add-hook 'kill-emacs-hook (lambda () (byte-recompile-directory unimacs-configures-dir 0)))
 
 (provide 'init-byte-compile)
 ;;; init-byte-compile.el ends here

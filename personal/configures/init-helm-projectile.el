@@ -3,8 +3,12 @@
 ;; comments
 
 ;;; Code:
-(require 'helm-projectile)
-(helm-projectile-on)
+(use-package helm-projectile
+  :defer t
+  :config
+  (require 'helm-projectile)
+  (helm-projectile-on)
+  )
 
 (provide 'init-helm-projectile)
 ;;; init-helm-projectile.el ends here

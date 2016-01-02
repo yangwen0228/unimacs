@@ -8,8 +8,8 @@
 (setq w3m-use-cookies t)
 (setq w3m-cookie-accept-bad-cookies t)
 (setq w3m-home-page
-      (if (file-readable-p (expand-file-name "html/home.html" prelude-tempfiles-dir))
-          (concat "file://" (expand-file-name "html/home.html" prelude-tempfiles-dir))
+      (if (file-readable-p (expand-file-name "html/home.html" unimacs-tempfiles-dir))
+          (concat "file://" (expand-file-name "html/home.html" unimacs-tempfiles-dir))
         "http://www.baidu.com"))
 
 ;; set proxy

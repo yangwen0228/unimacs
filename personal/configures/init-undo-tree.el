@@ -1,4 +1,13 @@
-(autoload 'undo-tree-visualize "undo-tree" "" nil)
-;; the only function I care about in undo-tree because evil-mode already use it
-(global-set-key "\C-xu" 'undo-tree-visualize)
+;;; init-undo-tree.el --- Summary
+;;; Commentary:
+;; comments
+
+;;; Code:
+(use-package undo-tree
+  :bind (("C-x u" . undo-tree-visualize)
+         ("C-_"   . undo-tree-undo)
+         ("C--"   . undo-tree-redo))
+  )
+
 (provide 'init-undo-tree)
+;;; init-undo-tree.el ends here

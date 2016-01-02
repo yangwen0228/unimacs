@@ -1,15 +1,18 @@
+;;; init-fonts.el --- Summary
+;;; Commentary:
+;; comments
+
+;;; Code:
 (require 'cl)
 
-(cond
- (*win32*
-  ;; (set-face-attribute 'default nil :family "Consolas" :height 140 :weight 'bold))
-  (set-face-attribute 'default nil :family "Consolas" :height 125 :weight 'normal)
-  (setq-default line-spacing 0.15)
-  )
- (*is-a-mac*
-  (set-face-attribute 'default nil :height 125)
-  (setq-default line-spacing 0.15)
- ))
+(let ((font))
+  (cond
+   (*win32*    (setq font "Consolas"))
+   (*is-a-mac* (setq font "Consolas")))
+  (set-face-attribute 'default nil
+                      :family font
+                      :height 110 :weight 'normal)
+  (setq-default line-spacing 0.15))
 
 (defun font-name-replace-size (font-name new-size)
   (let ((parts (split-string font-name "-")))
@@ -29,7 +32,7 @@ DELTA should be a multiple of 10, in the units used by the
         ;; we cater to Emacs 23 by looping instead.
         (set-frame-font (font-name-replace-size (face-font 'default)
                                                 new-point-height)
-                        t)))
+                        nil)))
     (set-face-attribute 'default nil :height new-height)
     (message "default font size is now %d" new-point-height)))
 
@@ -41,9 +44,10 @@ DELTA should be a multiple of 10, in the units used by the
   (interactive)
   (increment-default-font-height -10))
 
-(global-set-key (kbd "C-M-=") 'increase-default-font-height)
-(global-set-key (kbd "C-M--") 'decrease-default-font-height)
-
-
+(bind-key "C-M-=" 'increase-default-font-height)
+(bind-key "C-M--" 'decrease-default-font-height)
+(bind-key "M-+"   'text-scale-increase)   ; Font size +
+(bind-key "M-_"   'text-scale-decrease)   ; Font size -
 
 (provide 'init-fonts)
+;;; init-fonts.el ends here

@@ -599,6 +599,9 @@ Prefix argument means invert sense of `tcl-use-smart-word-finder'."
     (if file
         (progn
           ;; Use the w3m to read the html files.
+          (if (= (count-windows) 1)
+              (split-window-horizontally))
+          (other-window 1)
           (w3m-goto-url (concat "file://" file))
           )
       (if (string= command "")

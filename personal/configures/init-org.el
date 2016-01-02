@@ -94,7 +94,7 @@
       ;;(require 'org-checklist)
       (require 'org-fstree)
       (setq org-ditaa-jar-path (format "%s%s" (if *cygwin* "c:/cygwin" "")
-                                       (expand-file-name "contrib/scripts/ditaa.jar" prelude-elpa-dir)) )
+                                       (expand-file-name "contrib/scripts/ditaa.jar" unimacs-elpa-dir)) )
       (define-key org-mode-map "\C-cb" 'org-make-code-block)
 
       (defun soft-wrap-lines ()
@@ -121,7 +121,7 @@
     ad-do-it))
 
 ;; {{ org2nikola set up
-(setq org2nikola-output-root-directory (expand-file-name "projs/blog.yangwen0228.org" prelude-personal-dir))
+(setq org2nikola-output-root-directory (expand-file-name "projs/blog.yangwen0228.org" unimacs-personal-dir))
 (setq org2nikola-use-google-code-prettify t)
 (setq org2nikola-prettify-unsupported-language
       '(elisp "lisp"

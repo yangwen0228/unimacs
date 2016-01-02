@@ -20,5 +20,12 @@
 (add-hook 'lisp-mode-hook 'turn-on-smartparens-strict-mode)
 (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode)
 
+(defun unimacs-create-sp-wrapper (s)
+  "Create a wrapper function for smartparens using S."
+  `(lambda (&optional arg)
+     (interactive "P")
+     (sp-wrap-with-pair ,s)))
+
+
 (provide 'init-smartparens)
 ;;; init-smartparens.el ends here

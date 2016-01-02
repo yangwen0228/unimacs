@@ -1,4 +1,4 @@
-(setq my-extra-bin-dir (expand-file-name "extra-bins" prelude-utils-dir))
+(setq my-extra-bin-dir (expand-file-name "extra-bins" unimacs-utils-dir))
 
 
 (eval-after-load 'exec-path-from-shell
@@ -17,9 +17,6 @@
                     "glo651wb/bin"
                     "ctags5.8/bin"
                     "irony/bin"
-                    "GNU/bin"
-                    "w3m0.5.2/bin"
-                    "ag/bin"
                     "msys64/bin"
                     ))
       (let ((full-path (expand-file-name path my-extra-bin-dir)))

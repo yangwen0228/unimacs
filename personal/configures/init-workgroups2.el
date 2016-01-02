@@ -13,7 +13,7 @@
 (setq wg-prefix-key (kbd "C-c w"))
 
 ;; Change workgroups session file
-(setq wg-session-file (expand-file-name ".emacs_workgroups" prelude-tempfiles-dir))
+(setq wg-session-file (expand-file-name ".emacs_workgroups" unimacs-tempfiles-dir))
 
 ;; Set your own keyboard shortcuts to reload/save/switch WGs:
 ;; "s" == "Super" or "Win"-key, "S" == Shift, "C" == Control

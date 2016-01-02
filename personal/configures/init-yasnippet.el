@@ -4,7 +4,7 @@
 (require 'yasnippet)
 
 ;; my private snippets
-(setq my-yasnippet-dir (expand-file-name "snippets" prelude-utils-dir))
+(setq my-yasnippet-dir (expand-file-name "snippets" unimacs-utils-dir))
 ;; (setq yas-snippet-dirs (list my-yasnippet-dir))
 (setq yas-snippet-dirs (list yas-installed-snippets-dir))
 (if (and  (file-exists-p my-yasnippet-dir) (not (member my-yasnippet-dir yas-snippet-dirs)))

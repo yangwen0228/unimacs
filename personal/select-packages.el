@@ -8,181 +8,164 @@
 ;;----------------------------------------------------------------------------
 ;; Load configs for specific features and modes
 ;;----------------------------------------------------------------------------
-(defun require-and-configure (configure &optional package)
+(defun require-and-configure (configure)
   (condition-case err
-      (progn
-        (if package (prelude-require-package package))
-        (require configure nil 'noerror))
-    (error (error "when load %s : %s" package err))
-    ))
-;;----------------------------------------------------------------------------
-;; basic functions && frame
-;;----------------------------------------------------------------------------
-(require-and-configure 'init-funcs) ;; must come first
-(require-and-configure 'init-emacs)
-(require-and-configure 'init-misc)
-(require-and-configure 'init-exec-path) ;; Set up $PATH
-(require-and-configure 'init-recentf)
+      (require configure nil 'noerror)
+    (message (error "when load %s : %s" package err))))
 
-(require-and-configure 'init-dired+)
-(require-and-configure 'init-bind-key)
-(require-and-configure 'init-byte-compile)
-;;----------------------------------------------------------------------------
-;; interface
-;;----------------------------------------------------------------------------
+(setq unimacs-init-packages
+      '(
+        ;;-------------------------------------------------------------------
+        ;; basic functions && frame
+        ;;-------------------------------------------------------------------
+        init-funcs
+        init-emacs
+        init-misc
+        init-exec-path
+        init-recentf
+        init-dired+
+        init-bind-key
+        init-byte-compile
+        ;;-------------------------------------------------------------------
+        ;; interface
+        ;;-------------------------------------------------------------------
+        init-linum-mode
+        init-flx
+        init-projectile
+        init-window-numbering
+        ;; init-powerline
+        ;; init-smart-mode-line
+        
+        init-auto-highlight-symbol
+        init-highlight-chars
+        init-rainbow-delimiters
 
-(require-and-configure 'init-linum-mode)
-(require-and-configure 'init-flx)
-(require-and-configure 'init-projectile)
-(require-and-configure 'init-window-numbering)
+        init-ido
+        init-ido-vertical
 
-;; (require-and-configure 'init-powerline)
-;; (require-and-configure 'init-smart-mode-line)
-(require-and-configure 'init-auto-highlight-symbol)
-(require-and-configure 'init-highlight-chars)
-(require-and-configure 'init-rainbow-delimiters)
+        init-helm
+        init-helm-projectile
+        init-helm-swoop
+        init-helm-descbinds
+        init-helm-flycheck
+        init-helm-ag
+        init-helm-gtags
+        ;;-------------------------------------------------------------------
+        ;; editing
+        ;;-------------------------------------------------------------------
+        ;; init-mmm
+        init-avy
+        ;;init-ace-jump-mode
 
-(require-and-configure 'init-ido)
-(require-and-configure 'init-ido-vertical)
+        ;;init-evil
+        ;;init-evil-matchit
+        ;;init-evil-mc 'evil-mc
+        ;;init-surround
 
-(require-and-configure 'init-helm)
-(require-and-configure 'init-helm-projectile)
-(require-and-configure 'init-helm-swoop)
-(require-and-configure 'init-helm-descbinds)
-(require-and-configure 'init-helm-flycheck)
-(require-and-configure 'init-helm-ag)
-(require-and-configure 'init-helm-gtags)
-;;----------------------------------------------------------------------------
-;; editing
-;;----------------------------------------------------------------------------
-;; (require-and-configure 'init-mmm)
-(require-and-configure 'init-avy)
-;;(require-and-configure 'init-ace-jump-mode)
+        init-multiple-cursors
+        init-undo-tree
+        init-smartparens
+        init-align
 
-;;(require-and-configure 'init-evil)
-;;(require-and-configure 'init-evil-matchit)
-;;(require-and-configure 'init-evil-mc 'evil-mc)
-;;(require-and-configure 'init-surround)
+        ;; evil replacement
+        init-origami ;  foldin
+        init-origami-tcl
+        init-hideshowvis
 
-(require-and-configure 'init-multiple-cursors)
-(require-and-configure 'init-undo-tree)
-(require-and-configure 'init-smartparens)
-(require-and-configure 'init-align)
+        init-expand-region ; expand regio
+        init-comment-dwim-2 ; evil-nerd-commentar
 
-;; evil replacement
-(require-and-configure 'init-origami) ;  folding
-(require-and-configure 'init-origami-tcl)
-(require-and-configure 'init-hideshowvis)
+        ;;-------------------------------------------------------------------
+        ;; auto company && auto check
+        ;;-------------------------------------------------------------------
+        init-company
+        init-yasnippet
+        init-auto-yasnippet
+        init-flycheck
+        ;; init-flyspell
 
-(require-and-configure 'init-expand-region) ; expand region
-(require-and-configure 'init-comment-dwim-2) ; evil-nerd-commentary
+        ;;-------------------------------------------------------------------
+        ;; programming languages
+        ;;-------------------------------------------------------------------
+        init-emacs-w3m
+        init-elisp
+        init-python-mode
+        init-tcl-hm-mode
+        init-header2
+        init-markdown
+        ;; init-haskell
+        ;; init-rails
+        ;; init-ruby-mode
+        ;; init-csharp-mode
+        ;; init-clojure-cider
+        ;; init-cmake-mode
+        ;; init-lua-mode
+        ;; init-javascript
+        ;; init-html
+        ;; init-erlang
 
-;;----------------------------------------------------------------------------
-;; auto company && auto check
-;;----------------------------------------------------------------------------
-(require-and-configure 'init-company)
-(require-and-configure 'init-yasnippet)
-(require-and-configure 'init-auto-yasnippet)
-(require-and-configure 'init-flycheck)
-(require-and-configure 'init-flyspell)
+        ;; init-cc-mode
+        ;; init-irony
+        ;; init-irony-eldoc
+        ;; init-cpputils-cmake
+        ;; init-compile
+        ;;-------------------------------------------------------------------
+        ;; writting
+        ;;-------------------------------------------------------------------
+        init-org
+        init-org-mime
+        init-cnblogs
+        ;;init-auctex
+        ;; init-darcs
+        ;; init-doxygen
+        ;; init-frame-hooks
+        ;; init-gist
+        ;; init-git
+        ;; init-gnus
+        ;; init-gud
+        ;; init-gui-frames
+        ;; init-spelling
+        ;; init-keyfreq
+        ;; init-ledger
+        ;; init-osx-keys
+        ;; init-popwin
+        ;; init-proxies
+        ;; init-sql
+        ;; init-sr-speedbar
+        ;; init-vc
+        ;;-------------------------------------------------------------------
+        ;; modules not offen used
+        ;;-------------------------------------------------------------------
+        ;; init-bbdb
+        ;; init-css
+        ;; init-csv
+        ;; init-elnode
+        ;; init-emms
+        ;; init-haml
+        ;; init-moz
+        ;; init-sessions
+        ;; init-sh
+        ;; init-slime
+        ;; init-term-mode
+        ;; init-textile
+        ;; init-themes
+        ;; init-uniquify
+        ;; init-web-mode
+        ;; init-which-func
+        ;; init-windows
+        ;; init-xterm
+        ;; init-yari
+        ;; init-zencoding-mode
+        ;; init-modeline
+        ;; init-nyan
+        ;; init-semantic
+        ;; init-crontab
+        ;; init-workgroups2
+        ;; init-sunrise-commander
+        init-fonts
+        init-maxframe
+        init-diminish
+        ))
 
-;;----------------------------------------------------------------------------
-;; programming languages
-;;----------------------------------------------------------------------------
-(require-and-configure 'init-emacs-w3m)
-(require-and-configure 'init-elisp)
-(require-and-configure 'init-python-mode)
-(require-and-configure 'init-tcl-hm-mode)
-(require-and-configure 'init-header2)
-(require-and-configure 'init-markdown)
-;; (require-and-configure 'init-haskell)
-;; (require-and-configure 'init-rails)
-;; (require-and-configure 'init-ruby-mode)
-;; (require-and-configure 'init-csharp-mode)
-;; (require-and-configure 'init-clojure-cider)
-;; (require-and-configure 'init-cmake-mode)
-;; (require-and-configure 'init-lua-mode)
-;; (require-and-configure 'init-javascript)
-;; (require-and-configure 'init-html)
-;; (require-and-configure 'init-erlang)
-
-;; (require-and-configure 'init-cc-mode)
-;; (require-and-configure 'init-irony)
-;; (require-and-configure 'init-irony-eldoc)
-;; (require-and-configure 'init-cpputils-cmake)
-;; (require-and-configure 'init-compile)
-;;----------------------------------------------------------------------------
-;; writting
-;;----------------------------------------------------------------------------
-(require-and-configure 'init-org)
-(require-and-configure 'init-org-mime)
-(require-and-configure 'init-cnblogs)
-
-;;(require-and-configure 'init-auctex)
-
-;; not finished
-;; (require-and-configure 'init-darcs)
-;; (require-and-configure 'init-dash)
-;; (require-and-configure 'init-doxygen)
-
-;; (require-and-configure 'init-emacspeak)
-
-;; (require-and-configure 'init-frame-hooks)
-;; (require-and-configure 'init-gist)
-;; (require-and-configure 'init-git)
-;; (require-and-configure 'init-gnus)
-;; (require-and-configure 'init-gud)
-;; (require-and-configure 'init-gui-frames)
-;; (require-and-configure 'init-spelling)
-;; (require-and-configure 'init-keyfreq)
-;; (require-and-configure 'init-ledger)
-
-
-
-;; (require-and-configure 'init-osx-keys)
-;; (require-and-configure 'init-popwin)
-;; (require-and-configure 'init-proxies)
-
-
-;; (require-and-configure 'init-sql)
-;; (require-and-configure 'init-sr-speedbar)
-;; (require-and-configure 'init-vc)
-
-;; modules not offen used
-;; (require-and-configure 'init-bbdb)
-;; (require-and-configure 'init-css)
-;; (require-and-configure 'init-csv)
-;; (require-and-configure 'init-elnode)
-;; (require-and-configure 'init-emms)
-;; (require-and-configure 'init-haml)
-;; (require-and-configure 'init-moz)
-
-
-
-;; (require-and-configure 'init-sessions)
-;; (require-and-configure 'init-sh)
-;; (require-and-configure 'init-slime)
-;; (require-and-configure 'init-term-mode)
-;; (require-and-configure 'init-textile)
-;; (require-and-configure 'init-themes)
-;; (require-and-configure 'init-uniquify)
-;; (require-and-configure 'init-web-mode)
-;; (require-and-configure 'init-which-func)
-;; (require-and-configure 'init-windows)
-;; (require-and-configure 'init-xterm)
-;; (require-and-configure 'init-yari)
-;; (require-and-configure 'init-zencoding-mode)
-;; (require-and-configure 'init-modeline)
-;; (require-and-configure 'init-nyan)
-
-
-;; beated packages ;;;;;;;;;;;;;;;;;;;;;;;;
-;; (require-and-configure 'init-semantic)
-
-;; (require-and-configure 'init-crontab)
-;; (require-and-configure 'init-workgroups2)
-;; (require-and-configure 'init-sunrise-commander)
-(require-and-configure 'init-fonts)
-(require-and-configure 'init-maxframe)
-(require-and-configure 'init-diminish)
+(mapc 'require-and-configure unimacs-init-packages)
 ;;; personal-init.el ends here

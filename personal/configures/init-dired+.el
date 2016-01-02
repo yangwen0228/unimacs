@@ -3,6 +3,10 @@
 ;; comments
 
 ;;; Code:
+(use-package dired-details
+  :init
+  (progn
+    ))
 (require 'dired-details)
 (dired-details-install)
 
