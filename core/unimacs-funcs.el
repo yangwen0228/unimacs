@@ -29,6 +29,9 @@
 (require 'thingatpt)
 (require 'dash)
 
+;; enable y/n answers
+(fset 'yes-or-no-p 'y-or-n-p)
+
 (defun unimacs-open-with (arg)
   "Open visited file in default external program.
 
@@ -227,8 +230,7 @@ With a prefix ARG, force recompile all files."
    (list (when current-prefix-arg
            (setq force t))))
   (byte-recompile-directory unimacs-core-dir 0 force)
-  (byte-recompile-directory unimacs-configures-dir 0 force)
-  (byte-recompile-directory unimacs-vendor-dir 0 force))
+  (byte-recompile-directory unimacs-configures-dir 0 force))
 
 (defun unimacs-sudo-edit (&optional arg)
   "Edit currently visited file as root.
@@ -363,6 +365,12 @@ Doesn't mess with normal buffers."
                            ((s-equals? "bash" shell) ".bashrc")
                            (t (error "Unknown shell")))))
     (find-file-other-window (expand-file-name shell-init-file (getenv "HOME")))))
+
+(defun unimacs-toggle-list-bookmarks ()
+  (interactive)
+  (if (equalp "*Bookmark List*" (buffer-name))
+      (quit-window)
+    (call-interactively 'list-bookmarks)))
 
 (defadvice ido-find-file (after find-file-sudo activate)
   "Find file as root if necessary."

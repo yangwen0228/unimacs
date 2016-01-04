@@ -5,7 +5,7 @@
 ;;----------------------------------------------------------------------------
 (when (and *is-a-mac* (executable-find "proxy-config"))
   (defun mac-configured-proxy (proto)
-    (string-rtrim (shell-command-to-string
+    (s-trim-right (shell-command-to-string
                    (concat "proxy-config " (cdr (assoc-string proto '(("http" . "-h") ("https" . "-s"))))))))
 
   (defun extract-host-and-port (url-string)

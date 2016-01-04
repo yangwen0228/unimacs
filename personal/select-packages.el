@@ -2,6 +2,8 @@
 ;; You customize your personel lisp codes here.
 
 ;;; Commentary:
+;; Don't use linum-mode, it's very slow when scroll in big files.
+;; Don't use showhidevis, it has problem to open big files.
 
 ;;; code:
 ;; -*- coding: utf-8 -*-
@@ -24,20 +26,18 @@
         init-exec-path
         init-recentf
         init-dired+
-        init-bind-key
         init-byte-compile
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
-        init-linum-mode
+        init-discover-my-major
         init-flx
         init-projectile
         init-window-numbering
         ;; init-powerline
         ;; init-smart-mode-line
-        
+
         init-auto-highlight-symbol
-        init-highlight-chars
         init-rainbow-delimiters
 
         init-ido
@@ -57,11 +57,6 @@
         init-avy
         ;;init-ace-jump-mode
 
-        ;;init-evil
-        ;;init-evil-matchit
-        ;;init-evil-mc 'evil-mc
-        ;;init-surround
-
         init-multiple-cursors
         init-undo-tree
         init-smartparens
@@ -70,7 +65,6 @@
         ;; evil replacement
         init-origami ;  foldin
         init-origami-tcl
-        init-hideshowvis
 
         init-expand-region ; expand regio
         init-comment-dwim-2 ; evil-nerd-commentar
@@ -114,7 +108,6 @@
         ;;-------------------------------------------------------------------
         init-org
         init-org-mime
-        init-cnblogs
         ;;init-auctex
         ;; init-darcs
         ;; init-doxygen
@@ -162,9 +155,8 @@
         ;; init-crontab
         ;; init-workgroups2
         ;; init-sunrise-commander
-        init-fonts
         init-maxframe
-        init-diminish
+        ;; init-diminish
         ))
 
 (mapc 'require-and-configure unimacs-init-packages)

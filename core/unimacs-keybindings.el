@@ -38,15 +38,21 @@
 (bind-key "M-z" 'zop-up-to-char)
 (bind-key "M-Z" 'zop-to-char)
 
+(bind-key "RET" 'newline-and-indent)
+
 (bind-key "A"   'apropos              'help-command); apropos-command (C-h a)
-(bind-key "C-m" 'discover-my-major    'help-command)
 (bind-key "C-f" 'find-function        'help-command)
 (bind-key "C-k" 'find-function-on-key 'help-command)
 (bind-key "C-v" 'find-variable        'help-command)
 (bind-key "C-l" 'find-library         'help-command)
 (bind-key "C-i" 'info-display-manual  'help-command)
 
+(bind-key "<f2>"  'repeat-complex-command)
+(bind-key "<f10>" 'toggle-frame-maximized)
+(bind-key "<f11>" 'toggle-frame-fullscreen)
 (bind-key "<f12>" 'menu-bar-mode); toggle menu-bar visibility
+
+(bind-key "M-<f12>"  'unimacs-toggle-list-bookmarks)
 
 (bind-key "M-%"   'anzu-query-replace)
 (bind-key "C-M-%" 'anzu-query-replace-regexp)
@@ -57,8 +63,8 @@
 (bind-key "C-a"             'unimacs-move-beginning-of-line)
 (bind-key "C-M-\\"          'unimacs-indent-current-line-or-region)
 (bind-key "C-M-|"           'unimacs-indent-buffer)
-(bind-key "C-o"             'unimacs-smart-open-line-above)
-(bind-key "C-O"             'unimacs-smart-open-line-below)
+(bind-key "C-S-o"           'unimacs-smart-open-line-above)
+(bind-key "C-o"             'unimacs-smart-open-line-below)
 (bind-key "C-^"             'unimacs-join-next-line)
 (bind-key* "M-0"            'unimacs-switch-to-previous-buffer)
 (bind-key "C-x C-x"         'unimacs-exchange-point-and-mark)

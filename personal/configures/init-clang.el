@@ -59,7 +59,7 @@
 (setq my-clang-include-directories
       (mapcar (lambda (item)
                 (concat
-                 (string-rtrim (replace-regexp-in-string "^\s*" "" item))))
+                 (s-trim-right (replace-regexp-in-string "^\s*" "" item))))
               (remove-if #'(lambda (item) (string-match-p "^\s*$" item))
                          (split-string clang-include-dir-str "\n"))))
 

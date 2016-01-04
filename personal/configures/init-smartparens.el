@@ -26,6 +26,15 @@
      (interactive "P")
      (sp-wrap-with-pair ,s)))
 
+;; (setq sp-base-key-bindings 'paredit)
+;; (setq sp-autoskip-closing-pair 'always)
+;; (setq sp-hybrid-kill-entire-symbol nil)
+;; (sp-use-paredit-bindings)
+;; (show-smartparens-global-mode +1)
+;; (define-key prog-mode-map (kbd "M-(") (prelude-wrap-with "("))
+;; (define-key prog-mode-map (kbd "M-[") (prelude-wrap-with "["))
+;; (define-key prog-mode-map (kbd "M-\"") (prelude-wrap-with "\""))
+
 
 (provide 'init-smartparens)
 ;;; init-smartparens.el ends here

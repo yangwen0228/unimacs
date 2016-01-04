@@ -1,163 +1,19 @@
 ;;----------------------------------------------------------------------------
 ;; Some basic preferences
 ;;----------------------------------------------------------------------------
-(setq-default
- blink-cursor-delay 0
- blink-cursor-interval 0.4
- buffers-menu-max-size 30
- case-fold-search t
- compilation-scroll-output t
- ;;ediff-split-window-function 'split-window-horizontally
- ediff-split-window-function 'split-window-vertically
- ediff-window-setup-function 'ediff-setup-windows-plain
- grep-highlight-matches t
- grep-scroll-output t
- indent-tabs-mode nil
- line-spacing 0.2
- mouse-yank-at-point t
- set-mark-command-repeat-pop t
- tooltip-delay 0.5
- truncate-lines nil
- truncate-partial-width-windows nil
- ;; no annoying beep on errors
- visible-bell t)
-
-(global-auto-revert-mode)
-(setq global-auto-revert-non-file-buffers t
-      auto-revert-verbose nil)
-
-;; @see http://www.quora.com/Whats-the-best-way-to-edit-remote-files-from-Emacs
-(setq tramp-default-method "ssh")
-(setq tramp-auto-save-directory "~/.emacs.d/.backups/tramp")
-(setq tramp-chunksize 8192)
 
 ;; But don't show trailing whitespace in SQLi, inf-ruby etc.
 (add-hook 'comint-mode-hook
           (lambda () (setq show-trailing-whitespace nil)))
 
-(transient-mark-mode t)
-
-(define-key global-map (kbd "RET") 'newline-and-indent)
-
-
-(add-to-list 'auto-mode-alist '("\\.[Cc][Ss][Vv]\\'" . csv-mode))
-(autoload 'csv-mode "csv-mode" "Major mode for comma-separated value files." t)
-'
-;;----------------------------------------------------------------------------
-;; Zap *up* to char is a more sensible default
-;;----------------------------------------------------------------------------
-(autoload 'zap-up-to-char "misc" "Kill up to, but not including ARGth occurrence of CHAR.")
-
-;;----------------------------------------------------------------------------
-;; Don't disable narrowing commands
-;;----------------------------------------------------------------------------
-(put 'narrow-to-region 'disabled nil)
-(put 'narrow-to-page 'disabled nil)
-(put 'narrow-to-defun 'disabled nil)
-
-;;----------------------------------------------------------------------------
-;; Show matching parens
-;;----------------------------------------------------------------------------
-(paren-activate)     ; activating mic-paren
-
-;;----------------------------------------------------------------------------
-;; Fix per-window memory of buffer point positions
-;;----------------------------------------------------------------------------
-(global-pointback-mode)
-
-;;----------------------------------------------------------------------------
-;; Handy key bindings
-;;----------------------------------------------------------------------------
-;; To be able to M-x without meta
-(global-set-key (kbd "C-x C-m") 'execute-extended-command)
-
-(global-set-key (kbd "C-.") 'set-mark-command)
-(global-set-key (kbd "C-x C-.") 'pop-global-mark)
-
-;;----------------------------------------------------------------------------
-;; Page break lines
-;;----------------------------------------------------------------------------
-(global-page-break-lines-mode)
-
-;;----------------------------------------------------------------------------
-;; Shift lines up and down with M-up and M-down
-;;----------------------------------------------------------------------------
-(move-text-default-bindings)
-
-;;----------------------------------------------------------------------------
-;; Cut/copy the current line if no region is active
-;;----------------------------------------------------------------------------
-;(whole-line-or-region-mode t)
-;(diminish 'whole-line-or-region-mode)
-;(make-variable-buffer-local 'whole-line-or-region-mode)
-
-(defun suspend-mode-during-cua-rect-selection (mode-name)
-  "Add an advice to suspend `MODE-NAME' while selecting a CUA rectangle."
-  (let ((flagvar (intern (format "%s-was-active-before-cua-rectangle" mode-name)))
-        (advice-name (intern (format "suspend-%s" mode-name))))
-    (eval-after-load 'cua-rect
-      `(progn
-         (defvar ,flagvar nil)
-         (make-variable-buffer-local ',flagvar)
-         (defadvice cua--activate-rectangle (after ,advice-name activate)
-           (setq ,flagvar (and (boundp ',mode-name) ,mode-name))
-           (when ,flagvar
-             (,mode-name 0)))
-         (defadvice cua--deactivate-rectangle (after ,advice-name activate)
-           (when ,flagvar
-             (,mode-name 1)))))))
-
-
-
-(suspend-mode-during-cua-rect-selection 'whole-line-or-region-mode)
-
-;;----------------------------------------------------------------------------
-;; Random line sorting
-;;----------------------------------------------------------------------------
-(defun sort-lines-random (beg end)
-  "Sort lines in region randomly."
-  (interactive "r")
-  (save-excursion
-    (save-restriction
-      (narrow-to-region beg end)
-      (goto-char (point-min))
-      (let ;; To make `end-of-line' and etc. to ignore fields.
-          ((inhibit-field-text-motion t))
-        (sort-subr nil 'forward-line 'end-of-line nil nil
-                   (lambda (s1 s2) (eq (random 2) 0)))))))
-
-;need install browse-kill-ring
-(browse-kill-ring-default-keybindings)
-
-;; show trailing spaces in a programming mod
-(add-hook 'prog-mode-hook (lambda () (setq show-trailing-whitespace t)))
-
 ;; turns on auto-fill-mode, don't use text-mode-hook because for some
 ;; mode (org-mode for example), this will make the exported document
 ;; ugly!
 ;; (add-hook 'markdown-mode-hook 'turn-on-auto-fill)
-(add-hook 'change-log-mode-hook 'turn-on-auto-fill)
-(add-hook 'cc-mode-hook 'turn-on-auto-fill)
-(global-set-key (kbd "C-c q") 'auto-fill-mode)
+;; (add-hook 'change-log-mode-hook 'turn-on-auto-fill)
+;; (add-hook 'cc-mode-hook 'turn-on-auto-fill)
+;; (global-set-key (kbd "C-c q") 'auto-fill-mode)
 
-;; {{ whitespace
-;; (require 'whitespace)
-;; (setq whitespace-style '(face empty tabs lines-tail trailing))
-;; (global-whitespace-mode t)
-;; }}
-
-;; some project prefer tab, so be it
-;; @see http://stackoverflow.com/questions/69934/set-4-space-indent-in-emacs-in-text-mode
-(setq-default tab-width 4)
-(defun toggle-indent-tab ()
-  (interactive)
-  (if indent-tabs-mode
-      (progn
-        (setq indent-tabs-mode nil))
-    (progn
-        (setq indent-tabs-mode t)
-        (setq indent-line-function 'insert-tab)
-      )))
 ;;----------------------------------------------------------------------------
 ;; Misc config - yet to be placed in separate files
 ;;----------------------------------------------------------------------------
@@ -168,37 +24,17 @@
 (add-to-list 'auto-mode-alist '("\\.bashrc\\'" . sh-mode))
 ;; }}
 
-
-;; midnight mode purges buffers which haven't been displayed in 3 days
-(require 'midnight)
-(setq midnight-mode t)
-
-(add-auto-mode 'tcl-mode "Portfile\\'")
-(fset 'yes-or-no-p 'y-or-n-p)
-
-(column-number-mode 1)
-
-;; NO automatic new line when scrolling down at buffer bottom
-(setq next-line-add-newlines nil)
-
-;; @see http://stackoverflow.com/questions/4222183/emacs-how-to-jump-to-function-definition-in-el-file
-(global-set-key (kbd "C-h C-f") 'find-function)
-
-;Ctrl-X, u/l  to upper/lowercase regions without confirm
-(put 'downcase-region 'disabled nil)
-(put 'upcase-region 'disabled nil)
-
 ;; Write backup files to own directory
-(if (not (file-exists-p "~/.emacs.d/.backups"))
-    (make-directory (expand-file-name "~/.emacs.d/.backups")))
-(setq
-  backup-by-coping t ; don't clobber symlinks
-  backup-directory-alist '(("." . "~/.emacs.d/.backups"))
-  delete-old-versions t
-  kept-new-versions 6
-  kept-old-versions 2
-  version-control t  ;use versioned backups
-  )
+;; (if (not (file-exists-p "~/.emacs.d/.backups"))
+;;     (make-directory (expand-file-name "~/.emacs.d/.backups")))
+;; (setq
+;;   backup-by-coping t ; don't clobber symlinks
+;;   backup-directory-alist '(("." . "~/.emacs.d/.backups"))
+;;   delete-old-versions t
+;;   kept-new-versions 6
+;;   kept-old-versions 2
+;;   version-control t  ;use versioned backups
+;;   )
 ;; Make backups of files, even when they're in version control
 (setq vc-make-backup-files nil)
 
@@ -207,35 +43,6 @@
 ;; (setq display-time-24hr-format t)
 ;; (setq display-time-day-and-date t)
 ;; (display-time)
-
-(defun my-toggle-list-bookmarks ()
-  (interactive)
-  (if (equalp "*Bookmark List*" (buffer-name))
-      (quit-window)
-    (call-interactively 'list-bookmarks)))
-(global-set-key [f12] 'my-toggle-list-bookmarks)
-(global-set-key (kbd "M-o") 'switch-window)
-
-(when *win32*
-  ;; resize frame
-  (defun w32-maximize-frame ()
-    "Maximize the current frame."
-    (interactive)
-    (w32-send-sys-command 61488)
-    (global-set-key (kbd "C-c z") 'w32-restore-frame))
-
-  (global-set-key (kbd "C-c z") 'w32-maximize-frame)
-
-  (defun w32-restore-frame ()
-    "Restore a minimized frame."
-    (interactive)
-    (w32-send-sys-command 61728)
-    (global-set-key (kbd "C-c z") 'w32-maximize-frame))
-
-  )
-
-; @see http://xahlee.blogspot.com/2012/01/emacs-tip-hotkey-for-repeat-complex.html
-(global-set-key [f2] 'repeat-complex-command)
 
 ;effective emacs item 3
 (global-set-key "\C-s" 'isearch-forward-regexp)

@@ -11,7 +11,6 @@
                 hs-minor-mode
                 smartparens-mode
                 eldoc-mode
-                whitespace-mode
                 abbrev-mode
                 ))
   ;; (add-hook (intern (concat (symbol-name mode) "-hook")) `(lambda () (diminish ',mode)))

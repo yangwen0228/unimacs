@@ -26,14 +26,16 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(setq my-benchmark t)
+(defconst emacs-start-time (current-time))
+
+(setq my-benchmark nil)
 ;; (setq max-lisp-eval-depth 5000)
 ;; (setq debug-on-error t)
 (setq inhibit-default-init t) ; bug @ ido.el about 'seq
 
 ;; reduce the frequency of garbage collection by making it happen on
-;; each 30MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold (* 30 1024 1024))
+;; each 50MB of allocated data (the default is on every 0.76MB)
+(setq gc-cons-threshold (* 50 1024 1024))
 
 ;;----------------------------------------------------------------------------
 ;; Which functionality to enable (use t or nil for true and false)
@@ -121,16 +123,7 @@
 (message "Loading Unimacs's core...")
 
 ;; the core stuff
-(require 'unimacs-packages)
-(require 'unimacs-ui)
-(require 'unimacs-funcs)
-(require 'unimacs-keybindings)
-;; (require 'unimacs-mode)
-;; (require 'unimacs-editor)
-
-
-;; OSX specific settings
-;; (when *is-a-mac* (require 'unimacs-osx))
+(require 'unimacs)
 
 ;; config changes made through the customize UI will be store here
 (setq custom-file (expand-file-name "custom.el" unimacs-personal-dir))
@@ -145,5 +138,18 @@
 (when my-benchmark
   (benchmark-init/deactivate)
   (benchmark-init/show-durations-tree))
+
+(when window-system
+  (let ((elapsed (float-time (time-subtract (current-time)
+                                            emacs-start-time))))
+    (message "Loading %s...done (%.3fs)" load-file-name elapsed))
+
+  (add-hook 'after-init-hook
+            `(lambda ()
+               (let ((elapsed (float-time (time-subtract (current-time)
+                                                         emacs-start-time))))
+                 (message "Loading %s...done (%.3fs) [after-init]"
+                          ,load-file-name elapsed)))
+            t))
 
 ;;; init.el ends here
