@@ -24,25 +24,80 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(eval-when-compile
+(eval-and-compile
   (require 'use-package))
 (setq use-package-always-ensure t)
 (require 'bind-key)
 (require 'diminish)
 
+(use-package anaphora       :defer t)
+(use-package dash           :defer t)
+(use-package ctable         :defer t)
+(use-package deferred       :defer t)
+(use-package epc            :defer t)
+(use-package web            :defer t)
+(use-package epl            :defer t)
+(use-package f              :defer t)
+(use-package fuzzy          :defer t)
+(use-package gh             :defer t)
+(use-package ht             :defer t)
+(use-package let-alist      :defer t)
+(use-package logito         :defer t)
+(use-package makey          :defer t)
+(use-package pcache         :defer t)
+(use-package pkg-info       :defer t)
+(use-package popup          :defer t)
+(use-package popwin         :defer t)
+(use-package pos-tip        :defer t)
+(use-package s              :defer t)
+(use-package xml-rpc        :defer t)
+
+
 (use-package anzu
   :init (global-anzu-mode t)
   :diminish "")
 
+(use-package autorevert
+  :commands auto-revert-mode
+  :diminish auto-revert-mode
+  :init
+  (add-hook 'find-file-hook #'(lambda () (auto-revert-mode 1))))
+
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
 
+(use-package font-lock+)
+
+(use-package hideshow
+  :init (add-hook 'prog-mode-hook 'hs-minor-mode))
+
+(use-package hippie-exp
+  :disabled t
+  :bind ("M-/" . hippie-expand)
+  :config
+  (setq hippie-expand-try-functions-list '(try-expand-dabbrev
+                                         try-expand-dabbrev-all-buffers
+                                         try-expand-dabbrev-from-kill
+                                         ;; try-complete-file-name-partially
+                                         ;; try-complete-file-name
+                                         try-expand-all-abbrevs
+                                         ;; try-expand-list
+                                         try-expand-line
+                                         ;; try-complete-lisp-symbol-partially
+                                         ;; try-complete-lisp-symbol
+                                         )))
 (use-package mic-paren
   ;; highlight contents between braces.
   :init
   (paren-activate)
   (setq paren-match-face 'highlight)
   (setq paren-sexp-mode t)
+  (defadvice mic-paren-highlight (after mic-paren-highlight activate)
+    (when mark-active
+      (progn
+        (mic-delete-overlay (aref mic-paren-overlays 0))
+        (mic-delete-overlay (aref mic-paren-overlays 1))
+        (mic-delete-overlay (aref mic-paren-overlays 2)))))
   :diminish "")
 
 (use-package midnight
@@ -66,7 +121,6 @@
             (goto-char (point-min))
             (forward-line (1- num))))
       (nlinum-mode -1)))
-
   :init
   (bind-key "C-c g" #'goto-line)
   (global-set-key [remap goto-line] 'goto-line-with-feedback))
@@ -74,6 +128,10 @@
 (use-package page-break-lines
   :init (global-page-break-lines-mode t)
   :diminish "")
+
+(use-package subword
+  ;; M-f better jump between camel words. C-M-f whole word.
+  :init (add-hook 'prog-mode-hook 'subword-mode))
 
 (use-package tramp
   :config
@@ -111,33 +169,27 @@
 (use-package whitespace
   ;; display special chars, like tabs and trailing whitespace.
   :init
-  (setq whitespace-line-column 80)
-  (setq whitespace-style '(tabs newline space-mark
-                                tab-mark newline-mark
-                                face lines-tail))
-  (setq whitespace-display-mappings
-        ;; all numbers are Unicode codepoint in decimal. e.g. (insert-char 182 1)
-        ;; 32 SPACE, 183 MIDDLE DOT
-        '((space-mark nil)
-          ;;(newline-mark 10 [172 10]) ; 10 LINE FEED
-          (newline-mark nil)
-          ;; (tab-mark 9 [183 9] [92 9]); 9 TAB, MIDDLE DOT
-          (tab-mark 9 [8680 9] [92 9]); 9 TAB, MIDDLE DOT
-          ))
-  (setq whitespace-global-modes '(not org-mode
-                                      eshell-mode
-                                      shell-mode
-                                      web-mode
-                                      log4j-mode
-                                      "Web"
-                                      dired-mode
-                                      ;; emacs-lisp-mode
-                                      ;; clojure-mode
-                                      ;; lisp-mode
-                                      ))
   (global-whitespace-mode)
-  (setq show-trailing-whitespace t)
-  :diminish (global-whitespace-mode . ""))
+  :config
+  ;; For some reason, having these in settings.el gets ignored if whitespace
+  ;; loads lazily.
+  (setq whitespace-auto-cleanup t
+        whitespace-line-column 80
+        whitespace-rescan-timer-time nil
+        whitespace-silent t
+        ;;tabs newline space-mark trailing tab-mark newline-mark face lines-tail
+        whitespace-style '(face trailing tabs tab-mark))
+  (setq whitespace-display-mappings
+        '((space-mark nil); 32 SPACE, 183 MIDDLE DOT
+          (newline-mark nil);(newline-mark 10 [172 10]) ; 10 LINE FEED
+          (tab-mark 9 [8680 9] [92 9]); 9 TAB
+          ))
+  (setq whitespace-global-modes '(not org-mode eshell-mode shell-mode
+                                      ;; emacs-lisp-mode clojure-mode lisp-mode
+                                      web-mode log4j-mode "Web" dired-mode))
+  ;; Just setq does not work! So must add a hook.
+  (add-hook 'find-file-hook (lambda () (setq show-trailing-whitespace t)))
+  :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode))
 
 (use-package whole-line-or-region
   ;; kill or yank a whole line.

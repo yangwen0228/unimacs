@@ -2,7 +2,12 @@
 ;;; Commentary:
 ;;; code:
 (require 'yasnippet)
-
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(yas-field-highlight-face ((t (:inherit secondary-selection :background "gray" :foreground "black")))))
 ;; my private snippets
 (setq my-yasnippet-dir (expand-file-name "snippets" unimacs-utils-dir))
 ;; (setq yas-snippet-dirs (list my-yasnippet-dir))

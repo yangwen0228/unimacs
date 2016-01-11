@@ -5,8 +5,7 @@
 ;;; Code:
 (use-package dired-details
   :init
-  (progn
-    ))
+  )
 (require 'dired-details)
 (dired-details-install)
 ;; dired - reuse current buffer by pressing 'a'

@@ -25,66 +25,92 @@
 ;;; Code:
 
 ;; store all backup and autosave files in the tmp dir
-(setq backup-directory-alist         `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+(setq make-backup-files nil)
+;; delete old backups silently
+(setq delete-old-versions t)
+;; (setq backup-directory-alist         `((".*" . ,temporary-file-directory)))
+
+(use-package auto-save
+  :ensure nil
+  :init
+  (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+  ;; delete-auto-save-files
+  (setq delete-auto-save-files t))
 
 ;; autosave the undo-tree history
 (setq undo-tree-history-directory-alist `((".*" . ,temporary-file-directory)))
 (setq undo-tree-auto-save-history t)
 
-;; delete-auto-save-files
-(setq delete-auto-save-files t)
-;; delete old backups silently
-(setq delete-old-versions t)
-
-;; saveplace remembers your location in a file when saving files
 (use-package saveplace
+  ;; saveplace remembers your location in a file when saving files
   :init
   (setq save-place-file (expand-file-name "saveplace" unimacs-tempfiles-dir))
-  (save-place-mode))
+  (save-place-mode t))
 
-;; savehist keeps track of some history
-(require 'savehist)
-(setq savehist-additional-variables
-      ;; search entries
-      '(search-ring regexp-search-ring)
-      ;; save every minute
-      savehist-autosave-interval 60
-      ;; keep the home clean
-      savehist-file (expand-file-name "savehist" unimacs-tempfiles-dir))
-(savehist-mode +1)
+(use-package savehist
+  ;; savehist keeps track of some history
+  :init
+  (setq savehist-file (expand-file-name "savehist" unimacs-tempfiles-dir)
+        savehist-additional-variables '(search-ring regexp-search-ring)
+        savehist-autosave-interval    60 ; save every minute
+        history-length                100)
+  (put 'minibuffer-history 'history-length 50)
+  (put 'evil-ex-history    'history-length 50)
+  (savehist-mode t))
 
-;; save recent files
-(require 'recentf)
-(setq recentf-save-file (expand-file-name "recentf" unimacs-tempfiles-dir)
-      recentf-max-saved-items 500
-      recentf-max-menu-items 15
-      ;; disable recentf-cleanup on Emacs start, because it can cause
-      ;; problems with remote files
-      recentf-auto-cleanup 'never)
+(use-package recentf
+  ;; save recent files
+  :preface
+  (defun unimacs-recentf-exclude-p (file)
+    "A predicate to decide whether to exclude FILE from recentf."
+    (let ((file-dir (file-truename (file-name-directory file))))
+      (-any-p (lambda (dir)
+                (string-prefix-p dir file-dir))
+              (mapcar 'file-truename (list unimacs-tempfiles-dir
+                                           package-user-dir
+                                           "/tmp/")))))
+  (defun unimacs-kill-buffer-and-remove-recentf ()
+    "Kill the curent buffer and remove it from the recentf."
+    (interactive)
+    ;; (ido-buffer-internal 'kill 'kill-buffer "Kill buffer: "
+    ;;                      (buffer-name (current-buffer)) nil 'ignore)
+    (kill-buffer (current-buffer))
+    (setq recentf-list (cdr recentf-list)))
+  :init
+  (bind-key (kbd "C-x M-k") 'unimacs-kill-buffer-and-remove-recentf)
 
-(defun unimacs-recentf-exclude-p (file)
-  "A predicate to decide whether to exclude FILE from recentf."
-  (let ((file-dir (file-truename (file-name-directory file))))
-    (-any-p (lambda (dir)
-              (string-prefix-p dir file-dir))
-            (mapcar 'file-truename (list unimacs-tempfiles-dir package-user-dir)))))
+  (setq recentf-save-file (expand-file-name "recentf" unimacs-tempfiles-dir)
+        ;; disable recentf-cleanup on Emacs start, because it can cause
+        ;; problems with remote files
+        recentf-max-saved-items 100
+        recentf-max-menu-items  15
+        recentf-auto-cleanup    'never
+        recentf-exclude         '(unimacs-recentf-exclude-p)
+        recentf-keep            '(file-remote-p file-readable-p))
 
-(add-to-list 'recentf-exclude 'unimacs-recentf-exclude-p)
+  (recentf-mode t))
 
-(recentf-mode +1)
-;; bookmarks
-(require 'bookmark)
-(setq bookmark-default-file (expand-file-name "bookmarks" unimacs-tempfiles-dir)
-      bookmark-save-flag 1)
+(use-package bookmark
+  :init
+  (setq bookmark-default-file (expand-file-name "bookmarks" unimacs-tempfiles-dir)
+        bookmark-save-flag    1))
 
-;; projectile is a project management mode
-(require 'projectile)
-(setq projectile-cache-file (expand-file-name  "projectile.cache" unimacs-tempfiles-dir))
-(projectile-global-mode t)
-(setq eshell-directory-name (expand-file-name "eshell" unimacs-tempfiles-dir))
-(setq semanticdb-default-save-directory
-      (expand-file-name "semanticdb" unimacs-tempfiles-dir))
+(use-package projectile
+  ;; projectile is a project management mode
+  :init
+  (setq projectile-cache-file (expand-file-name  "projectile.cache" unimacs-tempfiles-dir)))
+
+(use-package eshell
+  :defer t
+  :init
+  (setq eshell-directory-name (expand-file-name "eshell" unimacs-tempfiles-dir)))
+
+(use-package semantic
+  :disabled t
+  :defer t
+  :init
+  (setq semanticdb-default-save-directory
+        (expand-file-name "semanticdb" unimacs-tempfiles-dir)))
 
 (provide 'unimacs-tempfiles)
 ;;; unimacs-tempfiles.el ends here

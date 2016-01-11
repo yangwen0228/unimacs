@@ -59,12 +59,19 @@
 (put 'narrow-to-region 'disabled nil)
 (put 'narrow-to-page   'disabled nil)
 (put 'narrow-to-defun  'disabled nil)
-;Ctrl-x Ctrl-u/l to upper/lowercase regions without confirm
+                                        ;Ctrl-x Ctrl-u/l to upper/lowercase regions without confirm
 (put 'downcase-region  'disabled nil)
 (put 'upcase-region    'disabled nil)
 
 ;; NO automatic new line when scrolling down at buffer bottom
 (setq next-line-add-newlines nil)
+
+(setq select-enable-clipboard t) ; use system clipboard
+
+;; (setq buffer-file-coding-system 'cp936-dos)
+;; (prefer-coding-system 'cp936-dos))
+(setq buffer-file-coding-system 'utf-8-unix)
+(prefer-coding-system 'utf-8-unix)
 
 (provide 'unimacs-settings)
 ;;; unimacs-settings.el ends here

@@ -8,6 +8,7 @@
 
 ;; Use pos-tip to show the error messages
 (require 'flycheck-pos-tip)
+(require 'popup)
 ;; (eval-after-load 'flycheck
 ;;   '(custom-set-variables
 ;;    '(flycheck-display-errors-function #'flycheck-pos-tip-error-messages)))

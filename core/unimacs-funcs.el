@@ -67,6 +67,11 @@ Position the cursor at its beginning, according to the current mode."
   (interactive)
   (delete-indentation 1))
 
+(defun unimacs-join-to-previous-line ()
+  "Join the current line to the line above it."
+  (interactive)
+  (delete-indentation))
+
 (defun unimacs-kill-whole-line (&optional arg)
   "A simple wrapper around command `kill-whole-line' that respects indentation.
 Passes ARG to command `kill-whole-line' when provided."
@@ -196,7 +201,9 @@ there's a region, all lines that region covers will be duplicated."
          ((vc-backend filename) (vc-rename-file filename new-name))
          (t
           (rename-file filename new-name t)
-          (set-visited-file-name new-name t t)))))))
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil)))))))
 
 (defun unimacs-delete-file-and-buffer ()
   "Kill the current buffer and deletes the file it is visiting."
@@ -209,6 +216,23 @@ there's a region, all lines that region covers will be duplicated."
           (delete-file filename delete-by-moving-to-trash)
           (message "Deleted file %s" filename)
           (kill-buffer))))))
+
+(defun unimacs-copy-file-and-rename-buffer ()
+  "Copy the current buffer and file it is visiting.
+
+If the old file is under version control, the new file is added into
+version control automatically"
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " filename)))
+        (copy-file filename new-name t)
+        (rename-buffer new-name)
+        (set-visited-file-name new-name)
+        (set-buffer-modified-p nil)
+        (when (vc-backend filename)
+          (vc-register))))))
 
 (defun unimacs-untabify-buffer ()
   "Remove all tabs from the current buffer."
@@ -227,8 +251,7 @@ there's a region, all lines that region covers will be duplicated."
 
 With a prefix ARG, force recompile all files."
   (interactive
-   (list (when current-prefix-arg
-           (setq force t))))
+   (list (when current-prefix-arg (setq force t))))
   (byte-recompile-directory unimacs-core-dir 0 force)
   (byte-recompile-directory unimacs-configures-dir 0 force))
 
@@ -255,10 +278,17 @@ the current buffer."
         (funcall function))
     (switch-to-buffer-other-window buffer-name)))
 
-(defun unimacs-insert-date ()
-  "Insert a timestamp according to locale's date and time format."
-  (interactive)
-  (insert (format-time-string "%c" (current-time))))
+(defun unimacs-insert-date (prefix)
+  "Insert the current date.
+
+With PREFIX argument, use ISO format.
+With two prefix arguments, write out the day and month name."
+  (interactive "P")
+  (let ((format (cond
+                 ((not prefix) "%Y%m%d")
+                 ((equal prefix '(4)) "%Y-%m-%d")
+                 ((equal prefix '(16)) "%d %B %Y"))))
+    (insert (format-time-string format))))
 
 (defun unimacs-recentf-ido-find-file ()
   "Find a recent file using ido."
@@ -371,6 +401,37 @@ Doesn't mess with normal buffers."
   (if (equalp "*Bookmark List*" (buffer-name))
       (quit-window)
     (call-interactively 'list-bookmarks)))
+
+(defun unimacs-dos2unix ()
+  "Convert a buffer from dos ^M end of lines to unix end of lines."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (search-forward "\r" nil t) (replace-match ""))))
+
+(defun unimacs-unix2dos ()
+  "Convert a buffer from unix end of lines to dos ^M end of lines."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (search-forward "\n" nil t) (replace-match "\r\n"))))
+
+(defun unimacs-goto-char-current-line (char &optional arg)
+  "Jump to the first CHAR in current line.
+The numth of occurences is determined by ARG."
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (unless (= (point) (line-end-position))
+    (goto-char (1+ (point)))
+    (search-forward (char-to-string char) (line-end-position) t arg)
+    (goto-char (1- (point)))))
+
+(defun unimacs-goto-char-current-line-backward (char &optional arg)
+  "Jump backward to the first CHAR in current line.
+The numth of occurences is determined by ARG."
+  (interactive (list (read-char "char: " t)
+                     current-prefix-arg))
+  (search-backward (char-to-string char) (line-beginning-position) t arg))
 
 (defadvice ido-find-file (after find-file-sudo activate)
   "Find file as root if necessary."

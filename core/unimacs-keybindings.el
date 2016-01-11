@@ -38,6 +38,11 @@
 (bind-key "M-z" 'zop-up-to-char)
 (bind-key "M-Z" 'zop-to-char)
 
+(bind-key "M-g c" 'goto-char)
+(bind-key "M-g l" 'goto-line)
+(bind-key "M-g f" 'unimacs-goto-char-current-line)
+(bind-key "M-g b" 'unimacs-goto-char-current-line-backward)
+
 (bind-key "RET" 'newline-and-indent)
 
 (bind-key "A"   'apropos              'help-command); apropos-command (C-h a)
@@ -62,12 +67,19 @@
 (bind-key "C-S-<backspace>" 'unimacs-kill-whole-line)
 (bind-key "C-a"             'unimacs-move-beginning-of-line)
 (bind-key "C-M-\\"          'unimacs-indent-current-line-or-region)
-(bind-key "C-M-|"           'unimacs-indent-buffer)
+(bind-key "C-M-|"           'unimacs-cleanup-buffer)
 (bind-key "C-S-o"           'unimacs-smart-open-line-above)
 (bind-key "C-o"             'unimacs-smart-open-line-below)
-(bind-key "C-^"             'unimacs-join-next-line)
+(bind-key "M-j"             'unimacs-join-next-line)
+(bind-key "M-S-j"           'unimacs-join-to-previous-line)
+(bind-key "C-j"             'newline-and-indent)
+(bind-key "C-S-j"           'backward-delete-char-untabify)
 (bind-key* "M-0"            'unimacs-switch-to-previous-buffer)
 (bind-key "C-x C-x"         'unimacs-exchange-point-and-mark)
+(bind-key "C-x M-S-k"       'unimacs-delete-file-and-buffer)
+(bind-key "C-x M-S-r"       'unimacs-rename-file-and-buffer)
+(bind-key "C-x M-S-c"       'unimacs-copy-file-and-rename-buffer)
+(bind-key "C-x M-p"         'unimacs-copy-file-name-to-clipboard)
 
 (provide 'unimacs-keybindings)
 ;;; unimacs-keybindings.el ends here

@@ -24,15 +24,13 @@
         init-emacs
         init-misc
         init-exec-path
-        init-recentf
-        init-dired+
+        init-dired
         init-byte-compile
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
         init-discover-my-major
         init-flx
-        init-projectile
         init-window-numbering
         ;; init-powerline
         ;; init-smart-mode-line

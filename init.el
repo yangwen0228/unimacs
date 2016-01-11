@@ -26,8 +26,6 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(defconst emacs-start-time (current-time))
-
 (setq my-benchmark nil)
 ;; (setq max-lisp-eval-depth 5000)
 ;; (setq debug-on-error t)
@@ -138,18 +136,5 @@
 (when my-benchmark
   (benchmark-init/deactivate)
   (benchmark-init/show-durations-tree))
-
-(when window-system
-  (let ((elapsed (float-time (time-subtract (current-time)
-                                            emacs-start-time))))
-    (message "Loading %s...done (%.3fs)" load-file-name elapsed))
-
-  (add-hook 'after-init-hook
-            `(lambda ()
-               (let ((elapsed (float-time (time-subtract (current-time)
-                                                         emacs-start-time))))
-                 (message "Loading %s...done (%.3fs) [after-init]"
-                          ,load-file-name elapsed)))
-            t))
 
 ;;; init.el ends here

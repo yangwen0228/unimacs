@@ -62,11 +62,11 @@
     'irony-completion-at-point-async)
   (cond
    (*win32*
-    (setq irony--server-executable (expand-file-name "irony/bin/irony-server.exe" my-extra-bin-dir))
-    ;; (setenv "LD_LIBRARY_PATH" (expand-file-name "irony/lib" my-extra-bin-dir))
+    (setq irony--server-executable (expand-file-name "extra-bins/irony/bin/irony-server.exe" unimacs-utils-dir))
+    ;; (setenv "LD_LIBRARY_PATH" (expand-file-name "extra-bins/irony/lib" unimacs-utils-dir))
     )
    (*is-a-mac*
-    (setq irony--server-executable (expand-file-name "irony/bin/irony-server" my-extra-bin-dir))
+    (setq irony--server-executable (expand-file-name "extra-bins/irony/bin/irony-server" unimacs-utils-dir))
     (setenv "LD_LIBRARY_PATH" "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib"))
    ))
 (add-hook 'irony-mode-hook 'my-irony-mode-hook)

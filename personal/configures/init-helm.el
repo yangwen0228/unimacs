@@ -1,5 +1,4 @@
 (use-package helm
-  :defer t
   :bind (("M-x"     . helm-M-x)
          ("C-x C-o" . helm-find-files)
          ("C-c f"   . helm-for-files)
