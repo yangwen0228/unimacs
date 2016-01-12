@@ -38,6 +38,8 @@
 (bind-key "M-z" 'zop-up-to-char)
 (bind-key "M-Z" 'zop-to-char)
 
+(bind-key* "<C-return>" 'other-window)
+
 (bind-key "M-g c" 'goto-char)
 (bind-key "M-g l" 'goto-line)
 (bind-key "M-g f" 'unimacs-goto-char-current-line)

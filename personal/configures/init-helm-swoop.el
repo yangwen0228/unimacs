@@ -11,11 +11,6 @@
          ("C-c M-i" . helm-multi-swoop)
          ("C-x M-i" . helm-multi-swoop-all))
   :config
-  (require 'helm)
-  (require 'helm-swoop)
-
-  ;; Change the keybinds to whatever you like :)
-
   ;; When doing isearch, hand the word over to helm-swoop
   (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
   ;; From helm-swoop to helm-multi-swoop-all

@@ -30,7 +30,7 @@
         ;; interface
         ;;-------------------------------------------------------------------
         init-discover-my-major
-        init-flx
+        ;; init-flx
         init-window-numbering
         ;; init-powerline
         ;; init-smart-mode-line
@@ -39,7 +39,7 @@
         init-rainbow-delimiters
 
         init-ido
-        init-ido-vertical
+        ;; init-ido-vertical
 
         init-helm
         init-helm-projectile
@@ -154,7 +154,6 @@
         ;; init-workgroups2
         ;; init-sunrise-commander
         init-maxframe
-        ;; init-diminish
         ))
 
 (mapc 'require-and-configure unimacs-init-packages)

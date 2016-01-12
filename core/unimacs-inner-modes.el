@@ -92,12 +92,21 @@
   (paren-activate)
   (setq paren-match-face 'highlight)
   (setq paren-sexp-mode t)
-  (defadvice mic-paren-highlight (after mic-paren-highlight activate)
+  (defadvice mic-paren-highlight (after mic-paren-not-highlight-mark-active activate)
     (when mark-active
       (progn
         (mic-delete-overlay (aref mic-paren-overlays 0))
         (mic-delete-overlay (aref mic-paren-overlays 1))
         (mic-delete-overlay (aref mic-paren-overlays 2)))))
+  (eval-and-compile
+    (require 'multiple-cursors))
+  (defadvice mic-paren-highlight (after mic-paren-not-highlight-multiple-cursors activate)
+    (when multiple-cursors-mode
+      (progn
+        (mic-delete-overlay (aref mic-paren-overlays 0))
+        (mic-delete-overlay (aref mic-paren-overlays 1))
+        (mic-delete-overlay (aref mic-paren-overlays 2)))))
+
   :diminish "")
 
 (use-package midnight

@@ -1,3 +1,8 @@
+;;; init-helm.el --- Summary
+;;; Commentary:
+;; comments
+
+;;; Code:
 (use-package helm
   :bind (("M-x"     . helm-M-x)
          ("C-x C-o" . helm-find-files)
@@ -5,8 +10,7 @@
          ("C-c i"   . helm-imenu))
   :config
   (require 'helm-config)
-  (helm-mode 1)                           ;turn helm-mode on, don't turn ido-mode on
-  (helm-autoresize-mode 0)
+  (helm-mode 1)                       ;turn helm-mode on, don't turn ido-mode on
 
   (setq helm-completing-read-handlers-alist
         '((describe-function . helm-completing-read-symbols)
@@ -14,26 +18,26 @@
           (debug-on-entry . helm-completing-read-symbols)
           (find-function . helm-completing-read-symbols)
           (find-tag . helm-completing-read-with-cands-in-buffer)
+          (execute-extended-command . helm-completing-read-symbols)
           (ffap-alternate-file . nil)
           (tmm-menubar . nil)
           (dired-do-copy . nil)
           (dired-do-rename . nil)
           (dired-create-directory . nil)
           (find-file . ido)
-          (copy-file-and-rename-buffer . nil)
-          (rename-file-and-buffer . nil)
-          (w3m-goto-url . nil)
-          (ido-find-file . nil)
+          (ido-find-file . ido)
           (ido-edit-input . nil)
           (mml-attach-file . ido)
-          (read-file-name . nil)
-          (yas/compile-directory . ido)
-          (execute-extended-command . ido)
+          (read-file-name . ido)
+          (read-directory-name . ido)
+          (yas-compile-directory . ido)
           (minibuffer-completion-help . nil)
           (minibuffer-complete . nil)
           (wg-load . ido)
           (rgrep . nil)
-          (read-directory-name . ido)
+          (w3m-goto-url . nil)
+          (unimacs-copy-file-and-rename-buffer . nil)
+          (unimacs-rename-file-and-buffer . nil)
           ))
 
   ;; helm-do-grep recursive
@@ -47,8 +51,8 @@
            (helm-current-prefix-arg non-recursive))
       (call-interactively 'helm-do-grep)))
   ;; (global-set-key (kbd "C-c M-r") 'helm-do-grep-recursive)
-
-
+  :diminish (helm-mode)
   )
 
 (provide 'init-helm)
+;;; init-helm.el ends here
