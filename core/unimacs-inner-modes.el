@@ -58,15 +58,22 @@
   :diminish "")
 
 (use-package autorevert
+  ;; revert buffers automatically when underlying files are changed externally
   :commands auto-revert-mode
   :diminish auto-revert-mode
   :init
-  (add-hook 'find-file-hook #'(lambda () (auto-revert-mode 1))))
+  (setq global-auto-revert-non-file-buffers t
+        auto-revert-verbose                 nil)
+
+  (add-hook 'find-file-hook (lambda () (auto-revert-mode 1))))
 
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
 
-(use-package font-lock+)
+(use-package font-lock+
+  :init
+  (global-font-lock-mode t) ; turn on syntax highlighting for all buffers
+  )
 
 (use-package hideshow
   :init (add-hook 'prog-mode-hook 'hs-minor-mode))
@@ -76,16 +83,16 @@
   :bind ("M-/" . hippie-expand)
   :config
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
-                                         try-expand-dabbrev-all-buffers
-                                         try-expand-dabbrev-from-kill
-                                         ;; try-complete-file-name-partially
-                                         ;; try-complete-file-name
-                                         try-expand-all-abbrevs
-                                         ;; try-expand-list
-                                         try-expand-line
-                                         ;; try-complete-lisp-symbol-partially
-                                         ;; try-complete-lisp-symbol
-                                         )))
+                                           try-expand-dabbrev-all-buffers
+                                           try-expand-dabbrev-from-kill
+                                           ;; try-complete-file-name-partially
+                                           ;; try-complete-file-name
+                                           try-expand-all-abbrevs
+                                           ;; try-expand-list
+                                           try-expand-line
+                                           ;; try-complete-lisp-symbol-partially
+                                           ;; try-complete-lisp-symbol
+                                           )))
 (use-package mic-paren
   ;; highlight contents between braces.
   :init

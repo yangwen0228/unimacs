@@ -35,9 +35,9 @@
                   (set (make-local-variable 'company-backends)
                        '((
                           ;; company-gtags-tcl-verbose
-                          company-gtags-tcl-rigid
-                          company-keywords
                           company-dabbrev-code
+                          company-keywords
+                          company-gtags-tcl-rigid
                           ;; company-etags
                           )
                          ;; company-dabbrev

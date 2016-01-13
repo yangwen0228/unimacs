@@ -44,13 +44,7 @@
  ;; no annoying beep on errors
  visible-bell t)
 
-;; revert buffers automatically when underlying files are changed externally
-(global-auto-revert-mode t)
-(setq global-auto-revert-non-file-buffers t
-      auto-revert-verbose nil)
-
 (transient-mark-mode t) ; If you change buffer, or focus, disable the current buffer's mark
-(global-font-lock-mode t) ; turn on syntax highlighting for all buffers
 (setq ring-bell-function (lambda ()))
 ;; move around lines based on how they are displayed, rather than the actual line.
 (setq line-move-visual t)
@@ -72,6 +66,36 @@
 ;; (prefer-coding-system 'cp936-dos))
 (setq buffer-file-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8-unix)
+
+;; automatically save buffers associated with files on buffer switch
+;; and on windows switch
+(defun unimacs-auto-save ()
+  "Save the current buffer."
+  (when (and buffer-file-name
+             (buffer-modified-p (current-buffer))
+             (file-writable-p buffer-file-name))
+    (save-buffer)))
+
+(defmacro unimacs-defadvice-commands (advice-name class commands &rest body)
+  "Apply advice named ADVICE-NAME to multiple COMMANDS.
+
+The body of the advice is in BODY."
+  `(progn
+     ,@(mapcar (lambda (command)
+                 `(defadvice ,command (,class ,(intern (concat (symbol-name command) "-" advice-name)) activate)
+                    ,@body))
+               commands)))
+
+;; advise all window switching functions
+(unimacs-defadvice-commands "auto-save"
+                 before
+                 (switch-to-buffer
+                  other-window
+                  select-window-by-number)
+                 (unimacs-auto-save))
+
+(add-hook 'mouse-leave-buffer-hook 'unimacs-auto-save)
+(add-hook 'focus-out-hook          'unimacs-auto-save)
 
 (provide 'unimacs-settings)
 ;;; unimacs-settings.el ends here
