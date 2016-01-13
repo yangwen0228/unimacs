@@ -2,8 +2,9 @@
 ;;; Commentary:
 ;;; code:
 (use-package yasnippet
-  :bind ("<tab>" . yas-expand) ; other completion, like minibuffer, use C-S-i
-  :config
+  ;; :bind ("<tab>" . yas-expand) ; other completion, like minibuffer, use C-S-i. All tab masked, not I desired.
+  :init
+  (yas-global-mode t)
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.
@@ -11,11 +12,11 @@
    ;; If there is more than one, they won't work right.
    '(yas-field-highlight-face ((t (:inherit secondary-selection :background "gray" :foreground "black")))))
 
-  (setq my-yasnippet-dir (expand-file-name "snippets" unimacs-utils-dir))
+  (setq unimacs-yasnippet-dir (expand-file-name "snippets" unimacs-utils-dir))
   (setq yas-snippet-dirs (list yas-installed-snippets-dir))
-  (when (and (file-exists-p my-yasnippet-dir)
-             (not (member my-yasnippet-dir yas-snippet-dirs)))
-      (add-to-list 'yas-snippet-dirs my-yasnippet-dir))
+  (when (and (file-exists-p unimacs-yasnippet-dir)
+             (not (member unimacs-yasnippet-dir yas-snippet-dirs)))
+      (add-to-list 'yas-snippet-dirs unimacs-yasnippet-dir))
   ;; give yas-dropdown-prompt in yas-prompt-functions a chance.(others: yas-ido-prompt yas-completing-prompt)
   (require 'dropdown-list)
   (setq yas-prompt-functions '(yas-dropdown-prompt yas-completing-prompt))
