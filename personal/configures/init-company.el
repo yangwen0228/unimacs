@@ -5,7 +5,7 @@
 ;; The company-mode is much better than auto-complete-mode.
 ;; More information please see:
 ;; @https://github.com/company-mode/company-mode/issues/68
-
+;; TODO: <tab> conflict with yasnippet
 ;;; Code:
 (use-package company
   :init
@@ -155,9 +155,8 @@
   (defun company-gtags-tcl-rigid (command &optional arg &rest ignored)
     "Support for tcl ns::proc kind of command.  COMMAND ARG IGNORED."
     (interactive (list 'interactive))
-    (modify-syntax-entry ?: "w" tcl-mode-syntax-table)
     (cl-case command
-      (interactive (company-begin-backend 'company-gtags-tcl-rigid (lambda () (modify-syntax-entry ?: "." tcl-mode-syntax-table))))
+      (interactive (company-begin-backend 'company-gtags-tcl-rigid))
       (prefix (and company-gtags-executable
                    buffer-file-name
                    (apply #'derived-mode-p company-gtags-modes)

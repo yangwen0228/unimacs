@@ -40,7 +40,7 @@
 
   (modify-syntax-entry ?* "w" tcl-mode-syntax-table)
   (modify-syntax-entry ?_ "w" tcl-mode-syntax-table)
-  (modify-syntax-entry ?: "w" tcl-mode-syntax-table)
+  (modify-syntax-entry ?: "." tcl-mode-syntax-table)
   (modify-syntax-entry ?| "_" tcl-mode-syntax-table)
   (modify-syntax-entry ?, "_" tcl-mode-syntax-table)
   (modify-syntax-entry ?! "." tcl-mode-syntax-table)

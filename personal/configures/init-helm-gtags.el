@@ -7,14 +7,14 @@
   :init
   (helm-gtags-mode t)
   :config
-  (setq helm-gtags-update-interval-second nil)
-  (setq helm-gtags-path-style 'root)
-  (setq helm-gtags-ignore-case nil)
-  (setq helm-gtags-read-only nil)
-  (setq helm-gtags-auto-update t)
-  (setq helm-gtags-pulse-at-cursor t)
-  (setq helm-gtags-cache-select-result t)
-  (setq helm-gtags-cache-max-result-size (* 10 1024 1024))
+  (setq helm-gtags-path-style             'root
+        helm-gtags-update-interval-second nil
+        helm-gtags-ignore-case            nil
+        helm-gtags-read-only              nil
+        helm-gtags-auto-update            t
+        helm-gtags-pulse-at-cursor        t
+        helm-gtags-cache-select-result    t
+        helm-gtags-cache-max-result-size  (* 10 1024 1024))
 
   (bind-keys* ("M-t"     . helm-gtags-find-tag)
               ("M-r"     . helm-gtags-find-rtag-adapter)
@@ -25,10 +25,6 @@
               ("C-c <"   . helm-gtags-previous-history)
               ("C-c >"   . helm-gtags-next-history)
               ("C-c s s" . helm-gtags-show-stack))
-
-  (setq helm-gtags-path-style  'relative
-        helm-gtags-ignore-case t
-        helm-gtags-read-only   t)
 
   (defun helm-gtags-find-rtag-for-ctags (tag)
     "TODO: Workaround for ctags rtags: Use TAG to find all matches, then filter procs."
@@ -49,7 +45,7 @@
     "Don't ignore case when find definition and reference."
     (setq helm-gtags-ignore-case nil))
 
-  (setq helm-gtags-default-label "default")
+  (setq helm-gtags-default-label "ctags")
   (add-hook 'prog-mode-hook
             (lambda ()
               (set (make-local-variable 'helm-gtags-default-label)
