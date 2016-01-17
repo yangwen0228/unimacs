@@ -4,9 +4,9 @@
 
 (when (> emacs-major-version 23)
   (require-package 'flycheck-ledger))
-(after-load 'flycheck
+(eval-after-load 'flycheck
   (require 'flycheck-ledger))
-(after-load 'ledger-mode
+(eval-after-load 'ledger-mode
   (define-key ledger-mode-map (kbd "RET") 'newline)
   (define-key ledger-mode-map (kbd "C-o") 'open-line))
 

@@ -20,9 +20,7 @@
         ;;-------------------------------------------------------------------
         ;; basic functions && frame
         ;;-------------------------------------------------------------------
-        init-funcs
         init-emacs
-        init-misc
         init-exec-path
         init-dired
         init-byte-compile
@@ -30,7 +28,6 @@
         ;; interface
         ;;-------------------------------------------------------------------
         init-discover-my-major
-        ;; init-flx
         init-window-numbering
         ;; init-powerline
         ;; init-smart-mode-line
@@ -39,13 +36,13 @@
         init-rainbow-delimiters
 
         init-ido
-        ;; init-ido-vertical
 
         init-helm
         init-helm-projectile
         init-helm-swoop
         init-helm-descbinds
         init-helm-flycheck
+        init-helm-flyspell
         init-helm-ag
         init-helm-gtags
         ;;-------------------------------------------------------------------
@@ -62,7 +59,6 @@
 
         ;; evil replacement
         init-origami ;  foldin
-        init-origami-tcl
 
         init-expand-region ; expand regio
         init-comment-dwim-2 ; evil-nerd-commentar
@@ -73,17 +69,14 @@
         init-company
         init-yasnippet
         init-auto-yasnippet
-        init-flycheck
-        ;; init-flyspell
 
         ;;-------------------------------------------------------------------
         ;; programming languages
         ;;-------------------------------------------------------------------
+        ;; init-header2
         init-emacs-w3m
-        init-elisp
         init-python-mode
         init-tcl-hm-mode
-        init-header2
         init-markdown
         ;; init-haskell
         ;; init-rails
@@ -95,65 +88,58 @@
         ;; init-javascript
         ;; init-html
         ;; init-erlang
-
         ;; init-cc-mode
         ;; init-irony
         ;; init-irony-eldoc
         ;; init-cpputils-cmake
         ;; init-compile
+        ;; init-sql
+        ;; init-css
+        ;; init-csv
+        ;; init-haml
+        ;; init-sh
+        ;; init-slime
+        ;; init-web-mode
+        ;; init-zencoding-mode
         ;;-------------------------------------------------------------------
         ;; writting
         ;;-------------------------------------------------------------------
         init-org
-        init-org-mime
-        ;;init-auctex
+        ;; init-org-mime
+        ;; init-auctex
         ;; init-darcs
+        ;;-------------------------------------------------------------------
+        ;; modules not offen used
+        ;;-------------------------------------------------------------------
         ;; init-doxygen
-        ;; init-frame-hooks
+        ;; init-vc
         ;; init-gist
         ;; init-git
         ;; init-gnus
         ;; init-gud
-        ;; init-gui-frames
-        ;; init-spelling
         ;; init-keyfreq
         ;; init-ledger
         ;; init-osx-keys
         ;; init-popwin
         ;; init-proxies
-        ;; init-sql
         ;; init-sr-speedbar
-        ;; init-vc
-        ;;-------------------------------------------------------------------
-        ;; modules not offen used
-        ;;-------------------------------------------------------------------
         ;; init-bbdb
-        ;; init-css
-        ;; init-csv
         ;; init-elnode
         ;; init-emms
-        ;; init-haml
         ;; init-moz
         ;; init-sessions
-        ;; init-sh
-        ;; init-slime
         ;; init-term-mode
         ;; init-textile
-        ;; init-themes
         ;; init-uniquify
-        ;; init-web-mode
         ;; init-which-func
-        ;; init-windows
         ;; init-xterm
         ;; init-yari
-        ;; init-zencoding-mode
         ;; init-modeline
-        ;; init-nyan
         ;; init-semantic
         ;; init-crontab
-        ;; init-workgroups2
         ;; init-sunrise-commander
         init-maxframe
+        ;; init-workgroups2
         ))
 
 (mapc 'require-and-configure unimacs-init-packages)

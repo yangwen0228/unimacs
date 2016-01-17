@@ -11,9 +11,11 @@
 ;; For instance, to always assign the calculator window the number 9, add the
 ;; following to your .emacs:
 ;;
-(require 'window-numbering)
-(window-numbering-mode 1)
-(setq window-numbering-assign-func
-      (lambda () (when (equal (buffer-name) "*Calculator*") 9)))
+(use-package window-numbering
+  :init
+  (window-numbering-mode 1)
+  (setq window-numbering-assign-func
+        (lambda () (when (equal (buffer-name) "*Calculator*") 9)))
+  )
 (provide 'init-window-numbering)
 ;;; init-window-numbering.el ends here

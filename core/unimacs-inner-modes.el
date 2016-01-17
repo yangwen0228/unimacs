@@ -69,13 +69,22 @@
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
 
+(use-package eldoc
+  :init
+  (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+  :config
+  (setq eldoc-idle-delay 0.2)
+  (setq eldoc-echo-area-use-multiline-p t)
+  :diminish (eldoc-mode))
+
 (use-package font-lock+
   :init
   (global-font-lock-mode t) ; turn on syntax highlighting for all buffers
   )
 
 (use-package hideshow
-  :init (add-hook 'prog-mode-hook 'hs-minor-mode))
+  :init (add-hook 'prog-mode-hook 'hs-minor-mode)
+  :diminish (hs-minor-mode))
 
 (use-package hippie-exp
   :disabled t
@@ -146,7 +155,8 @@
 
 (use-package subword
   ;; M-f better jump between camel words. C-M-f whole word.
-  :init (add-hook 'prog-mode-hook 'subword-mode))
+  :init (add-hook 'prog-mode-hook 'subword-mode)
+  :diminish (subword-mode))
 
 (use-package tramp
   :config

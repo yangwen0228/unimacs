@@ -3,7 +3,16 @@
 ;; init all the variables in the origin emacs
 
 ;;; Code:
-(setq make-backup-files nil)
+
+(defun add-fun-to-hooks (fun hooks)
+  "Add function to hooks"
+  (dolist (hook hooks)
+    (add-hook hook fun)))
+
+(defun add-funs-to-hook (funs hook)
+  "Add list of functions to hook."
+  (dolist (fun funs)
+    (add-hook hook fun)))
 
 ;; define a key map, must define a interactive function. turn the function to command.
 ;; quit the help window.

@@ -1,5 +1,5 @@
 
 (autoload 'smarty-mode "smarty-mode" "Smarty Mode" t)
-(add-auto-mode 'smarty-mode "\\.tpl\\'")
+(add-to-list 'auto-mode-alist ("\\.tpl\\'" . 'smarty-mode))
 
 (provide 'init-php)

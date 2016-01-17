@@ -17,7 +17,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(rainbow-delimiters-depth-1-face ((t (:foreground "DeepSkyBlue1")))))
-
   )
 
 (provide 'init-rainbow-delimiters)

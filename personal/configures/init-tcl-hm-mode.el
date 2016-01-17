@@ -4,11 +4,11 @@
 
 ;;; Code:
 (use-package tcl-hm-mode
+  :ensure nil
   :mode (("\\.tcl\\'"  . tcl-hm-mode)
          ("\\.test\\'" . tcl-hm-mode)
          ("\\.wgt\\'"  . tcl-hm-mode)
          ("\\.msg\\'"  . tcl-hm-mode))
-  :ensure nil
   :init
   (autoload 'tcl-hm-mode "tcl-hm-mode" "Tcl hm Mode" t)
   (use-package tcl-hm-eldoc

@@ -3,38 +3,21 @@
 ;; comments
 
 ;;; Code:
-(require 'smartparens)
-(require 'smartparens-config)
-
-(smartparens-global-mode 1)
-(show-smartparens-global-mode t)
-(setq sp-navigate-consider-sgml-tags '(html-mode nxml-mode web-mode xml-mode))
-
-(sp-local-pair 'minibuffer-inactive-mode "'" nil :actions nil)
-
-(define-key smartparens-mode-map (kbd "C-M-f") 'sp-forward-sexp)
-(define-key smartparens-mode-map (kbd "C-M-b") 'sp-backward-sexp)
-(define-key smartparens-mode-map (kbd "C-M-n") 'sp-next-sexp)
-(define-key smartparens-mode-map (kbd "C-M-p") 'sp-previous-sexp)
-
-(add-hook 'lisp-mode-hook 'turn-on-smartparens-strict-mode)
-(add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode)
-
-(defun unimacs-create-sp-wrapper (s)
-  "Create a wrapper function for smartparens using S."
-  `(lambda (&optional arg)
-     (interactive "P")
-     (sp-wrap-with-pair ,s)))
-
-;; (setq sp-base-key-bindings 'paredit)
-;; (setq sp-autoskip-closing-pair 'always)
-;; (setq sp-hybrid-kill-entire-symbol nil)
-;; (sp-use-paredit-bindings)
-;; (show-smartparens-global-mode +1)
-;; (define-key prog-mode-map (kbd "M-(") (prelude-wrap-with "("))
-;; (define-key prog-mode-map (kbd "M-[") (prelude-wrap-with "["))
-;; (define-key prog-mode-map (kbd "M-\"") (prelude-wrap-with "\""))
-
+(use-package smartparens
+  :bind (("C-M-f" . sp-forward-sexp)
+         ("C-M-b" . sp-backward-sexp)
+         ("C-M-n" . sp-next-sexp)
+         ("C-M-p" . sp-previous-sexp))
+  :init
+  (use-package smartparens-config :ensure nil)
+  (smartparens-global-mode 1)
+  (show-smartparens-global-mode t)
+  (setq sp-navigate-consider-sgml-tags '(html-mode nxml-mode web-mode xml-mode))
+  (sp-local-pair 'minibuffer-inactive-mode "'" nil :actions nil)
+  (add-hook 'lisp-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode)
+  :diminish (smartparens-mode smartparens-global-mode)
+  )
 
 (provide 'init-smartparens)
 ;;; init-smartparens.el ends here

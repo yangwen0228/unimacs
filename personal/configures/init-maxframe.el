@@ -18,8 +18,6 @@
                                       63
                                     (+ 27 63))))
 
-(require 'init-funcs) ; for with-selected-frame
-
 (defvar sanityinc/prev-frame nil "The selected frame before invoking `make-frame-command'.")
 (defadvice make-frame-command (before sanityinc/note-previous-frame activate)
   "Record the selected frame before creating a new one interactively."

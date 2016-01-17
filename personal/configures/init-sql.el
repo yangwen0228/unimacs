@@ -1,5 +1,5 @@
 (require-package 'sql-indent)
-(after-load 'sql
+(eval-after-load 'sql
   (require 'sql-indent))
 
 (defun sanityinc/pop-to-sqli-buffer ()
@@ -13,7 +13,7 @@
     (when sql-buffer
       (sanityinc/pop-to-sqli-buffer))))
 
-(after-load 'sql
+(eval-after-load 'sql
   (define-key sql-mode-map (kbd "C-c C-z") 'sanityinc/pop-to-sqli-buffer)
   (add-hook 'sql-interactive-mode-hook 'sanityinc/never-indent)
   (when (package-installed-p 'dash-at-point)
@@ -29,7 +29,7 @@
 (setq-default sql-input-ring-file-name
               (expand-file-name ".sqli_history" user-emacs-directory))
 
-(after-load 'page-break-lines
+(eval-after-load 'page-break-lines
   (push 'sql-mode page-break-lines-modes))
 
 (provide 'init-sql)

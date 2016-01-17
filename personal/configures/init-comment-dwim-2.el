@@ -3,7 +3,8 @@
 ;; comments
 
 ;;; Code:
-(global-set-key (kbd "M-;") 'comment-dwim-2)
+(use-package comment-dwim-2
+  :bind ("M-;" . comment-dwim-2))
 
 (provide 'init-comment-dwim-2)
 ;;; init-comment-dwim-2.el ends here

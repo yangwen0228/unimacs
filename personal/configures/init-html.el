@@ -2,11 +2,11 @@
 (add-hook 'html-mode-hook (lambda () (tidy-build-menu html-mode-map)))
 
 (require-package 'tagedit)
-(after-load 'sgml-mode
+(eval-after-load 'sgml-mode
   (tagedit-add-paredit-like-keybindings)
   (add-hook 'sgml-mode-hook (lambda () (tagedit-mode 1))))
 
-(add-auto-mode 'html-mode "\\.(jsp|tmpl)\\'")
+(add-to-list 'auto-mode-alist ("\\.(jsp|tmpl)\\'" . 'html-mode))
 
 ;; Note: ERB is configured in init-ruby-mode
 

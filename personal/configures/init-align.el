@@ -4,11 +4,10 @@
 ;; Align your code in a pretty way.
 
 ;;; Code:
-(require 'use-package)
 (use-package align
   :bind ("C-x \\" . align-regexp)
-  :init
-  ;; <item name="test" age ="20"/>
+  :preface
+    ;; <item name="test" age ="20"/>
   ;; <item name="test2" age ="20"/>
   ;; =>
   ;; <item name="test"  age ="20"/>
@@ -55,6 +54,7 @@
     (interactive "r")
     (align-regexp start end "\\(\\s-*\\)\\$?\\(\\s-+[0-9]+\\)\\.?"
                   -2 1 t))
+  :config
   )
 
 (provide 'init-align)

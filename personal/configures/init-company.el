@@ -21,7 +21,7 @@
   (add-to-list 'company-keywords-alist
                (append '(tcl-mode) tcl-hm-commands-list))
 
-  (add-to-hooks (lambda ()
+  (add-fun-to-hooks (lambda ()
                   (set (make-local-variable 'company-backends)
                        '(company-c-headers
                          company-irony
@@ -31,7 +31,7 @@
                          )))
                 '(c-mode-hook c++-mode-hook objc-mode-hook))
 
-  (add-to-hooks (lambda ()
+  (add-fun-to-hooks (lambda ()
                   (set (make-local-variable 'company-backends)
                        '((
                           ;; company-gtags-tcl-verbose
@@ -173,6 +173,16 @@
                          (when (and company-gtags-insert-arguments anno)
                            (insert anno)
                            (company-template-c-like-templatify anno)))))))
+
+(use-package company-jedi
+  :init
+  (add-hook 'python-mode-hook 'jedi:setup)
+  :config
+  ;; Standard Jedi.el setting
+  (setq jedi:mode-function 'jedi:get-in-function-call-when-idle)
+  (setq jedi:setup-keys t)
+  (setq jedi:complete-on-dot t)
+  )
 
 (provide 'init-company)
 ;;; init-company.el ends here
