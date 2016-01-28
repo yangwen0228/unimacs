@@ -52,7 +52,6 @@
 (use-package s              :defer t)
 (use-package xml-rpc        :defer t)
 
-
 (use-package anzu
   :init (global-anzu-mode t)
   :diminish "")
@@ -68,6 +67,15 @@
 
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
+
+(use-package edit-server
+  ;; Chrome editor.
+  :disabled t
+  :if (and window-system)
+  :init
+  (defun server-ensure-safe-dir (dir) "Noop" t)
+  (add-hook 'after-init-hook 'server-start t)
+  (add-hook 'after-init-hook 'edit-server-start t))
 
 (use-package eldoc
   :init
@@ -150,8 +158,20 @@
   (global-set-key [remap goto-line] 'goto-line-with-feedback))
 
 (use-package page-break-lines
-  :init (global-page-break-lines-mode t)
-  :diminish "")
+  :init
+  (add-hook 'find-file-hook 'page-break-lines-mode)
+  :diminish ""
+  )
+
+(use-package server
+  :ensure nil
+  :config
+  (when (and (eq window-system 'w32) (file-exists-p (getenv "APPDATA")))
+    (setq server-auth-dir (concat (getenv "APPDATA") "/.emacs.d/server"))
+    (unless (file-exists-p server-auth-dir)
+      (make-directory server-auth-dir)))
+  (defun server-ensure-safe-dir (dir) "Noop" t)
+  (server-start))
 
 (use-package subword
   ;; M-f better jump between camel words. C-M-f whole word.

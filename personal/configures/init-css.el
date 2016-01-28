@@ -3,13 +3,16 @@
 (dolist (hook '(css-mode-hook html-mode-hook sass-mode-hook))
   (add-hook hook 'rainbow-mode)
   )
+(defun my-css-imenu-make-index ()
+  (save-excursion
+    (imenu--generic-function '((nil "^ *\\([^ ]+\\) *{ *$" 1)))))
 
-(setq-default scss-compile-at-save nil)
+(add-hook 'css-mode-hook
+          (lambda ()
+              (setq imenu-create-index-function 'my-css-imenu-make-index)))
 
-
-(eval-after-load 'auto-complete
-  '(progn
-     (dolist (hook '(css-mode-hook sass-mode-hook scss-mode-hook))
-       (add-hook hook 'ac-css-mode-setup))))
+(add-hook 'scss-mode-hook
+          (lambda ()
+              (setq imenu-create-index-function 'my-css-imenu-make-index)))
 
 (provide 'init-css)

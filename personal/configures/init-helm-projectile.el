@@ -4,27 +4,26 @@
 
 ;;; Code:
 (use-package helm-projectile
-  ;; :bind (())
-  :config
+  :init
+  (helm-projectile-on)
   (use-package projectile
     :preface
-    (defun project-create-a-project (dir)
+    (defun projectile-create-a-project (dir)
       (interactive "D")
       (let ((file (expand-file-name ".projectile" dir)))
         (with-temp-file file
           (erase-buffer)
           (insert-string "
-;; - means ignore this pattern, must has a lead "/", using the regexp rule.
+;; - means ignore this pattern, must has a lead \"/\", using the regexp rule.
 ;; + means add this subdir, it will block the root dir.
 -/GTAGS
 -/GPATH
 -/GRTAGS
--GRTAGS
 -/\\.svn
 ")
           )))
 
-    :config
+    :init
     (projectile-global-mode 1)
     (setq projectile-project-root-files-functions
           '(projectile-root-bottom-up
@@ -104,9 +103,22 @@ prefix the string will be assumed to be an ignore string."
     ;; Use cache for big project.
     (setq projectile-enable-caching t)
 
+    (defun my-projectile-project-name ()
+      "Return project name."
+      (if projectile-project-name
+          projectile-project-name
+        (let ((project-root (condition-case nil
+                                (projectile-project-root)
+                              (error nil))))
+          (if project-root
+              (let ((project-name (funcall projectile-project-name-function project-root)))
+                (if (string= project-name "source codes")
+                    (funcall projectile-project-name-function (file-name-directory (directory-file-name project-root)))
+                  project-name))
+            "-"))))
+
     (setq projectile-mode-line
-          '(:eval (format " Pj[%s]" (projectile-project-name)))))
-  (helm-projectile-on))
+          '(:eval (format " Pj[%s]" (my-projectile-project-name))))))
 
 (provide 'init-helm-projectile)
 ;;; init-helm-projectile.el ends here

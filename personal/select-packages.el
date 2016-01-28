@@ -13,7 +13,7 @@
 (defun require-and-configure (configure)
   (condition-case err
       (require configure nil 'noerror)
-    (message (error "when load %s : %s" package err))))
+    (error (message "Error: when load %s : %s" configure err))))
 
 (setq unimacs-init-packages
       '(
@@ -78,6 +78,12 @@
         init-python-mode
         init-tcl-hm-mode
         init-markdown
+
+        init-web-mode
+        init-javascript
+        init-css
+        init-html
+
         ;; init-haskell
         ;; init-rails
         ;; init-ruby-mode
@@ -85,21 +91,19 @@
         ;; init-clojure-cider
         ;; init-cmake-mode
         ;; init-lua-mode
-        ;; init-javascript
-        ;; init-html
         ;; init-erlang
+
         ;; init-cc-mode
         ;; init-irony
         ;; init-irony-eldoc
         ;; init-cpputils-cmake
         ;; init-compile
+
         ;; init-sql
-        ;; init-css
         ;; init-csv
         ;; init-haml
         ;; init-sh
         ;; init-slime
-        ;; init-web-mode
         ;; init-zencoding-mode
         ;;-------------------------------------------------------------------
         ;; writting

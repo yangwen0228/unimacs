@@ -8,8 +8,24 @@
 ;; TODO: <tab> conflict with yasnippet
 ;;; Code:
 (use-package company
+  :preface
+  (defun define-company-backends (list)
+    (dolist (cons list)
+      (let ((modes    (car cons))
+            (backends (cdr cons)))
+        (dolist (mode modes)
+          (add-hook
+           (intern (concat (symbol-name mode) "-hook"))
+           `(lambda ()
+              (set (make-local-variable 'company-backends)
+                   ',backends)))))))
   :init
   (global-company-mode t)
+  (define-company-backends
+    '(((c-mode c++-mode objc-mode) . (company-c-headers company-irony company-dabbrev-code))
+      ((tcl-hm-mode tcl-mode)      . (company-dabbrev-code company-keywords company-gtags))
+      ((js-mode js2-mode web-mode) . (company-web-html company-tern))))
+
   (setq company-idle-delay            0.1
         company-tooltip-limit         15
         company-minimum-prefix-length 2
@@ -17,35 +33,18 @@
         company-require-match         nil
         company-show-numbers          t)
 
-  (require 'tcl-hm-mode)
-  (add-to-list 'company-keywords-alist
-               (append '(tcl-mode) tcl-hm-commands-list))
+  (add-hook 'tcl-mode-hook
+            (lambda ()
+              (require 'tcl-hm-mode)
+              (add-to-list 'company-keywords-alist
+                           (append '(tcl-mode) tcl-hm-commands-list))))
+  (use-package tern
+    :init
+    ;; (setq tern-command '("node" "/path/to/npm/node_modules/tern/bin/tern"))
+    (setq tern-command (cons (executable-find "tern") '())) ; good solution.
+    (add-hook 'js2-mode-hook 'tern-mode)
+    (add-hook 'web-mode-hook 'tern-mode))
 
-  (add-fun-to-hooks (lambda ()
-                  (set (make-local-variable 'company-backends)
-                       '(company-c-headers
-                         company-irony
-                         company-dabbrev-code
-                         ;; company-gtags
-                         ;; company-capf
-                         )))
-                '(c-mode-hook c++-mode-hook objc-mode-hook))
-
-  (add-fun-to-hooks (lambda ()
-                  (set (make-local-variable 'company-backends)
-                       '((
-                          ;; company-gtags-tcl-verbose
-                          company-dabbrev-code
-                          company-keywords
-                          company-gtags-tcl-rigid
-                          ;; company-etags
-                          )
-                         ;; company-dabbrev
-                         company-files
-                         ;; company-capf
-                         )))
-                '(tcl-hm-mode-hook tcl-mode-hook))
-  :config
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "C-j") 'company-show-location)
   ;; (define-key company-active-map (kbd "C-n") 'company-select-next)
@@ -175,14 +174,13 @@
                            (company-template-c-like-templatify anno)))))))
 
 (use-package company-jedi
-  :init
-  (add-hook 'python-mode-hook 'jedi:setup)
+  :commands (company-jedi)
   :config
+  (add-hook 'python-mode-hook 'jedi:setup)
   ;; Standard Jedi.el setting
   (setq jedi:mode-function 'jedi:get-in-function-call-when-idle)
   (setq jedi:setup-keys t)
-  (setq jedi:complete-on-dot t)
-  )
+  (setq jedi:complete-on-dot t))
 
 (provide 'init-company)
 ;;; init-company.el ends here

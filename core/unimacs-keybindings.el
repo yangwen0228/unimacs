@@ -72,7 +72,7 @@
 (bind-key "C-M-|"           'unimacs-cleanup-buffer)
 (bind-key "C-S-o"           'unimacs-smart-open-line-above)
 (bind-key "C-o"             'unimacs-smart-open-line-below)
-(bind-key "M-j"             'unimacs-join-next-line)
+(bind-key* "M-j"             'unimacs-join-next-line)
 (bind-key "M-S-j"           'unimacs-join-to-previous-line)
 (bind-key "C-j"             'newline-and-indent)
 (bind-key "C-S-j"           'backward-delete-char-untabify)

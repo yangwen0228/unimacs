@@ -4,11 +4,13 @@
 
 ;;; Code:
 (use-package helm-flycheck
-  :init
-  (eval-after-load 'flycheck
-    '(define-key flycheck-mode-map (kbd "C-c ! h") 'helm-flycheck))
+  :bind ("C-c ! h" . helm-flycheck)
   :config
   (use-package flycheck
+    :init
+    (flycheck-mode t)
+    (eval-after-load 'flycheck
+    '(define-key flycheck-mode-map (kbd "C-c ! h") 'helm-flycheck))
     :config
     (when (eval-when-compile (>= emacs-major-version 24))
       (require 'flycheck)
@@ -124,8 +126,7 @@ string is a package name with an optional version number attached such as `Tcl' 
     ;;      ;; In default, syntax checked by Clang and Cppcheck.
     ;;      (flycheck-add-next-checker 'c/c++-clang
     ;;                                 'c/c++-googlelint 'append)))
-    )
-  )
+    ))
 
 (provide 'init-helm-flycheck)
 ;;; init-helm-flycheck.el ends here

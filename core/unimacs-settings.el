@@ -25,8 +25,6 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-
-
 (setq-default
  case-fold-search t
  compilation-scroll-output t
