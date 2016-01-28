@@ -14,17 +14,23 @@
       (let ((modes    (car cons))
             (backends (cdr cons)))
         (dolist (mode modes)
-          (add-hook
-           (intern (concat (symbol-name mode) "-hook"))
-           `(lambda ()
-              (set (make-local-variable 'company-backends)
-                   ',backends)))))))
+          (let* ((modename (symbol-name mode))
+                 (funcname (concat "company-backends-for-" modename))
+                 (func (intern funcname))
+                 (hook (intern (concat modename "-hook"))))
+            (setf (symbol-function func)
+                  `(lambda ()
+                     (set (make-local-variable 'company-backends)
+                          ',backends)))
+            (add-hook hook func))))))
   :init
   (global-company-mode t)
   (define-company-backends
-    '(((c-mode c++-mode objc-mode) . (company-c-headers company-irony company-dabbrev-code))
-      ((tcl-hm-mode tcl-mode)      . (company-dabbrev-code company-keywords company-gtags))
-      ((js-mode js2-mode web-mode) . (company-web-html company-tern))))
+    '(((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers))
+      ((tcl-hm-mode tcl-mode)      . ((company-keywords company-gtags-tcl-rigid company-dabbrev-code) company-files))
+      ((js-mode js2-mode)          . (company-tern))
+      ((web-mode)                  . (company-web-html company-tern company-dabbrev-code company-css company-files))
+      ))
 
   (setq company-idle-delay            0.1
         company-tooltip-limit         15
@@ -33,17 +39,9 @@
         company-require-match         nil
         company-show-numbers          t)
 
-  (add-hook 'tcl-mode-hook
-            (lambda ()
-              (require 'tcl-hm-mode)
-              (add-to-list 'company-keywords-alist
-                           (append '(tcl-mode) tcl-hm-commands-list))))
-  (use-package tern
-    :init
-    ;; (setq tern-command '("node" "/path/to/npm/node_modules/tern/bin/tern"))
-    (setq tern-command (cons (executable-find "tern") '())) ; good solution.
-    (add-hook 'js2-mode-hook 'tern-mode)
-    (add-hook 'web-mode-hook 'tern-mode))
+  (require 'tcl-hm-mode)
+  (add-to-list 'company-keywords-alist
+               (append '(tcl-mode) tcl-hm-commands-list))
 
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "C-j") 'company-show-location)
@@ -53,6 +51,39 @@
   ;; (define-key company-search-map (kbd "C-n") 'company-select-next)
   ;; (define-key company-search-map (kbd "C-p") 'company-select-previous)
   )
+
+(use-package company-tern
+  :commands (company-tern company-tern-create-project)
+  :preface
+  (defun company-tern-create-project (dir)
+    (interactive "D")
+    (let ((file (expand-file-name ".tern-project" dir)))
+      (with-temp-file file
+        (erase-buffer)
+        (insert-string "
+{
+\"libs\": [
+         \"browser\",
+         \"jquery\"
+         ],
+\"loadEagerly\": [
+                \"jquery-*.min.js\"
+                ],
+\"dontLoad\": [
+             ],
+\"plugins\": {
+\"node\": {}
+}
+}
+"
+                       ))))
+  :init
+  (use-package tern
+    :init
+    ;; (setq tern-command '("node" "/path/to/npm/node_modules/tern/bin/tern"))
+    (setq tern-command (cons (executable-find "tern") '())) ; good solution.
+    (add-hook 'js2-mode-hook 'tern-mode)
+    (add-hook 'web-mode-hook 'tern-mode)))
 
 (use-package company-quickhelp
   :disabled t
