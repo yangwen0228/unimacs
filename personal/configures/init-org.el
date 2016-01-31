@@ -4,16 +4,26 @@
 
 ;;; Code:
 (use-package org
-  :mode (("\\.org\\'" . org-mode))
-  :bind (("C-c l" . org-store-link)
-         ("C-c a" . org-agenda))
+  :mode ("\\.org\\'" . org-mode)
   :config
-  ;; TODO: (use-package cnblogs)
-  (require 'cnblogs)
-  (cnblogs-minor-mode t)
-  (bind-keys* ("C-c c p" . cnblogs-new-post)
-              ("C-c c e" . cnblogs-edit-post)
-              ("C-c c d" . cnblogs-delete-post))
+  (use-package cnblogs
+    :ensure nil
+    :init
+    (require 'cnblogs)
+    (cnblogs-minor-mode t)
+    (setq org2blog/wp-blog-alist
+          '(("cnblogs"
+             :url "http://www.cnblogs.com/yangwen0228/services/metaWeblog.aspx"
+             :username "yangwen0228"
+             :default-categories ("emacs")
+             :keep-new-lines t
+             :confirm t
+             :wp-code nil
+             :tags-as-categories nil)))
+    (bind-keys ("C-c c p" . cnblogs-new-post)
+               ("C-c c e" . cnblogs-edit-post)
+               ("C-c c d" . cnblogs-delete-post))
+    )
 
   (defun org-make-code-block ()
     (interactive)
@@ -33,10 +43,11 @@
   ;; and you need install texlive-xetex on different platforms
   ;; To install texlive-xetex:
   ;;    `sudo USE="cjk" emerge texlive-xetex` on Gentoo Linux
-  (setq org-latex-to-pdf-process
+  (setq org-latex-to-pdf-process ;; org v7
         '("xelatex -interaction nonstopmode -output-directory %o %f"
           "xelatex -interaction nonstopmode -output-directory %o %f"
           "xelatex -interaction nonstopmode -output-directory %o %f"))
+  (setq org-latex-pdf-process org-latex-to-pdf-process) ;; org v8
   ;; }}
 
   ;; Various preferences
@@ -50,7 +61,10 @@
         org-agenda-window-setup 'current-window
         org-fast-tag-selection-single-key 'expert
         org-export-kill-product-buffer-when-displayed t
+        ;; org v7
         org-export-odt-preferred-output-format "doc"
+        ;; org v8
+        org-odt-preferred-output-format "doc"
         org-tags-column 80
         ;;org-startup-indented t
         )

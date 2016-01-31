@@ -23,8 +23,8 @@
 (define-key lisp-mode-map       (kbd "C-M-q") 'my-quit-help-window)
 (define-key emacs-lisp-mode-map (kbd "C-M-q") 'my-quit-help-window)
 
-(setq browse-url-generic-program "C:/Program Files (x86)/Mozilla Firefox/firefox.exe")
-;; (setq browse-url-generic-program "C:/Users/yangwen/AppData/Local/Google/Chrome/Application/chrome.exe")
+;; (setq browse-url-generic-program "C:/Program Files (x86)/Mozilla Firefox/firefox.exe")
+(setq browse-url-generic-program "C:/Users/yangwen/AppData/Local/Google/Chrome/Application/chrome.exe")
 (defun browse-current-file ()
   "Open the current file as a URL using `browse-url'."
   (interactive)

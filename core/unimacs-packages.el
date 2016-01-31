@@ -48,7 +48,12 @@ Because in China mainland, sometimes melpa doesn't work!"
                   '("melpa" . "http://melpa.milkbox.net/packages/") t))
     (popkit
      (add-to-list 'package-archives
-                  '("popkit" . "http://elpa.popkit.org/packages/") t))))
+                  '("popkit" . "http://elpa.popkit.org/packages/") t)
+     (add-to-list 'package-archives
+                  '("ELPA" . "http://tromey.com/elpa/") t)
+     (add-to-list 'package-archives
+                  '("SC"   . "http://joseito.republika.pl/sunrise-commander/") t)
+     )))
 
 (unimacs-create-package-archives 'popkit)
 

@@ -80,10 +80,11 @@
         init-markdown
 
         init-web-mode
+        init-emmet
         init-javascript
-        init-css
-        init-html
+        ;; init-css
 
+        ;; init-html
         ;; init-haskell
         ;; init-rails
         ;; init-ruby-mode
@@ -141,7 +142,7 @@
         ;; init-modeline
         ;; init-semantic
         ;; init-crontab
-        ;; init-sunrise-commander
+        init-sunrise-commander
         init-maxframe
         ;; init-workgroups2
         ))
