@@ -69,6 +69,7 @@
         init-company
         init-yasnippet
         init-auto-yasnippet
+        init-mvc
 
         ;;-------------------------------------------------------------------
         ;; programming languages

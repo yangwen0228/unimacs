@@ -36,18 +36,12 @@
  ;; If there is more than one, they won't work right.
  '(cursor ((t (:background "RoyalBlue2" :foreground "#002b36" :inverse-video t)))))
 
-(when (functionp 'menu-bar-mode)
-  (menu-bar-mode -1))
-(when (functionp 'set-scroll-bar-mode)
-  (set-scroll-bar-mode 'nil))
-;; (when (functionp 'mouse-wheel-mode)
-;;   (mouse-wheel-mode -1))
-(when (functionp 'tooltip-mode)
-  (tooltip-mode -1))
-(when (functionp 'tool-bar-mode)
-  (tool-bar-mode -1))
-(when (functionp 'blink-cursor-mode)
-  (blink-cursor-mode -1))
+(when (functionp 'menu-bar-mode)       (menu-bar-mode -1))
+(when (functionp 'set-scroll-bar-mode) (set-scroll-bar-mode 'nil))
+;; (when (functionp 'mouse-wheel-mode)    (mouse-wheel-mode -1))
+(when (functionp 'tooltip-mode)        (tooltip-mode -1))
+(when (functionp 'tool-bar-mode)       (tool-bar-mode -1))
+(when (functionp 'blink-cursor-mode)   (blink-cursor-mode -1))
 
 ;; disable startup screen
 (setq inhibit-startup-screen t)

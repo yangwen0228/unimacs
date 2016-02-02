@@ -1,3 +1,8 @@
+;;; mvc.el --- Summary
+;;; Commentary:
+;; comments
+
+;;; Code:
 (require 'projectile)
 (defconst mvc-version "1.0")
 
@@ -19,28 +24,72 @@
                               (expand-file-name "modules" (projectile-project-root))
                             (error nil)) nil nil))
     (read-string "The module name (module): " nil nil "module")))
+  ;; (unless (file-exists-p dir)
+  ;;     (make-directory dir t))
   (when (or (not (file-exists-p (expand-file-name name dir)))
             (and (file-exists-p (expand-file-name name dir))
                  (yes-or-no-p (format "The module %s is already exist, do you want to overwrite?" name))))
     (if (file-exists-p (expand-file-name name dir))
         (delete-directory (expand-file-name name dir))
-      (make-directory (expand-file-name name dir)))
-    (let ((model       (expand-file-name "model.tcl" dir))
-          (view        (expand-file-name "view.tcl"  dir))
-          (control-dir (expand-file-name "control" dir))
-          (control     (expand-file-name "control/control.tcl" dir))
-          (locale-dir  (expand-file-name "locales" dir))
-          (locale      (expand-file-name "cn.msg" dir)))
-      (make-directory control-dir)
-      (make-directory locale-dir)
+      (make-directory (expand-file-name name dir) t))
+    (let* ((module-dir (expand-file-name name dir))
+           (model       (expand-file-name "model.tcl" module-dir))
+           (view        (expand-file-name "view.tcl"  module-dir))
+           (control-dir (expand-file-name "control" module-dir))
+           (control     (expand-file-name "control/control.tcl" module-dir))
+           (locale-dir  (expand-file-name "locales" module-dir))
+           (locale      (expand-file-name "locales/cn.msg" module-dir)))
+      (make-directory control-dir t)
+      (make-directory locale-dir t)
       (with-temp-file model
         (insert "catch {namespace delete modules::" name "::model}\n"
                 "\n"
-                "namespace eval ::modules::" name "model {\n"
+                "namespace eval modules::" name "::model {\n"
                 "}\n"
                 "\n"
-                "# Public APIs: procname's first letter should be lower case\n"
+                "# Public APIs: procname's first letter should be lower case\n\n"
                 "# Private APIs: procname's first letter should be upper case"))
+      (with-temp-file view
+        (insert "if {[info commands ::modules::" name "::View] ne \"\"} {\n"
+                "    return\n"
+                "}\n"
+                "catch {namespace delete modules::" name "::view}\n"
+                "\n"
+                "namespace eval modules::" name "::view {\n"
+                "    variable V_Dir [file dir [info script]]\n"
+                "    variable V_LocalesDir [list]\n"
+                "    proc setLocalesDir {dir} {\n"
+                "        variable V_LocalesDir $dir\n"
+                "    }\n"
+                "}\n"
+                "\n"
+                "package require TclOO\n"
+                "oo::class create modules::" name "::View {\n"
+                "    constructor {frm xmlFile} {\n"
+                "    mclocale cn;# must use mclocale before mcload\n"
+                "    mcload [file join $modules::" name "::view::V_Dir locales]\n"
+                "    mcload $modules::" name "::view::V_LocalesDir\n"
+                "    }\n"
+                "}\n"
+                "# Public APIs: procname's first letter should be lower case\n\n"
+                "# Private APIs: procname's first letter should be upper case"))
+      (with-temp-file control
+        (let ((classname (upcase-initials name)))
+          (insert "if {[info commands ::modules::" classname "] ne \"\"} {\n"
+                  "    return\n"
+                  "}\n"
+                  "\n"
+                  "package require TclOO\n"
+                  "oo::class create modules::" classname " {\n"
+                  "    superclass modules::" name "::View\n"
+                  "    constructor {frm xmlFile} {\n"
+                  "    }\n"
+                  "}\n"
+                  "# Public APIs: procname's first letter should be lower case\n\n"
+                  "# Private APIs: procname's first letter should be upper case")))
+      (with-temp-file locale
+        (insert "::msgcat::mcset cn \"\" \"\""))
       )))
 
 (provide 'mvc)
+;;; mvc.el ends here
