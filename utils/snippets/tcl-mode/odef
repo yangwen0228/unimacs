@@ -1,0 +1,9 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: TclOO class
+# key: odef
+# group: TclOO
+# binding: direct-keybinding
+# --
+::oo::define `(save-excursion (when (string-match "oo::class\\s-\+create\\s-\+\\([^ \t]+\\)" (buffer-string)) (match-string 1 (buffer-string)) ))` ${1:$$(yas-choose-value '("method" "variable"))} ${2:name} {${3:args}} {
+    $0
+}

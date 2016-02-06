@@ -30,15 +30,6 @@
   (interactive)
   (browse-url-generic (concat "file://" (buffer-file-name))))
 
-;; Chinese in windows system.
-(when (eq system-type 'windows-nt)
-  (set-default 'process-coding-system-alist
-               '(("find"   gbk-dos . gbk-dos)
-                 ("global" gbk-dos . gbk-dos)
-                 ("gtags"  gbk-dos . gbk-dos)
-                 ("ctags"  gbk-dos . gbk-dos)
-                 ("ag"     gbk-dos . gbk-dos)
-                 )))
 
 (provide 'init-emacs)
 ;;; init-emacs.el ends here

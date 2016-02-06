@@ -62,8 +62,22 @@
 
 ;; (setq buffer-file-coding-system 'cp936-dos)
 ;; (prefer-coding-system 'cp936-dos))
+
 (setq buffer-file-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8-unix)
+;; Chinese in windows system.
+;; Chinese filenames to Emacs and Emacsclientw:
+;; @see: http://www.gnu.org/software/emacs/manual/html_node/emacs/File-Name-Coding.html
+(when *win32* (setq file-name-coding-system 'gbk-dos))
+;; Chinese filenames to apps:
+(when (eq system-type 'windows-nt)
+  (set-default 'process-coding-system-alist
+               '(("find"   gbk-dos . gbk-dos)
+                 ("global" gbk-dos . gbk-dos)
+                 ("gtags"  gbk-dos . gbk-dos)
+                 ("ctags"  gbk-dos . gbk-dos)
+                 ("ag"     gbk-dos . gbk-dos)
+                 )))
 
 ;; automatically save buffers associated with files on buffer switch
 ;; and on windows switch
@@ -86,11 +100,11 @@ The body of the advice is in BODY."
 
 ;; advise all window switching functions
 (unimacs-defadvice-commands "auto-save"
-                 before
-                 (switch-to-buffer
-                  other-window
-                  select-window-by-number)
-                 (unimacs-auto-save))
+                            before
+                            (switch-to-buffer
+                             other-window
+                             select-window-by-number)
+                            (unimacs-auto-save))
 
 (add-hook 'mouse-leave-buffer-hook 'unimacs-auto-save)
 (add-hook 'focus-out-hook          'unimacs-auto-save)

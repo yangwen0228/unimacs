@@ -1,0 +1,15 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: TclOO class
+# key: oclass
+# group: TclOO
+# binding: direct-keybinding
+# --
+if {[info commands $1] ne ""} {
+    return;
+}
+package require TclOO
+
+## @b $3
+::oo::class create $1 {
+    $0
+}
