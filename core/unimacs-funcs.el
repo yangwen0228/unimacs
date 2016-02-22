@@ -111,9 +111,10 @@ point reaches the beginning or end of the buffer, stop there."
 (defun unimacs-indent-current-line-or-region ()
   "Indent the currently visited buffer."
   (interactive)
-  (if mark-active
-      (indent-region (point-min) (point-max))
-    (indent-region (line-beginning-position) (line-end-position)))
+  (let* ((positions (unimacs-get-positions-of-line-or-region))
+         (beg (car positions))
+         (end (cdr positions)))
+    (indent-region beg end))
   (message "Indent lines...done"))
 
 (defun unimacs-indent-buffer ()
