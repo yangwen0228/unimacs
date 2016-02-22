@@ -200,6 +200,12 @@
   ;;   (add-to-list 'tramp-remote-path "~/bin"))
   )
 
+(use-package visual-line-mode
+  :ensure nil
+  :init
+  (global-visual-line-mode t)
+  (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)))
+
 (use-package volatile-highlights
   ;; highlight when undo or yank
   :init

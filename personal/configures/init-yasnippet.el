@@ -4,19 +4,26 @@
 (use-package yasnippet
   ;; :bind ("<tab>" . yas-expand) ; other completion, like minibuffer, use C-S-i. All tab masked, not I desired.
   :init
+  ;; fix conflict where smartparens clobbers yas' key bindings
+  (defadvice yas-expand (before dotemacs activate)
+    (sp-remove-active-pair-overlay))
+  (add-hook 'yas-before-expand-snippet-hook (lambda () (smartparens-mode -1)))
+  (add-hook 'yas-after-exit-snippet-hook    (lambda () (smartparens-mode 1)))
+
   (yas-global-mode t)
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.
    ;; Your init file should contain only one such instance.
    ;; If there is more than one, they won't work right.
-   '(yas-field-highlight-face ((t (:inherit secondary-selection :background "gray" :foreground "black")))))
+   ;; '(yas-field-highlight-face ((t (:inherit secondary-selection :background "gray" :foreground "black"))))
+   '(yas-field-highlight-face ((t (:inherit secondary-selection)))))
 
   (setq unimacs-yasnippet-dir (expand-file-name "snippets" unimacs-utils-dir))
   (setq yas-snippet-dirs (list yas-installed-snippets-dir))
   (when (and (file-exists-p unimacs-yasnippet-dir)
              (not (member unimacs-yasnippet-dir yas-snippet-dirs)))
-      (add-to-list 'yas-snippet-dirs unimacs-yasnippet-dir))
+    (add-to-list 'yas-snippet-dirs unimacs-yasnippet-dir))
   ;; give yas-dropdown-prompt in yas-prompt-functions a chance.(others: yas-ido-prompt yas-completing-prompt)
   (require 'dropdown-list)
   (setq yas-prompt-functions '(yas-dropdown-prompt yas-completing-prompt))

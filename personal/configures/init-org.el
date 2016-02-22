@@ -6,6 +6,7 @@
 (use-package org
   :mode ("\\.org\\'" . org-mode)
   :config
+  (add-hook 'org-mode-hook 'org-indent-mode)
   (use-package cnblogs
     :ensure nil
     :init

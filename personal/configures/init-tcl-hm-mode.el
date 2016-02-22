@@ -9,12 +9,22 @@
          ("\\.test\\'" . tcl-hm-mode)
          ("\\.wgt\\'"  . tcl-hm-mode)
          ("\\.msg\\'"  . tcl-hm-mode))
-  :init
-  (autoload 'tcl-hm-mode "tcl-hm-mode" "Tcl hm Mode" t)
+  :config
   (use-package tcl-hm-eldoc
     :ensure nil
     :init (add-hook 'tcl-mode-hook 'tcl-hm-eldoc))
-  :config
+  (defun macro2tcl ()
+    (interactive)
+    (let* ((beg (if (region-active-p)
+                    (region-beginning)
+                  (line-beginning-position)))
+           (end (if (region-active-p)
+                    (region-end)
+                  (line-end-position))))
+      (save-excursion
+        (replace-regexp "(\\|," " " nil beg end)
+        (replace-regexp ")" "" nil beg end))
+      ))
   (define-key tcl-hm-mode-map "{"        'tcl-electric-char)
   (define-key tcl-hm-mode-map "}"        'tcl-electric-brace)
   (define-key tcl-hm-mode-map "["        'tcl-electric-char)
