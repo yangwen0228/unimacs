@@ -26,6 +26,7 @@
 
 ;;; Code:
 (setq-default
+ tab-width 4
  case-fold-search t
  compilation-scroll-output t
  ediff-split-window-function 'split-window-horizontally
