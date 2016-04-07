@@ -64,7 +64,6 @@
                 "package require TclOO\n"
                 "oo::class create modules::" name "::View {\n"
                 "    constructor {} {\n"
-                "        mclocale cn;# must use mclocale before mcload\n"
                 "        mcload [file join $modules::" name "::V_Dir locales]\n"
                 "        mcload $modules::" name "::V_LocalesDir\n"
                 "    }\n"
@@ -87,6 +86,7 @@
                   "# Private APIs: procname's first letter should be upper case")))
       (with-temp-file locale
         (insert "::msgcat::mcset cn \"\" \"\""))
+      (find-file view)
       )))
 
 (provide 'mvc)
