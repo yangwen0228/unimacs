@@ -5,7 +5,8 @@
 ;;; Code:
 (use-package tcl-hm-mode
   :ensure nil
-  :mode (("\\.tcl\\'"  . tcl-hm-mode)
+  :mode (("\\.tm\\'"   . tcl-mode)
+         ("\\.tcl\\'"  . tcl-hm-mode)
          ("\\.test\\'" . tcl-hm-mode)
          ("\\.wgt\\'"  . tcl-hm-mode)
          ("\\.msg\\'"  . tcl-hm-mode))
