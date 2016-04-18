@@ -3,6 +3,6 @@
 # key: fore
 # binding: direct-keybinding
 # --
-foreach ${1:item} ${2:\$lst_Items} {
+foreach $1 $2 {
     $0
 }

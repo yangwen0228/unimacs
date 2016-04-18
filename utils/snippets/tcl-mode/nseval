@@ -1,0 +1,5 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: namespace eval
+# key: nseval
+# --
+namespace eval $1 {$0}

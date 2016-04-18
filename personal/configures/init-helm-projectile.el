@@ -48,30 +48,36 @@
          ;; ((eq vcs 'svn) projectile-svn-command) ; don't use svn to search files.
          (t projectile-generic-command))))
 
-    (defun projectile-remove-ignored (files)
+    (defun projectile-remove-ignored (files &optional subdirectories)
       "Remove ignored files and folders from FILES.
 
-Operates on filenames relative to the project root."
+Operates on filenames relative to the project root.  Optionally,
+you can filter ignored files in subdirectories by setting
+SUBDIRECTORIES to a non-nil value."
       (let ((ignored (append (projectile-ignored-files-rel)
                              (projectile-ignored-directories-rel))))
         (-remove (lambda (file)
                    ;; string-prefix-p -> string-match-p
-                   (or (--any-p (string-match-p it file) ignored)
+                   (or (--any-p (string-match-p it (if subdirectories
+                                                       (file-name-nondirectory file)
+                                                     file))
+                                ignored)
                        (--any-p (string-suffix-p it file) projectile-globally-ignored-file-suffixes)))
                  files)))
 
     (defun projectile-parse-dirconfig-file ()
       "Parse project ignore file and return directories to ignore and keep.
 
-The return value will be a cons, the car being the list of
-directories to keep, and the cdr being the list of files or
-directories to ignore.
+The return value will be a list of three elements, the car being
+the list of directories to keep, the cadr being the list of files
+or directories to ignore, and the caddr being the list of files
+or directories to ensure.
 
 Strings starting with + will be added to the list of directories
 to keep, and strings starting with - will be added to the list of
 directories to ignore.  For backward compatibility, without a
 prefix the string will be assumed to be an ignore string."
-      (let (keep ignore (dirconfig (projectile-dirconfig-file)))
+      (let (keep ignore ensure (dirconfig (projectile-dirconfig-file)))
         (when (projectile-file-exists-p dirconfig)
           (with-temp-buffer
             (insert-file-contents dirconfig)
@@ -79,14 +85,17 @@ prefix the string will be assumed to be an ignore string."
               (pcase (char-after)
                 (?+ (push (buffer-substring (1+ (point)) (line-end-position)) keep))
                 (?- (push (buffer-substring (1+ (point)) (line-end-position)) ignore))
+                (?! (push (buffer-substring (1+ (point)) (line-end-position)) ensure))
                 ;; add comment support, not - + begin, as comment
                 ;; (_  (push (buffer-substring     (point)  (line-end-position)) ignore))
                 )
               (forward-line)))
-          (cons (--map (file-name-as-directory (projectile-trim-string it))
+          (list (--map (file-name-as-directory (projectile-trim-string it))
                        (delete "" (reverse keep)))
                 (-map  #'projectile-trim-string
-                       (delete "" (reverse ignore)))))))
+                       (delete "" (reverse ignore)))
+                (-map  #'projectile-trim-string
+                       (delete "" (reverse ensure)))))))
 
     (setq projectile-svn-command "svn list -R . | grep -v '$/")
     (setq projectile-git-submodule-command

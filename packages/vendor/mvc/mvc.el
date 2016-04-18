@@ -42,11 +42,15 @@
       (make-directory control-dir t)
       (make-directory locale-dir t)
       (with-temp-file model
-        (insert "catch {namespace delete modules::" name "::model}\n"
-                "\n"
-                "namespace eval modules::" name "::model {\n"
+        (insert "if {[info commands ::modules::" name "::Model] ne \"\"} {\n"
+                "    return\n"
                 "}\n"
                 "\n"
+                "package require TclOO\n"
+                "oo::class create modules::" name "::Model {\n"
+                "    constructor {} {\n"
+                "    }\n"
+                "}\n"
                 "# Public APIs: procname's first letter should be lower case\n\n"
                 "# Private APIs: procname's first letter should be upper case"))
       (with-temp-file view
@@ -68,7 +72,9 @@
                 "        mcload $modules::" name "::V_LocalesDir\n"
                 "    }\n"
                 "}\n"
-                "# Public APIs: procname's first letter should be lower case\n\n"
+                "# Public APIs: procname's first letter should be lower case\n"
+                "::oo::define modules::" name "::View method buildGUI {frm} {\n"
+                "}\n"
                 "# Private APIs: procname's first letter should be upper case"))
       (with-temp-file control
         (let ((classname (upcase-initials name)))
@@ -78,11 +84,21 @@
                   "\n"
                   "package require TclOO\n"
                   "oo::class create modules::" classname " {\n"
-                  "    superclass modules::" name "::View\n"
+                  "    variable View Model\n"
                   "    constructor {frm xmlFile} {\n"
+                  "        set View  [::modules::" name "::View  new]\n"
+                  "        set Model [::modules::" name "::Model new]\n"
+                  "        my buildGUI $frm\n"
+                  "    }\n"
+                  "    destructor {\n"
+                  "        $View  destroy\n"
+                  "        $Model destroy\n"
                   "    }\n"
                   "}\n"
-                  "# Public APIs: procname's first letter should be lower case\n\n"
+                  "# Public APIs: procname's first letter should be lower case\n"
+                  "::oo::define modules::" classname " method buildGUI {frm} {\n"
+                  "    $View buildGUI $frm\n"
+                  "}\n"
                   "# Private APIs: procname's first letter should be upper case")))
       (with-temp-file locale
         (insert "::msgcat::mcset cn \"\" \"\""))

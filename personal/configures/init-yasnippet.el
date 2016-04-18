@@ -7,8 +7,8 @@
   ;; fix conflict where smartparens clobbers yas' key bindings
   (defadvice yas-expand (before dotemacs activate)
     (sp-remove-active-pair-overlay))
-  (add-hook 'yas-before-expand-snippet-hook (lambda () (smartparens-mode -1)))
-  (add-hook 'yas-after-exit-snippet-hook    (lambda () (smartparens-mode 1)))
+  ;; (add-hook 'yas-before-expand-snippet-hook (lambda () (smartparens-mode -1)))
+  ;; (add-hook 'yas-after-exit-snippet-hook    (lambda () (smartparens-mode 1)))
 
   (yas-global-mode t)
   (custom-set-faces

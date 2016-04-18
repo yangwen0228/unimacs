@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: TclOO method define
+# key: omethod
+# group: TclOO
+# --
+oo::define `(save-excursion (if (string-match "oo::class\\s-\+create\\s-\+\\([^ \t]+\\)" (buffer-string)) (let ((ns (match-string 1 (buffer-string)))) ns)))` method ${1:name} {${2:args}} {
+    $0
+}
