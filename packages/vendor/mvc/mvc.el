@@ -85,7 +85,7 @@
                   "package require TclOO\n"
                   "oo::class create modules::" classname " {\n"
                   "    variable View Model\n"
-                  "    constructor {frm xmlFile} {\n"
+                  "    constructor {frm} {\n"
                   "        set View  [::modules::" name "::View  new]\n"
                   "        set Model [::modules::" name "::Model new]\n"
                   "        my buildGUI $frm\n"
