@@ -72,7 +72,7 @@
 (add-hook 'irony-mode-hook 'my-irony-mode-hook)
 (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
 
-(defun my-irony-root-dir (dir)
+(defun my-create-irony-project (dir)
   (interactive
    (list (read-directory-name "Root Directory: ")))
   (let* ((default-directory dir)
