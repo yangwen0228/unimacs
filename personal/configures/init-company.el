@@ -157,6 +157,7 @@
 
 (use-package company-gtags
   :ensure nil
+  :bind* ("C-<tab>" . company-gtags-tcl-rigid)
   :commands (company-gtags company-gtags-tcl-rigid)
   :preface
   (defun company-gtags--fetch-tcl-tags-rigid (prefix)
