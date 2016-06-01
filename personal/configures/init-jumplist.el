@@ -15,6 +15,8 @@
        ido-find-file
        find-file find-function find-variable
        dired-jump avy-goto-char
+       helm-gtags-find-pattern helm-gtags-find-tag helm-gtags-find-rtag-adapter
+       helm-ag-select-directory
        isearch-forward end-of-buffer beginning-of-buffer))
    '(jumplist-ex-mode t))
   )
