@@ -32,7 +32,7 @@
         ;; init-powerline
         ;; init-smart-mode-line
 
-        init-auto-highlight-symbol
+        ;; init-auto-highlight-symbol
         init-rainbow-delimiters
 
         init-ido
@@ -51,7 +51,8 @@
         ;; init-mmm
         init-avy
         init-string-edit
-        ;;init-ace-jump-mode
+        init-iedit
+        init-jumplist
 
         init-multiple-cursors
         init-undo-tree

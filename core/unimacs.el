@@ -27,7 +27,7 @@
 ;;; Code:
 ;; The order should not be changed!
 (require 'unimacs-packages)    ; must come first
-(require 'unimacs-inner-modes) ; must come second
+(require 'unimacs-modes) ; must come second
 (require 'unimacs-ui)
 (require 'unimacs-funcs)
 (require 'unimacs-keybindings)

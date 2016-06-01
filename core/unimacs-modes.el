@@ -1,4 +1,4 @@
-;;; unimacs-inner-modes.el --- Summary: init inner modes.
+;;; unimacs-modes.el --- Summary: init unimacs core modes.
 
 ;; This file is not part of GNU Emacs.
 
@@ -246,5 +246,5 @@
   :diminish "")
 
 
-(provide 'unimacs-inner-modes)
-;;; unimacs-inner-modes.el ends here
+(provide 'unimacs-modes)
+;;; unimacs-modes.el ends here
