@@ -43,6 +43,9 @@
  ;; no annoying beep on errors
  visible-bell t)
 
+(when (fboundp 'winner-mode)
+  (winner-mode 1))
+
 (transient-mark-mode t) ; If you change buffer, or focus, disable the current buffer's mark
 (setq ring-bell-function (lambda ()))
 ;; move around lines based on how they are displayed, rather than the actual line.
@@ -78,6 +81,8 @@
                  ("gtags"  gbk-dos . gbk-dos)
                  ("ctags"  gbk-dos . gbk-dos)
                  ("ag"     gbk-dos . gbk-dos)
+                 ("java"   gbk-dos . gbk-dos)
+                 ("javac"  gbk-dos . gbk-dos)
                  )))
 
 ;; automatically save buffers associated with files on buffer switch

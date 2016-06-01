@@ -27,8 +27,8 @@
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
-        init-discover-my-major
         init-window-numbering
+        init-switch-window
         ;; init-powerline
         ;; init-smart-mode-line
 
@@ -50,6 +50,7 @@
         ;;-------------------------------------------------------------------
         ;; init-mmm
         init-avy
+        init-string-edit
         ;;init-ace-jump-mode
 
         init-multiple-cursors
@@ -118,7 +119,7 @@
         ;; modules not offen used
         ;;-------------------------------------------------------------------
         ;; init-doxygen
-        ;; init-vc
+        init-vc
         ;; init-gist
         ;; init-git
         ;; init-gnus

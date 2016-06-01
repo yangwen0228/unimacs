@@ -115,7 +115,7 @@
 
 ;; preload the personal settings from `unimacs-personal-preload-dir'
 (when (file-exists-p unimacs-personal-preload-dir)
-  (message "Loading personal configuration files in %s..." unimacs-personal-preload-dir)
+  (message "Loading personal preload configuration files in %s..." unimacs-personal-preload-dir)
   (mapc 'load (directory-files unimacs-personal-preload-dir 't "^[^#].*el$")))
 
 (message "Loading Unimacs's core...")

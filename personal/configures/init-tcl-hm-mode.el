@@ -14,7 +14,7 @@
   (use-package tcl-hm-eldoc
     :ensure nil
     :init (add-hook 'tcl-mode-hook 'tcl-hm-eldoc))
-  (defun macro2tcl ()
+  (defun tcl-hm-macro2tcl ()
     (interactive)
     (let* ((beg (if (region-active-p)
                     (region-beginning)

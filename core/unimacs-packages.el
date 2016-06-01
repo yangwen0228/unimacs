@@ -75,12 +75,11 @@ Because in China mainland, sometimes melpa doesn't work!"
     diff-hl                ;display svn git status at the left margin
     easy-kill              ; mark and copy whole lines, like V in Vim.
     elisp-slime-nav
-    epl
+    epl ; Emacs package library based on package.el
     gitconfig-mode gitignore-mode
     google-c-style
-    guru-mode
     magit
-    move-text
+    move-text ; move a line up/down, alt-up alt-down
     rainbow-mode
     popup
     ;; libs:
