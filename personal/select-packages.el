@@ -24,6 +24,7 @@
         init-exec-path
         init-dired
         init-byte-compile
+        init-maxframe
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
@@ -31,12 +32,9 @@
         init-switch-window
         ;; init-powerline
         ;; init-smart-mode-line
-
         ;; init-auto-highlight-symbol
         init-rainbow-delimiters
-
         init-ido
-
         init-helm
         init-helm-projectile
         init-helm-swoop
@@ -53,18 +51,15 @@
         init-string-edit
         init-iedit
         init-jumplist
-
         init-multiple-cursors
         init-undo-tree
         init-smartparens
         init-align
-
         ;; evil replacement
-        init-origami ;  foldin
-
-        init-expand-region ; expand regio
+        init-hideshow ;  folding
+        ;; init-origami ;  folding
+        init-expand-region ; expand region
         init-comment-dwim-2 ; evil-nerd-commentar
-
         ;;-------------------------------------------------------------------
         ;; auto company && auto check
         ;;-------------------------------------------------------------------
@@ -72,7 +67,6 @@
         init-yasnippet
         init-auto-yasnippet
         init-mvc
-
         ;;-------------------------------------------------------------------
         ;; programming languages
         ;;-------------------------------------------------------------------
@@ -81,12 +75,10 @@
         init-python-mode
         init-tcl-hm-mode
         init-markdown
-
         init-web-mode
         init-emmet
         init-javascript
         ;; init-css
-
         ;; init-html
         ;; init-haskell
         ;; init-rails
@@ -145,8 +137,7 @@
         ;; init-modeline
         ;; init-semantic
         ;; init-crontab
-        init-sunrise-commander
-        init-maxframe
+        ;; init-sunrise-commander
         ;; init-workgroups2
         ))
 

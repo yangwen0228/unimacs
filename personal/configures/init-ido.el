@@ -12,7 +12,7 @@
   (ido-mode 'buffer) ; use 'buffer rather than t to use only buffer switching
   (ido-everywhere t)
   (setq ido-use-filename-at-point nil)
-  (setq ido-auto-merge-work-directories-length 0)
+  (setq ido-auto-merge-work-directories-length -1) ; use -1 to disable annoying too smart auto completion
   (setq ido-use-virtual-buffers t)
   (setq ido-default-buffer-method 'selected-window) ; Allow the same buffer to be open in different frames
 

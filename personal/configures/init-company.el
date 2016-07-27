@@ -185,14 +185,14 @@
                                                (string-to-number (match-string 1)))))))))
 
   (defun company-grab-symbol-for-tcl-rigid ()
-  "If point is at the end of a symbol, return it.
+    "If point is at the end of a symbol, return it.
 Otherwise, if point is not inside a symbol, return an empty string."
-  (if (or (looking-at "\\_>")
-          (looking-at "$"))
-      (buffer-substring (point) (save-excursion (skip-syntax-backward "w_.")
-                                                (point)))
-    (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_)))
-      "")))
+    (if (or (looking-at "\\_>")
+            (looking-at "$"))
+        (buffer-substring (point) (save-excursion (skip-syntax-backward "w_.")
+                                                  (point)))
+      (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_)))
+        "")))
 
   (defun company-gtags-tcl-rigid (command &optional arg &rest ignored)
     "Support for tcl ns::proc kind of command.  COMMAND ARG IGNORED."

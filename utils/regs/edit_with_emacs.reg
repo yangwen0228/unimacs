@@ -1,7 +1,11 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\*\shell\Edit With Emacs]
+[HKEY_CLASSES_ROOT\*\shell\Edit In Emacs]
 @=""
+[HKEY_CLASSES_ROOT\*\shell\Edit In Emacs\command]
+@="\"d:\\git\\emacs_beta\\bin\\emacsclientw.exe\" -n \"%1\""
 
-[HKEY_CLASSES_ROOT\*\shell\Edit With Emacs\command]
-@="\"d:\\git\\emacs_beta\\bin\\emacsclientw.exe\" -nc --alternate-editor=\"d:\\git\\emacs_beta\\bin\\runemacs.exe\" \"%1\""
+[HKEY_CLASSES_ROOT\*\shell\Edit With New Emacs]
+@=""
+[HKEY_CLASSES_ROOT\*\shell\Edit With New Emacs\command]
+@="\"d:\\git\\emacs_beta\\bin\\emacsclientw.exe\" -nc \"%1\""

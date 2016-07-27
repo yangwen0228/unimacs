@@ -90,10 +90,6 @@
   (global-font-lock-mode t) ; turn on syntax highlighting for all buffers
   )
 
-(use-package hideshow
-  :init (add-hook 'prog-mode-hook 'hs-minor-mode)
-  :diminish (hs-minor-mode))
-
 (use-package hippie-exp
   :disabled t
   :bind ("M-/" . hippie-expand)
@@ -135,6 +131,29 @@
 (use-package move-text
   :bind (("M-<up>"   . move-text-up)
          ("M-<down>" . move-text-down))
+  :config
+  (defun move-text-internal (arg)
+  (cond
+   ((and mark-active transient-mark-mode)
+    (if (> (point) (mark))
+        (exchange-point-and-mark))
+    (let ((column (current-column))
+          (text (delete-and-extract-region (point) (mark))))
+      (forward-line arg)
+      (move-to-column column t)
+      (set-mark (point))
+      (insert text)
+      (exchange-point-and-mark)
+      (setq deactivate-mark nil)))
+   (t
+    (let ((column (current-column)))
+      (beginning-of-line)
+      (when (or (> arg 0) (not (bobp)))
+        (forward-line)
+        (when (or (< arg 0) (not (eobp)))
+          (transpose-lines arg))
+        (forward-line -1))
+      (move-to-column column t)))))
   :diminish "")
 
 (use-package nlinum
@@ -201,6 +220,7 @@
   )
 
 (use-package visual-line-mode
+  ;; break line to fit view
   :ensure nil
   :init
   (global-visual-line-mode t)

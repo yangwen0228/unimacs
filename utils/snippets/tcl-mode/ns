@@ -1,0 +1,18 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: standard namespace
+# key: ns
+# binding: direct-keybinding
+# --
+catch {namespace delete ${1:`(save-excursion
+(-when-let (file-path (buffer-file-name))
+ (-when-let (tail (elt (s-match "source codes/\\(.*\\)" (f-no-ext file-path)) 1))
+  (s-concat "::" (s-join "::" (f-split tail))
+  ))))`}}
+
+## @b namespace $1 --- Summary:$2
+namespace eval $1 {
+    $0
+}
+# Public APIs: procname's first letter should be lower case
+
+# Private APIs: procname's first letter should be upper case

@@ -1,4 +1,6 @@
 Windows Registry Editor Version 5.00
 
-[-HKEY_CLASSES_ROOT\*\shell\Edit With Emacs]
+[-HKEY_CLASSES_ROOT\*\shell\Edit In Emacs]
+@=""
+[-HKEY_CLASSES_ROOT\*\shell\Edit With New Emacs]
 @=""

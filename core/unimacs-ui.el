@@ -43,7 +43,7 @@
 (when (functionp 'tool-bar-mode)       (tool-bar-mode -1))
 (when (functionp 'blink-cursor-mode)   (blink-cursor-mode -1))
 
-;; disable startup screen
+;; enable/disable startup screen: nil -> enable, t -> disable
 (setq inhibit-startup-screen t)
 
 ;; nice scrolling
