@@ -69,10 +69,7 @@
 
 (setq buffer-file-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8-unix)
-;; Chinese in windows system.
-;; Chinese filenames to Emacs and Emacsclientw:
-;; @see: http://www.gnu.org/software/emacs/manual/html_node/emacs/File-Name-Coding.html
-(when *win32* (setq file-name-coding-system 'gbk-dos))
+
 ;; Chinese filenames to apps:
 (when (eq system-type 'windows-nt)
   (set-default 'process-coding-system-alist

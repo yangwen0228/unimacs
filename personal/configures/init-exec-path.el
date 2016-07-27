@@ -13,15 +13,22 @@
   (setq unimacs-extra-bin-dir (expand-file-name "extra-bins" unimacs-utils-dir))
   (cond
    (*win32*
+    ;; setting emacs bin dir
+    (let ((emacs-bin-dir (expand-file-name "../../../../bin" exec-directory)))
+      (setenv "PATH" (concat (replace-regexp-in-string "\/" "\\\\" emacs-bin-dir)
+                             ";" (getenv "PATH")))
+      (add-to-list 'exec-path emacs-bin-dir))
+
+    ;; setting extra bin dir
     (let ((paths '("Aspell" "glo651wb" "ctags5.8" "irony" "msys64")))
       (dolist (path paths)
-        (let ((full-path
-               (expand-file-name (concat path "/bin") unimacs-extra-bin-dir)))
-          (setenv "PATH"
-                  (concat
-                   (replace-regexp-in-string "\/" "\\\\" full-path)
-                   ";" (getenv "PATH")))
+        (let ((full-path (expand-file-name (concat path "/bin")
+                                           unimacs-extra-bin-dir)))
+          (setenv "PATH" (concat (replace-regexp-in-string "\/" "\\\\" full-path)
+                                 ";" (getenv "PATH")))
           (add-to-list 'exec-path full-path))))
+
+    ;; setting gtags
     (setenv "GTAGSCONF" (expand-file-name "glo651wb/share/gtags/gtags.conf"
                                           unimacs-extra-bin-dir)))
    (*is-a-mac*

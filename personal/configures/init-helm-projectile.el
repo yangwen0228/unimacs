@@ -20,6 +20,11 @@
 -/GPATH
 -/GRTAGS
 -/\\.svn
+-/\\.git
+-/icons
+-/images
+-/libs/encoding
+-/**.dll
 ")
           )))
 
@@ -30,17 +35,23 @@
             projectile-root-top-down
             ;; projectile-root-top-down-recurring ; don't use svn to define root.
             ))
+    ;; Bugfix: support Chinese file path.
     (defun projectile-files-via-ext-command (command)
       "Get a list of relative file names in the project root by executing COMMAND."
       (condition-case nil
-          (split-string (shell-command-to-string command) "\0" t)
+          (let* ((items (split-string command " "))
+                 (cmd (nth 0 items))
+                 (opts (subseq items 1)))
+            (with-temp-buffer
+              (apply #'call-process cmd nil t nil opts)
+              (split-string (buffer-string) "\0" t)))
         (error nil)))
 
     (defun projectile-get-ext-command ()
       "Determine which external command to invoke based on the project's VCS."
       (let ((vcs (projectile-project-vcs)))
         (cond
-         ((eq vcs 'git) projectile-git-command)
+         ;; ((eq vcs 'git) projectile-git-command)
          ((eq vcs 'hg) projectile-hg-command)
          ((eq vcs 'fossil) projectile-fossil-command)
          ((eq vcs 'bzr) projectile-bzr-command)

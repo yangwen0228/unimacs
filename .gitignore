@@ -4,5 +4,6 @@
 /GTAGS
 /GRTAGS
 /GPATH
+/.projectile
 */custom.el
 *.elc
