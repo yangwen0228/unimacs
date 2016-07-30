@@ -368,20 +368,6 @@ Doesn't mess with normal buffers."
   (exchange-point-and-mark)
   (deactivate-mark nil))
 
-(require 'epl)
-
-(defun unimacs-update ()
-  "Update Unimacs to its latest version."
-  (interactive)
-  (when (y-or-n-p "Do you want to update Unimacs? ")
-    (message "Updating installed packages...")
-    (epl-upgrade)
-    (message "Updating Unimacs...")
-    (cd unimacs-dir)
-    (shell-command "git pull")
-    (unimacs-recompile-init)
-    (message "Update finished. Restart Emacs to complete the process.")))
-
 (defun unimacs-find-user-init-file ()
   "Edit the `user-init-file', in another window."
   (interactive)

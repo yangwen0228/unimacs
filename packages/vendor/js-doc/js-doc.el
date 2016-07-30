@@ -182,7 +182,7 @@ When the function body contains this pattern,
 js-doc-throw-line will be inserted"
   :group 'js-doc)
 
-(defcustom js-doc-document-regexp "^\[ 	\]*\\*[^//]"
+(defcustom js-doc-document-regexp "^\[      \]*\\*[^//]"
   "regular expression of JsDoc comment
 When the string ahead of current point matches this pattarn,
 js-doc regards current state as in JsDoc style comment"
@@ -247,62 +247,62 @@ The comment style can be custimized via `customize-group js-doc'"
   (beginning-of-defun)
   ;; Parse function info
   (let ((params '())
-	(document-list '())
-	(head-of-func (point))
-	from
-	to
-	begin
-	end)
+        (document-list '())
+        (head-of-func (point))
+        from
+        to
+        begin
+        end)
     (save-excursion
       (setq from
-	    (search-forward "(" nil t)
+            (search-forward "(" nil t)
             to
-	    (1- (search-forward ")" nil t)))
+            (1- (search-forward ")" nil t)))
       ;; Now we got the string between ()
       (when (> to from)
-	(dolist (param-block
-		 (split-string (buffer-substring-no-properties from to) ","))
-	  (add-to-list 'params (js-doc-pick-symbol-name param-block) t)))
+        (dolist (param-block
+                 (split-string (buffer-substring-no-properties from to) ","))
+          (add-to-list 'params (js-doc-pick-symbol-name param-block) t)))
       ;; begin-end contains whole function body
       (setq begin
             (search-forward "{" nil t)
             end
             (scan-lists (1- begin) 1 0))
-    ;; put document string into document-list
-    (add-to-list 'document-list
-		 (js-doc-format-string js-doc-top-line) t)
-    (add-to-list 'document-list
-		 (js-doc-format-string js-doc-description-line) t)
-    ;; params
-    (dolist (param params)
-      (setq js-doc-current-parameter-name param)
+      ;; put document string into document-list
       (add-to-list 'document-list
-		   (js-doc-format-string js-doc-parameter-line) t))
-    ;; return / throw
-    (when (js-doc-block-has-regexp begin end
-				   js-doc-return-regexp)
+                   (js-doc-format-string js-doc-top-line) t)
       (add-to-list 'document-list
-		   (js-doc-format-string js-doc-return-line) t))
-    (when (js-doc-block-has-regexp begin end
-				   js-doc-throw-regexp)
+                   (js-doc-format-string js-doc-description-line) t)
+      ;; params
+      (dolist (param params)
+        (setq js-doc-current-parameter-name param)
+        (add-to-list 'document-list
+                     (js-doc-format-string js-doc-parameter-line) t))
+      ;; return / throw
+      (when (js-doc-block-has-regexp begin end
+                                     js-doc-return-regexp)
+        (add-to-list 'document-list
+                     (js-doc-format-string js-doc-return-line) t))
+      (when (js-doc-block-has-regexp begin end
+                                     js-doc-throw-regexp)
+        (add-to-list 'document-list
+                     (js-doc-format-string js-doc-throw-line) t))
+      ;; end
       (add-to-list 'document-list
-		   (js-doc-format-string js-doc-throw-line) t))
-    ;; end
-    (add-to-list 'document-list
-		 (js-doc-format-string js-doc-bottom-line) t)
-    ;; Insert the document
-    (search-backward "(" nil t)
-    (beginning-of-line)
-    (setq from (point))                 ; for indentation
-    (dolist (document document-list)
-      (insert document))
-    ;; Indent
-    (indent-region from (point)))))
+                   (js-doc-format-string js-doc-bottom-line) t)
+      ;; Insert the document
+      (search-backward "(" nil t)
+      (beginning-of-line)
+      (setq from (point))                 ; for indentation
+      (dolist (document document-list)
+        (insert document))
+      ;; Indent
+      (indent-region from (point)))))
 
 ;; http://www.emacswiki.org/emacs/UseIswitchBuffer
 (defun js-doc-icompleting-read (prompt collection)
   (let ((iswitchb-make-buflist-hook
-	 #'(lambda ()
+         #'(lambda ()
              (setq iswitchb-temp-buflist collection))))
     (iswitchb-read-buffer prompt nil nil)))
 
@@ -315,7 +315,7 @@ The comment style can be custimized via `customize-group js-doc'"
 (defun js-doc-blank-line-p (p)
   "Return t when the line at the current point is blank line"
   (save-excursion (eql (progn (beginning-of-line) (point))
-		       (progn (end-of-line) (point)))))
+                       (progn (end-of-line) (point)))))
 
 (defun js-doc-in-comment-p (p)
   "Return t when the point p is in the comment"
@@ -334,7 +334,7 @@ The comment style can be custimized via `customize-group js-doc'"
   (save-excursion
     (goto-char p)
     (and (search-backward "/**" nil t)
-	 (not (search-forward "*/" p t)))))
+         (not (search-forward "*/" p t)))))
 
 (defun js-doc-insert-tag ()
   "Insert a JsDoc tag interactively."
@@ -342,22 +342,22 @@ The comment style can be custimized via `customize-group js-doc'"
   (insert "@")
   (when (js-doc-in-document-p (point))
     (let ((tag (completing-read "Tag: " (js-doc-make-tag-list)
-				nil nil nil nil nil)))
+                                nil nil nil nil nil)))
       (unless (string-equal tag "")
-	(insert tag " ")))))
+        (insert tag " ")))))
 
 (defun js-doc-describe-tag ()
   "Describe the JsDoc tag"
   (interactive)
   (let ((tag (completing-read "Tag: " (js-doc-make-tag-list)
-			      nil t (word-at-point) nil nil))
-	(temp-buffer-show-hook #'(lambda ()
-				  (fill-region 0 (buffer-size))
-				  (fit-window-to-buffer))))
+                              nil t (word-at-point) nil nil))
+        (temp-buffer-show-hook #'(lambda ()
+                                   (fill-region 0 (buffer-size))
+                                   (fit-window-to-buffer))))
     (unless (string-equal tag "")
       (with-output-to-temp-buffer "JsDocTagDescription"
-	(princ (format "@%s\n\n%s"
-		       tag
-		       (cdr (assoc tag js-doc-all-tag-alist))))))))
+        (princ (format "@%s\n\n%s"
+                       tag
+                       (cdr (assoc tag js-doc-all-tag-alist))))))))
 
 (provide 'js-doc)

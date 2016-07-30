@@ -11,8 +11,8 @@ catch {namespace delete ${1:`(save-excursion
 
 ## @b namespace $1 --- Summary:$2
 namespace eval $1 {
-    $0
+    variable V_Dir [file normalize [file dir [info script]]]
 }
 # Public APIs: procname's first letter should be lower case
-
+$0
 # Private APIs: procname's first letter should be upper case

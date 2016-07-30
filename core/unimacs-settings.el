@@ -26,51 +26,60 @@
 
 ;;; Code:
 (setq-default
- tab-width 4
- case-fold-search t
- compilation-scroll-output t
  ediff-split-window-function 'split-window-horizontally
  ediff-window-setup-function 'ediff-setup-windows-plain
- grep-highlight-matches t
- grep-scroll-output t
- indent-tabs-mode nil
- mouse-yank-at-point t
- set-mark-command-repeat-pop t
- tooltip-delay 0.5
- fill-column 80
- truncate-lines nil
+ case-fold-search               t
+ compilation-scroll-output      t
+ fill-column                    80
+ grep-highlight-matches         t
+ grep-scroll-output             t
+ indent-tabs-mode               nil
+ mouse-yank-at-point            t
+ set-mark-command-repeat-pop    t
+ tab-width                      8
+ tooltip-delay                  0.5
+ truncate-lines                 nil
  truncate-partial-width-windows nil
  ;; no annoying beep on errors
  visible-bell t)
 
-(when (fboundp 'winner-mode)
-  (winner-mode 1))
-
-(transient-mark-mode t) ; If you change buffer, or focus, disable the current buffer's mark
-(setq ring-bell-function (lambda ()))
-;; move around lines based on how they are displayed, rather than the actual line.
-(setq line-move-visual t)
+(winner-mode t)                               ; window layout undo/redo
+(transient-mark-mode t)                       ; If you change buffer, or focus, disable the current buffer's mark
+(setq ring-bell-function (lambda ()))         ; no annoying ring bell
+(setq line-move-visual t)                     ; move around lines based on how they are displayed, rather than the actual line.
+(setq next-line-add-newlines nil)             ; NO automatic new line when scrolling down at buffer bottom
+(setq select-enable-clipboard t)              ; use system clipboard
 
 ;; Don't disable narrowing commands
 (put 'narrow-to-region 'disabled nil)
 (put 'narrow-to-page   'disabled nil)
 (put 'narrow-to-defun  'disabled nil)
-                                        ;Ctrl-x Ctrl-u/l to upper/lowercase regions without confirm
+;; Ctrl-x Ctrl-u/l to upper/lowercase regions without confirm
 (put 'downcase-region  'disabled nil)
 (put 'upcase-region    'disabled nil)
 
-;; NO automatic new line when scrolling down at buffer bottom
-(setq next-line-add-newlines nil)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ENCODING ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'file-coding-system-alist '("\\.bat"  . gb2312))
+(add-to-list 'file-coding-system-alist '("\\.html" . utf-8))
+(add-to-list 'file-coding-system-alist '("\\.js"   . utf-8))
+(add-to-list 'file-coding-system-alist '("\\.php"  . utf-8))
+(add-to-list 'file-coding-system-alist '("\\.tcl"  . utf-8-unix))
+(add-to-list 'file-coding-system-alist '("\\.el"   . utf-8-unix))
 
-(setq select-enable-clipboard t) ; use system clipboard
+(prefer-coding-system        'utf-8-unix)
+(set-default-coding-systems  'utf-8-unix)
+(set-terminal-coding-system  'utf-8-unix)
+(set-keyboard-coding-system  'utf-8-unix)
+(set-selection-coding-system 'utf-8-unix)
+(setq-default buffer-file-coding-system 'utf-8-unix)
 
-;; (setq buffer-file-coding-system 'cp936-dos)
-;; (prefer-coding-system 'cp936-dos))
+;; mnemonic for utf-8 is "U", which is defined in the mule.el
+(setq eol-mnemonic-mac  ":CR")
+(setq eol-mnemonic-unix ":LF")
+(setq eol-mnemonic-dos  ":CRLF")
+(setq eol-mnemonic-undecided ":?")
 
-(setq buffer-file-coding-system 'utf-8-unix)
-(prefer-coding-system 'utf-8-unix)
-
-;; Chinese filenames to apps:
+;; Chinese filenames in shell commands.
 (when (eq system-type 'windows-nt)
   (set-default 'process-coding-system-alist
                '(("find"   gbk-dos . gbk-dos)

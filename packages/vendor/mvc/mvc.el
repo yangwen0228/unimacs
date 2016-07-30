@@ -4,6 +4,7 @@
 
 ;;; Code:
 (require 'projectile)
+(require 'f)
 (defconst mvc-version "1.0")
 
 (defgroup mvc nil
@@ -41,67 +42,70 @@
            (locale      (expand-file-name "locales/cn.msg" module-dir)))
       (make-directory control-dir t)
       (make-directory locale-dir t)
-      (with-temp-file model
-        (insert "if {[info commands ::modules::" name "::Model] ne \"\"} {\n"
-                "    return\n"
-                "}\n"
-                "\n"
-                "package require TclOO\n"
-                "oo::class create modules::" name "::Model {\n"
-                "    constructor {} {\n"
-                "    }\n"
-                "}\n"
-                "# Public APIs: procname's first letter should be lower case\n\n"
-                "# Private APIs: procname's first letter should be upper case"))
-      (with-temp-file view
-        (insert "if {[info commands ::modules::" name "::View] ne \"\"} {\n"
-                "    return\n"
-                "}\n"
-                "namespace eval modules::" name " {\n"
-                "    variable V_Dir [file dir [info script]]\n"
-                "    variable V_LocalesDir [list]\n"
-                "    proc setLocalesDir {dir} {\n"
-                "        variable V_LocalesDir $dir\n"
-                "    }\n"
-                "}\n"
-                "\n"
-                "package require TclOO\n"
-                "oo::class create modules::" name "::View {\n"
-                "    constructor {} {\n"
-                "        mcload [file join $modules::" name "::V_Dir locales]\n"
-                "        mcload $modules::" name "::V_LocalesDir\n"
-                "    }\n"
-                "}\n"
-                "# Public APIs: procname's first letter should be lower case\n"
-                "::oo::define modules::" name "::View method buildGUI {frm} {\n"
-                "}\n"
-                "# Private APIs: procname's first letter should be upper case"))
-      (with-temp-file control
-        (let ((classname (upcase-initials name)))
-          (insert "if {[info commands ::modules::" classname "] ne \"\"} {\n"
-                  "    return\n"
-                  "}\n"
-                  "\n"
-                  "package require TclOO\n"
-                  "oo::class create modules::" classname " {\n"
-                  "    variable View Model\n"
-                  "    constructor {} {\n"
-                  "        set View  [::modules::" name "::View  new]\n"
-                  "        set Model [::modules::" name "::Model new]\n"
-                  "    }\n"
-                  "    destructor {\n"
-                  "        ::cnhc::oo::destroyObjsByVarName View Model\n"
-                  "    }\n"
-                  "}\n"
-                  "# Public APIs: procname's first letter should be lower case\n"
-                  "::oo::define modules::" classname " method buildGUI {frm} {\n"
-                  "    $View buildGUI $frm\n"
-                  "}\n"
-                  "# Private APIs: procname's first letter should be upper case")))
-      (with-temp-file locale
-        (insert "::msgcat::mcset cn \"\" \"\""))
-      (find-file view)
-      )))
+      (f-write-text
+       (concat "if {[info commands ::modules::" name "::Model] ne \"\"} {\n"
+               "    return\n"
+               "}\n"
+               "\n"
+               "package require TclOO\n"
+               "oo::class create ::modules::" name "::Model {\n"
+               "    constructor {} {\n"
+               "    }\n"
+               "}\n"
+               "# Public APIs: procname's first letter should be lower case\n\n"
+               "# Private APIs: procname's first letter should be upper case")
+       'utf-8 model)
+      (f-write-text
+       (concat "if {[info commands ::modules::" name "::View] ne \"\"} {\n"
+               "    return\n"
+               "}\n"
+               "namespace eval modules::" name " {\n"
+               "    variable V_Dir [file dir [info script]]\n"
+               "    variable V_LocalesDir [list]\n"
+               "    proc setLocalesDir {dir} {\n"
+               "        variable V_LocalesDir $dir\n"
+               "    }\n"
+               "}\n"
+               "\n"
+               "package require TclOO\n"
+               "oo::class create ::modules::" name "::View {\n"
+               "    constructor {} {\n"
+               "        mcload [file join $modules::" name "::V_Dir locales]\n"
+               "        mcload $modules::" name "::V_LocalesDir\n"
+               "    }\n"
+               "}\n"
+               "# Public APIs: procname's first letter should be lower case\n"
+               "::oo::define modules::" name "::View method buildGUI {frm} {\n"
+               "}\n"
+               "# Private APIs: procname's first letter should be upper case")
+       'utf-8 view)
+      (f-write-text
+       (let ((classname (upcase-initials name)))
+         (concat "if {[info commands ::modules::" classname "] ne \"\"} {\n"
+                 "    return\n"
+                 "}\n"
+                 "\n"
+                 "package require TclOO\n"
+                 "oo::class create ::modules::" classname " {\n"
+                 "    variable View Model\n"
+                 "    constructor {} {\n"
+                 "        set View  [::modules::" name "::View  new]\n"
+                 "        set Model [::modules::" name "::Model new]\n"
+                 "    }\n"
+                 "    destructor {\n"
+                 "        ::cnhc::oo::destroyObjsByVarName View Model\n"
+                 "    }\n"
+                 "}\n"
+                 "# Public APIs: procname's first letter should be lower case\n"
+                 "::oo::define ::modules::" classname " method buildGUI {frm} {\n"
+                 "    $View buildGUI $frm\n"
+                 "}\n"
+                 "# Private APIs: procname's first letter should be upper case"))
+       'utf-8 control)
+      (f-write-text
+       (concat "::msgcat::mcset cn \"\" \"\"")
+       'utf-8 locale)
+      (find-file view))))
 
 (provide 'mvc)
 ;;; mvc.el ends here

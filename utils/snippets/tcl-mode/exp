@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: expr
+# key: exp
+# binding: direct-keybinding
+# --
+expr {$0}

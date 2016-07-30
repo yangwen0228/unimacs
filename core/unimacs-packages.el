@@ -70,16 +70,11 @@ Because in China mainland, sometimes melpa doesn't work!"
     bind-key
     diminish
     solarized-theme
-
     browse-kill-ring
-    diff-hl                ;display svn git status at the left margin
-    easy-kill              ; mark and copy whole lines, like V in Vim.
-    elisp-slime-nav
-    epl ; Emacs package library based on package.el
+    diff-hl                ; display svn git status at the left margin
+    pkg-info epl ; Emacs package library based on package.el
     gitconfig-mode gitignore-mode
-    google-c-style
     magit
-    move-text ; move a line up/down, alt-up alt-down
     rainbow-mode
     popup
     ;; libs:

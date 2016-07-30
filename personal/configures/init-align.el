@@ -6,9 +6,9 @@
 ;;; Code:
 (use-package align
   :bind (("C-x \\" . align-regexp)
-         ("C-x |" . align-regexp-repeated))
+         ("C-x |"  . my-align-regexp-repeated))
   :preface
-  (defun align-regexp-repeated (start stop regexp)
+  (defun my-align-regexp-repeated (start stop regexp)
     "Like align-regexp, but repeated for multiple columns. See
 http://www.emacswiki.org/emacs/AlignCommands"
     (interactive "r\nsAlign regexp: ")

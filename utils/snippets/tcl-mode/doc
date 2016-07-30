@@ -4,25 +4,48 @@
 # group : doxygen
 # type : command
 # --
- # name: python-doxygen
- # key: pydox
- # type: command
- # --
-(let* ((next-func-alist (doxymacs-find-next-func))
+(defun find-next-func ()
+  (save-excursion
+    (if (re-search-forward
+         (concat
+          ;; proc
+          "\\(proc\\|oo::define[ \ta-zA-z0-9_~:<,>*&]+method\\)[ \t]+"
+
+          ;; name
+          "\\([a-zA-Z0-9_~:<,>*&]+\\)"
+          "[ \t]+{"
+          ) nil t)
+
+        (let* ((func (buffer-substring (match-beginning 2) (match-end 2)))
+               (args (buffer-substring (point) (progn
+                                                (backward-char 1)
+                                                (forward-list)
+                                                (backward-char 1)
+                                                (point))))
+               ret)
+          (list (cons 'func func)
+                (cons 'args '(""))
+                (cons 'return '(""))))
+    nil)))
+
+(let* ((next-func-alist (find-next-func))
        (func-name (cdr (assoc 'func next-func-alist)))
        (params-list (cdr (assoc 'args next-func-alist)))
        (return-name (cdr (assoc 'return next-func-alist))) ;; broken in python
        (snippet-text "")
        (idx 1))
-  (setq snippet-text (format "## ${1:%s}\n" func-name))
+  (setq snippet-text (format "## @b ${1:%s}\n" func-name))
   (setq idx 2)
   (dolist (param params-list)
     (setq snippet-text (concat snippet-text
-                               (format "# \\param %s ${%d: (optional, default=${%d:None}) ${%d:?}}\n"
-                                       param idx (1+ idx) (+ 2
-                                                             idx))))
+                               (format "#  @param ${%d:%s}\n"
+                                       idx param)))
     (setq idx (+ 3 idx)))
   (setq snippet-text (concat snippet-text
-                             (format "# \\return ${%d:%s}"
+                             (format "#  @return ${%d:%s}"
                                      idx "None")))
+  (setq snippet-text (concat snippet-text
+                             "\n#\n#  Example:\n#\n#  "
+                             func-name
+                             "$0"))
   (yas/expand-snippet snippet-text))

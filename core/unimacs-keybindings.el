@@ -27,16 +27,12 @@
 ;;; Code:
 (require 'bind-key)
 
-(bind-key "C-x \\"  'align-regexp) ; Align your code in a pretty way.
 (bind-key "C-x p"   'proced)       ; Start proced in a similar manner to dired
 (bind-key "C-x m"   'eshell)       ; Start eshell or switch to it if it's active.
 (bind-key "C-x M"   '(lambda () (interactive) (eshell t))); Force start new eshell
-(bind-key "C-x C-b" 'ibuffer); replace buffer-menu with ibuffer
+(bind-key "C-x C-b" 'ibuffer)      ; replace buffer-menu with ibuffer
 (bind-key "C-x g"   'magit-status)
 (bind-key "C-x M-g" 'magit-dispatch-popup)
-
-(bind-key "M-z" 'zop-up-to-char)
-(bind-key "M-Z" 'zop-to-char)
 
 (bind-key* "<C-return>" 'other-window)
 
@@ -72,7 +68,7 @@
 (bind-key "C-M-|"           'unimacs-cleanup-buffer)
 (bind-key "C-S-o"           'unimacs-smart-open-line-above)
 (bind-key "C-o"             'unimacs-smart-open-line-below)
-(bind-key* "M-j"             'unimacs-join-next-line)
+(bind-key* "M-j"            'unimacs-join-next-line)
 (bind-key "M-S-j"           'unimacs-join-to-previous-line)
 (bind-key "C-j"             'newline-and-indent)
 (bind-key "C-S-j"           'backward-delete-char-untabify)
