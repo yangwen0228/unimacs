@@ -63,8 +63,8 @@
 (add-to-list 'file-coding-system-alist '("\\.html" . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.js"   . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.php"  . utf-8))
-(add-to-list 'file-coding-system-alist '("\\.tcl"  . utf-8-unix))
-(add-to-list 'file-coding-system-alist '("\\.el"   . utf-8-unix))
+(add-to-list 'file-coding-system-alist '("\\.tcl"  . utf-8))
+(add-to-list 'file-coding-system-alist '("\\.el"   . utf-8))
 
 (prefer-coding-system        'utf-8-unix)
 (set-default-coding-systems  'utf-8-unix)
@@ -72,7 +72,6 @@
 (set-keyboard-coding-system  'utf-8-unix)
 (set-selection-coding-system 'utf-8-unix)
 (setq-default buffer-file-coding-system 'utf-8-unix)
-
 ;; mnemonic for utf-8 is "U", which is defined in the mule.el
 (setq eol-mnemonic-mac  ":CR")
 (setq eol-mnemonic-unix ":LF")
@@ -81,6 +80,7 @@
 
 ;; Chinese filenames in shell commands.
 (when (eq system-type 'windows-nt)
+  (setq file-name-coding-system 'gbk-dos)
   (set-default 'process-coding-system-alist
                '(("find"   gbk-dos . gbk-dos)
                  ("global" gbk-dos . gbk-dos)
@@ -120,6 +120,17 @@ The body of the advice is in BODY."
 
 (add-hook 'mouse-leave-buffer-hook 'unimacs-auto-save)
 (add-hook 'focus-out-hook          'unimacs-auto-save)
+
+(defun unimacs-remove-elc-on-save ()
+  "If you're saving an elisp file, likely the .elc is no longer valid."
+  (add-hook 'after-save-hook
+            (lambda ()
+              (if (file-exists-p (concat buffer-file-name "c"))
+                  (delete-file (concat buffer-file-name "c"))))
+            nil t))
+
+(add-hook 'emacs-lisp-mode-hook 'unimacs-remove-elc-on-save)
+(add-hook 'kill-emacs-hook 'unimacs-recompile-user-files)
 
 (provide 'unimacs-settings)
 ;;; unimacs-settings.el ends here

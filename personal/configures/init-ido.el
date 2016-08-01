@@ -32,7 +32,7 @@
           flx-ido-use-faces t))
 
   (use-package ido-vertical-mode
-    :config
+    :init
     (ido-vertical-mode 1)
     (setq ido-vertical-define-keys 'C-n-and-C-p-only
           ido-vertical-show-count  t

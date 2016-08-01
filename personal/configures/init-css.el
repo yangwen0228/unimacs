@@ -1,8 +1,8 @@
 ;; Colourise CSS colour literals
 ;; web-mode does not like rainbow-mode
 (dolist (hook '(css-mode-hook html-mode-hook sass-mode-hook))
-  (add-hook hook 'rainbow-mode)
-  )
+  (add-hook hook 'rainbow-mode))
+
 (defun my-css-imenu-make-index ()
   (save-excursion
     (imenu--generic-function '((nil "^ *\\([^ ]+\\) *{ *$" 1)))))

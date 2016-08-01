@@ -3,33 +3,34 @@
 ;; comments
 
 ;;; Code:
-;; looks nodejs is more popular, if you prefer rhino, change to "js"
-(setq inferior-js-program-command "node --interactive")
-(add-to-list 'interpreter-mode-alist (cons "node" 'js2-mode))
-
-(require 'js-comint)
-;; if use node.js, we need nice output
-(setenv "NODE_NO_READLINE" "1")
-;; (setq inferior-js-mode-hook
-;;       (lambda ()
-;;         ;; We like nice colors
-;;         (ansi-color-for-comint-mode-on)
-;;         ;; Deal with some prompt nonsense
-;;         (add-to-list
-;;          'comint-preoutput-filter-functions
-;;          (lambda (output)
-;;            (replace-regexp-in-string "\033\\[[0-9A-Z][0-9A-Z]" "" output)))))
-
-(defun add-inferior-js-keys ()
-  (moz-minor-mode 1)
-  (local-set-key "\C-x\C-e" 'js-send-last-sexp)
-  (local-set-key "\C-\M-x" 'js-send-last-sexp-and-go)
-  (local-set-key "\C-cb" 'js-send-buffer)
-  (local-set-key "\C-c\C-b" 'js-send-buffer-and-go)
-  (local-set-key "\C-cl" 'js-load-file-and-go))
-
-;; may be in an arbitrary order
 (eval-when-compile (require 'cl))
+
+(use-package js-comint
+  :commands (inferior-js-mode)
+  :config
+  (require 'js-comint)
+  ;; looks nodejs is more popular, if you prefer rhino, change to "js"
+  (setq inferior-js-program-command "node --interactive")
+  (add-to-list 'interpreter-mode-alist (cons "node" 'js2-mode))
+  ;; if use node.js, we need nice output
+  (setenv "NODE_NO_READLINE" "1")
+  (setq inferior-js-mode-hook
+        (lambda ()
+          ;; We like nice colors
+          (ansi-color-for-comint-mode-on)
+          ;; Deal with some prompt nonsense
+          (add-to-list
+           'comint-preoutput-filter-functions
+           (lambda (output)
+             (replace-regexp-in-string "\033\\[[0-9A-Z][0-9A-Z]" "" output)))))
+  (defun add-inferior-js-keys ()
+    (moz-minor-mode 1)
+    (local-set-key "\C-x\C-e" 'js-send-last-sexp)
+    (local-set-key "\C-\M-x" 'js-send-last-sexp-and-go)
+    (local-set-key "\C-cb" 'js-send-buffer)
+    (local-set-key "\C-c\C-b" 'js-send-buffer-and-go)
+    (local-set-key "\C-cl" 'js-load-file-and-go))
+  )
 
 ;; json
 (use-package json-mode
@@ -42,7 +43,7 @@
   :mode (("\\.js\\(\\.erb\\)?\\'" . js2-mode)
          ("\\.ts\\'" . js2-mode))
   :config
-  
+
   (setq-default js2-use-font-lock-faces t
                 js2-mode-must-byte-compile nil
                 js2-idle-timer-delay 0.5 ; NOT too big for real time syntax check
@@ -288,19 +289,19 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
   ;; }}
 
   (defun my-js2-mode-setup()
-      ;; looks nodejs is more popular
-      (require 'js-comint)
-      ;; if use node.js we need nice output
-      (setenv "NODE_NO_READLINE" "1")
-      (js2-imenu-extras-mode)
-      (setq mode-name "JS2")
-      (require 'js2-refactor)
-      (js2-refactor-mode t)
-      (js2r-add-keybindings-with-prefix "C-c C-m")
+    ;; looks nodejs is more popular
+    (require 'js-comint)
+    ;; if use node.js we need nice output
+    (setenv "NODE_NO_READLINE" "1")
+    (js2-imenu-extras-mode)
+    (setq mode-name "JS2")
+    (require 'js2-refactor)
+    (js2-refactor-mode t)
+    (js2r-add-keybindings-with-prefix "C-c C-m")
 
-      (require 'js-doc)
-      (define-key js2-mode-map "\C-cd" 'js-doc-insert-function-doc)
-      (define-key js2-mode-map "@" 'js-doc-insert-tag))
+    (require 'js-doc)
+    (define-key js2-mode-map "\C-cd" 'js-doc-insert-function-doc)
+    (define-key js2-mode-map "@" 'js-doc-insert-tag))
 
   (add-hook 'js2-mode-hook 'my-js2-mode-setup)
   (setq-default js2-additional-externs

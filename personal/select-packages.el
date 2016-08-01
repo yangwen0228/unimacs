@@ -23,16 +23,12 @@
         init-emacs
         init-exec-path
         init-dired
-        init-byte-compile
         init-maxframe
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
         init-window-numbering
         init-switch-window
-        ;; init-powerline
-        ;; init-smart-mode-line
-        ;; init-auto-highlight-symbol
         init-rainbow-delimiters
         init-ido
         init-helm
@@ -46,7 +42,7 @@
         ;;-------------------------------------------------------------------
         ;; editing
         ;;-------------------------------------------------------------------
-        ;; init-mmm
+        init-keyfreq
         init-avy
         init-string-edit
         init-iedit
@@ -58,7 +54,6 @@
         ;; evil replacement
         init-hideshow ;  folding
         ;; init-origami ;  folding
-        init-expand-region ; expand region
         init-comment-dwim-2 ; evil-nerd-commentar
         ;;-------------------------------------------------------------------
         ;; auto company && auto check
@@ -78,7 +73,7 @@
         init-web-mode
         init-emmet
         init-javascript
-        ;; init-css
+        init-css
         ;; init-html
         ;; init-haskell
         ;; init-rails
@@ -98,9 +93,7 @@
         ;; init-sql
         ;; init-csv
         ;; init-haml
-        ;; init-sh
         ;; init-slime
-        ;; init-zencoding-mode
         ;;-------------------------------------------------------------------
         ;; writting
         ;;-------------------------------------------------------------------
@@ -117,10 +110,7 @@
         ;; init-git
         ;; init-gnus
         ;; init-gud
-        ;; init-keyfreq
-        ;; init-ledger
         ;; init-osx-keys
-        ;; init-popwin
         ;; init-proxies
         ;; init-sr-speedbar
         ;; init-bbdb
@@ -131,10 +121,7 @@
         ;; init-term-mode
         ;; init-textile
         ;; init-uniquify
-        ;; init-which-func
         ;; init-xterm
-        ;; init-yari
-        ;; init-modeline
         ;; init-semantic
         ;; init-crontab
         ;; init-sunrise-commander
