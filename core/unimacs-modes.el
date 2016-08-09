@@ -37,6 +37,8 @@
 
 (use-package anzu
   :init (global-anzu-mode t)
+  :config
+  (setq query-replace-skip-read-only t)
   :diminish "")
 
 (use-package autorevert
@@ -46,7 +48,7 @@
   :init
   (global-auto-revert-mode t)
   (setq global-auto-revert-non-file-buffers t
-        auto-revert-verbose                 nil))
+        auto-revert-verbose nil))
 
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
