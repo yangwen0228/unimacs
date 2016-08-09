@@ -27,7 +27,7 @@ http://www.emacswiki.org/emacs/AlignCommands"
       (align-regexp start (+ stop (- (buffer-size) old-buffer-size))
                     ;; add space at end of regexp
                     (concat regexp "\\([[:space:]]*\\)")
-                    1 0 t)
+                    1 spacing t)
       (indent-region start (+ stop (- (buffer-size) old-buffer-size)))))
   ;; <item name="test" age ="20"/>
   ;; <item name="test2" age ="20"/>
