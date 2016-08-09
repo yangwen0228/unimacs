@@ -158,10 +158,8 @@
   (global-set-key [remap goto-line] 'goto-line-with-feedback))
 
 (use-package page-break-lines
-  :init
-  (add-hook 'find-file-hook 'page-break-lines-mode)
-  :diminish ""
-  )
+  :init (global-page-break-lines-mode)
+  :diminish "")
 
 (use-package server
   :ensure nil
