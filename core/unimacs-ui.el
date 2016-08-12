@@ -69,19 +69,42 @@
                    (abbreviate-file-name (buffer-file-name))
                  "%b"))))
 
-;; font settings.
-(let ((font)) (cond
-   (*win32*    (setq font "Consolas"))
-   (*is-a-mac* (setq font "Consolas")))
-  (set-face-attribute 'default nil
-                      :family font :height 110 :weight 'normal)
-  (setq-default line-spacing 0.15))
+(setq unimacs-font-size 11)
+(defun unimacs-make-font-string (font-name font-size)
+  (if (and (stringp font-size)
+           (equal ":" (string (elt font-size 0))))
+      (format "%s%s" font-name font-size)
+    (format "%s %s" font-name font-size)))
+
+(defun unimacs-set-font ()
+  "english-font-size could be set to \":pixelsize=18\" or a integer.
+If set/leave chinese-font-size to nil, it will follow english-font-size"
+
+  (require 'cl) ; for find if
+  (let* ((english-fonts '("Consolas" "Monaco" "DejaVu Sans Mono" "Monospace" "Courier New"))
+         (chinese-fonts '("Microsoft Yahei" "文泉驿等宽微米黑" "黑体" "新宋体" "宋体"))
+         (en-font (unimacs-make-font-string (find-if #'x-list-fonts english-fonts)
+                                          unimacs-font-size))
+         (zh-font (font-spec :family (find-if #'x-list-fonts chinese-fonts)
+                             :size nil)))
+    ;; Set the default English font
+    (set-face-attribute 'default nil :font en-font)
+
+    ;; Set Chinese font
+    ;; Do not use 'unicode charset, it will cause the English font setting invalid
+    (dolist (charset '(kana han symbol cjk-misc bopomofo))
+      (set-fontset-font (frame-parameter nil 'font)
+                        charset zh-font)))
+  (message "default font size is now %d" unimacs-font-size))
+
+(unimacs-set-font)
 
 (defun font-name-replace-size (font-name new-size)
   (let ((parts (split-string font-name "-")))
     (setcar (nthcdr 7 parts) (format "%d" new-size))
     (mapconcat 'identity parts "-")))
 
+;; not used
 (defun increment-default-font-height (delta)
   "Adjust the default font height by DELTA on every frame.
 The pixel size of the frame is kept (approximately) the same.
@@ -101,11 +124,13 @@ DELTA should be a multiple of 10, in the units used by the
 
 (defun increase-default-font-height ()
   (interactive)
-  (increment-default-font-height 10))
+  (setq unimacs-font-size (1+ unimacs-font-size))
+  (unimacs-set-font))
 
 (defun decrease-default-font-height ()
   (interactive)
-  (increment-default-font-height -10))
+  (setq unimacs-font-size (1- unimacs-font-size))
+  (unimacs-set-font))
 
 (bind-key "C-M-=" 'increase-default-font-height)
 (bind-key "C-M--" 'decrease-default-font-height)

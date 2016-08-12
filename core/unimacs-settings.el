@@ -71,6 +71,7 @@
 (set-terminal-coding-system  'utf-8-unix)
 (set-keyboard-coding-system  'utf-8-unix)
 (set-selection-coding-system 'utf-8-unix)
+(set-clipboard-coding-system 'gbk-dos)
 (setq-default buffer-file-coding-system 'utf-8-unix)
 ;; mnemonic for utf-8 is "U", which is defined in the mule.el
 (setq eol-mnemonic-mac  ":CR")
