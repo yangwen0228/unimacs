@@ -52,6 +52,12 @@
       scroll-conservatively 1000
       scroll-preserve-screen-position t)
 
+;; mnemonic for utf-8 is "U", which is defined in the mule.el
+(setq eol-mnemonic-mac  ":CR")
+(setq eol-mnemonic-unix ":LF")
+(setq eol-mnemonic-dos  ":CRLF")
+(setq eol-mnemonic-undecided ":?")
+
 ;; mode line settings
 (line-number-mode t)
 (column-number-mode t)
@@ -81,8 +87,8 @@
 If set/leave chinese-font-size to nil, it will follow english-font-size"
 
   (require 'cl) ; for find if
-  (let* ((english-fonts '("Consolas" "Monaco" "DejaVu Sans Mono" "Monospace" "Courier New"))
-         (chinese-fonts '("Microsoft Yahei" "文泉驿等宽微米黑" "黑体" "新宋体" "宋体"))
+  (let* ((english-fonts '("Consolas" "DejaVu Sans Mono" "Monospace" "Courier New"))
+         (chinese-fonts '("新宋体" "黑体" "文泉驿等宽微米黑"))
          (en-font (unimacs-make-font-string (find-if #'x-list-fonts english-fonts)
                                           unimacs-font-size))
          (zh-font (font-spec :family (find-if #'x-list-fonts chinese-fonts)
