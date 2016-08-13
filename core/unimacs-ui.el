@@ -52,6 +52,12 @@
       scroll-conservatively 1000
       scroll-preserve-screen-position t)
 
+;; mnemonic for utf-8 is "U", which is defined in the mule.el
+(setq eol-mnemonic-mac  ":CR")
+(setq eol-mnemonic-unix ":LF")
+(setq eol-mnemonic-dos  ":CRLF")
+(setq eol-mnemonic-undecided ":?")
+
 ;; mode line settings
 (line-number-mode t)
 (column-number-mode t)
