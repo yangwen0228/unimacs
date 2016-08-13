@@ -66,17 +66,19 @@
 (add-to-list 'file-coding-system-alist '("\\.tcl"  . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.el"   . utf-8))
 
-(prefer-coding-system        'utf-8-unix)
-(set-default-coding-systems  'utf-8-unix)
-(set-terminal-coding-system  'utf-8-unix)
-(set-keyboard-coding-system  'utf-8-unix)
-(set-selection-coding-system 'utf-8-unix)
+(prefer-coding-system        'utf-8)
+(set-default-coding-systems  'utf-8)
+(set-terminal-coding-system  'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(unless (eq system-type 'windows-nt)
+  (set-selection-coding-system 'utf-8))
 (set-clipboard-coding-system 'gbk-dos)
-(setq-default buffer-file-coding-system 'utf-8-unix)
+(setq-default buffer-file-coding-system 'utf-8)
 
 ;; Chinese filenames in shell commands.
 (when (eq system-type 'windows-nt)
   (setq file-name-coding-system 'gbk-dos)
+  (setq default-process-coding-system '(gbk-dos . gbk-dos))
   (set-default 'process-coding-system-alist
                '(("find"   gbk-dos . gbk-dos)
                  ("global" gbk-dos . gbk-dos)
