@@ -72,12 +72,13 @@
 (set-keyboard-coding-system  'utf-8)
 (unless (eq system-type 'windows-nt)
   (set-selection-coding-system 'utf-8))
-(set-clipboard-coding-system 'gbk-dos)
+(set-clipboard-coding-system 'utf-8)
 (setq-default buffer-file-coding-system 'utf-8)
 
 ;; Chinese filenames in shell commands.
 (when (eq system-type 'windows-nt)
   (setq file-name-coding-system 'gbk-dos)
+  (set-clipboard-coding-system 'gbk-dos)
   (setq default-process-coding-system '(gbk-dos . gbk-dos))
   (set-default 'process-coding-system-alist
                '(("find"   gbk-dos . gbk-dos)
