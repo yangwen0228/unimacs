@@ -873,7 +873,7 @@
 ;;[c][b]
 (defun cnblogs-category-selection-toggle (c)
   "根据字符c查找要触发的分类，然后触发这个分类"
-  (let* ((begin (string-match (concat "[" c "]" [ ]*)
+  (let* ((begin (string-match (concat "[" c "]" "[ ]*")
                               (buffer-substring (string-match "随笔分类" (buffer-string)) (point-max)))
 
                 (substring (buffer-substring (point-min) (point-max)) 23728 23731 )
@@ -927,10 +927,8 @@
       (while t
         (let ((c (read-char-exclusive)))
           (cond
-           ((= c ?\r) (throw exit t))
-           (t (do nothing)
-              )
-           ))))))
+           ((= c ?\r) (throw 'exit t))
+           (t nil)))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;mode设置;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (cnblogs-define-variables)        ;定义变量，可以不用定义成函数

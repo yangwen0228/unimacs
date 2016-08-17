@@ -62,6 +62,18 @@ Position the cursor at its beginning, according to the current mode."
   (move-end-of-line nil)
   (newline-and-indent))
 
+(defun unimacs-join-lines ()
+  "Join whole buffer or region."
+  (interactive)
+  (let* ((positions (unimacs-get-positions-of-buffer-or-region))
+         (beg (car positions))
+         (end (cdr positions)))
+    (save-excursion
+      (goto-char beg)
+      (while (and (< (point) end)
+                  (search-forward-regexp "[ \t]*\n[ \t]*" nil t))
+        (replace-match "")))))
+
 (defun unimacs-join-next-line ()
   "Join the current line with the line beneath it."
   (interactive)
@@ -145,6 +157,20 @@ point reaches the beginning or end of the buffer, stop there."
     (when filename
       (kill-new filename)
       (message "Copied buffer file name '%s' to the clipboard." filename))))
+
+(defun unimacs-get-positions-of-buffer-or-region ()
+  "Return positions (beg . end) of the current buffer or region."
+  (let (beg end)
+    (if (and mark-active (> (point) (mark)))
+        (exchange-point-and-mark))
+    (if mark-active
+        (setq beg (line-beginning-position))
+      (setq beg (point-min)))
+    (if mark-active
+        (progn (exchange-point-and-mark)
+               (setq end (line-end-position)))
+      (setq end (point-max)))
+    (cons beg end)))
 
 (defun unimacs-get-positions-of-line-or-region ()
   "Return positions (beg . end) of the current line or region."
