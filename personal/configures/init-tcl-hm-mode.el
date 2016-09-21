@@ -35,6 +35,7 @@
   (define-key tcl-hm-mode-map "\t"       'tcl-indent-command)
   (define-key tcl-hm-mode-map "\M-\C-x"  'tcl-eval-defun)
   (define-key tcl-hm-mode-map "\C-c\C-j" 'tcl-help-on-hm-word)
+  (define-key global-map "\C-c\C-j" 'tcl-help-on-hm-word)
   (define-key tcl-hm-mode-map "\C-c\C-v" 'tcl-eval-defun)
   (define-key tcl-hm-mode-map "\C-c\C-f" 'tcl-load-file)
   (define-key tcl-hm-mode-map "\C-c\C-t" 'inferior-tcl)
@@ -44,10 +45,20 @@
                "C/Program Files (x86)/TclPro1.4/lib/tclX8.3/help/tcl/")
   (add-to-list 'tcl-help-directory-list
                "C:/Program Files (x86)/TclPro1.4/lib/tkX8.3/help/tk/")
-  (add-to-list 'tcl-hm-help-directory-list
-               "C:/Program Files/Altair/13.0/hw/tcl/hwt/docs")
-  (add-to-list 'tcl-hm-help-directory-list
-               "C:/Program Files/Altair/13.0/help/hwdref/")
+
+  (defun tcl-hm-set-help-version (version)
+    "Change HyperWorks help VERSION."
+    (interactive (list (read-version)))
+    (setq tcl-hm-help-directory-list nil)
+    (add-to-list 'tcl-hm-help-directory-list
+                 (concat "C:/Program Files/Altair/" version "/hw/tcl/hwt/docs"))
+    (add-to-list 'tcl-hm-help-directory-list
+                 (concat "C:/Program Files/Altair/" version "/help/hwdref/"))
+    )
+  (defsubst read-version ()
+    (let ((versions '("12.0" "13.0" "14.0")))
+      (completing-read "HyperWorks Version(Default: 13.0): " versions nil t nil nil "13.0")))
+  (tcl-hm-set-help-version "14.0")
 
   (modify-syntax-entry ?* "w" tcl-mode-syntax-table)
   (modify-syntax-entry ?_ "w" tcl-mode-syntax-table)
