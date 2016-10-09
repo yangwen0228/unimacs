@@ -5,7 +5,7 @@
 # binding: direct-keybinding
 # --
 if {[info commands $1] ne ""} {
-    return;
+    return
 }
 package require TclOO
 

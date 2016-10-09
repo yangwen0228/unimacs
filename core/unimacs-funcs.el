@@ -112,13 +112,18 @@ point reaches the beginning or end of the buffer, stop there."
 
   ;; Move lines first
   (when (/= arg 1)
-    (let ((line-move-visual nil))
-      (forward-line (1- arg))))
+    (forward-line (1- arg)))
 
-  (let ((orig-point (point)))
-    (back-to-indentation)
-    (when (= orig-point (point))
-      (move-beginning-of-line 1))))
+  (if (bolp)
+      (back-to-indentation)
+    (if line-move-visual
+        (beginning-of-visual-line)
+      (beginning-of-line)))
+  ;; (let ((orig-point (point)))
+  ;;   (back-to-indentation)
+  ;;   (when (= orig-point (point))
+  ;;     (move-beginning-of-line 1)))
+  )
 
 (defun unimacs-indent-current-line-or-region ()
   "Indent the currently visited buffer."

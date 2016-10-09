@@ -409,7 +409,7 @@
   (let ((regexp (concat "^[ \t]*#\\+" field ":\\([^\n]*\\)$"))
         (content (buffer-substring-no-properties (point-min) (point-max))))
     (if (string-match regexp content)
-        (string-trim (match-string 1 content))
+        (s-trim (match-string 1 content))
       nil)))
 
 (defun cnblogs-make-media-object-file-data (media-path) ;todo: type可能要详细分类
@@ -439,17 +439,14 @@
                        ""))
              ;; categories
              (cons "categories"
-                   (let ((categories-list
-                          (cnblogs-categories-string-to-list
-                           (cnblogs-fetch-field "CATEGORIES"))))
-                     (or
-                      categories-list
-                      '("[随笔分类]未分类"))))
+                   (let ((categories-list (cnblogs-categories-string-to-list
+                                           (cnblogs-fetch-field "CATEGORIES"))))
+                     (or categories-list
+                         '("[随笔分类]未分类"))))
              ;; tags
              (cons "mt_keywords"
-                   (or
-                    (cnblogs-fetch-field "KEYWORDS")
-                    ""))
+                   (or (cnblogs-fetch-field "KEYWORDS")
+                       ""))
 
              ;; dateCreated
              (cons "dateCreated"
@@ -604,10 +601,8 @@
 
 (defun cnblogs-current-buffer-to-post ()
   (cond
-   ((equal mode-name
-           "Org")
+   ((equal mode-name "Org")
     (cnblogs-org-mode-buffer-to-post))
-
    (t
     (cnblogs-other-mode-buffer-to-post))))
 
