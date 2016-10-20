@@ -63,7 +63,7 @@
 (add-to-list 'file-coding-system-alist '("\\.html" . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.js"   . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.php"  . utf-8))
-(add-to-list 'file-coding-system-alist '("\\.tcl"  . utf-8))
+;; (add-to-list 'file-coding-system-alist '("\\.tcl"  . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.el"   . utf-8))
 
 (prefer-coding-system        'utf-8)

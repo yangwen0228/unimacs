@@ -44,6 +44,7 @@
         ;;-------------------------------------------------------------------
         init-keyfreq
         init-avy
+        init-pinyin-search
         init-string-edit
         init-iedit
         init-jumplist
