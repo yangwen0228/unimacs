@@ -87,8 +87,13 @@
 If set/leave chinese-font-size to nil, it will follow english-font-size"
 
   (require 'cl) ; for find if
+<<<<<<< HEAD
   (let* ((english-fonts '("Consolas" "Monaco" "DejaVu Sans Mono" "Monospace" "Courier New"))
          (chinese-fonts '("新宋体" "黑体" "Microsoft Yahei" "文泉驿等宽微米黑" "宋体"))
+=======
+  (let* ((english-fonts '("Consolas" "DejaVu Sans Mono" "Monospace" "Courier New"))
+         (chinese-fonts '("新宋体" "黑体" "文泉驿等宽微米黑"))
+>>>>>>> c3df42bc3c63bbff6a5be06b1e1203514886d30a
          (en-font (unimacs-make-font-string (find-if #'x-list-fonts english-fonts)
                                           unimacs-font-size))
          (zh-font (font-spec :family (find-if #'x-list-fonts chinese-fonts)
