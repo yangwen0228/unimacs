@@ -62,9 +62,9 @@
 (add-to-list 'file-coding-system-alist '("\\.bat"  . gb2312))
 (add-to-list 'file-coding-system-alist '("\\.html" . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.js"   . utf-8))
-(add-to-list 'file-coding-system-alist '("\\.php"  . utf-8))
+;; (add-to-list 'file-coding-system-alist '("\\.php"  . utf-8))
 ;; (add-to-list 'file-coding-system-alist '("\\.tcl"  . utf-8))
-(add-to-list 'file-coding-system-alist '("\\.el"   . utf-8))
+;; (add-to-list 'file-coding-system-alist '("\\.el"   . utf-8))
 
 (prefer-coding-system        'utf-8)
 (set-default-coding-systems  'utf-8)
