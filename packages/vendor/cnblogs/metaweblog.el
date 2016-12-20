@@ -1,8 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; metaWeblog.newPost
-
 (require 'xml-rpc)
 
+;; metaWeblog.newPost
 (defun cnblogs-metaweblog-new-post (post publishp)
   (xml-rpc-method-call cnblogs-server-url
                        "metaWeblog.newPost"
@@ -43,7 +42,6 @@
                        cnblogs-user-name
                        cnblogs-user-passwd))
 
-
 ;; metaWeblog.getCategories
 (defun cnblogs-metaweblog-get-categories ()
   (xml-rpc-method-call cnblogs-server-url
@@ -74,7 +72,7 @@
                        cnblogs-user-passwd))
 
 ;; blogger.deletePost
-(defun cnblogs-metaweblog-delete-post (cnblogs-post-id publish);我还不明白这个publish有什么作用
+(defun cnblogs-metaweblog-delete-post (cnblogs-post-id publishp)
   (xml-rpc-method-call cnblogs-server-url
                        "blogger.deletePost"
                        "appkey"
@@ -83,7 +81,7 @@
                          cnblogs-post-id)
                        cnblogs-user-name
                        cnblogs-user-passwd
-                       publish))
+                       publishp))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -58,7 +58,7 @@
   (defsubst read-version ()
     (let ((versions '("12.0" "13.0" "14.0")))
       (completing-read "HyperWorks Version(Default: 13.0): " versions nil t nil nil "13.0")))
-  (tcl-hm-set-help-version "14.0")
+  (tcl-hm-set-help-version "12.0")
 
   (modify-syntax-entry ?* "w" tcl-mode-syntax-table)
   (modify-syntax-entry ?_ "w" tcl-mode-syntax-table)

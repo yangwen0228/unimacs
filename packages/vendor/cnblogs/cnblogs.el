@@ -174,20 +174,23 @@
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;底层函数;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun cnblogs-check-legal-for-publish (src-file)
   "检查文件是否可以发布"
-  (and
-   (if (member (file-name-extension src-file)
-               cnblogs-src-file-extension-list)
-       t
-     (progn
-       (message "Failed: UNSUPPORTED file!")
-       nil))
+  (let (legal-state)
+    (and
+     (if (not (member (file-name-extension src-file)
+                      cnblogs-src-file-extension-list))
+         (progn
+           (message "Failed: UNSUPPORTED file!")
+           (setq legal-state 1)
+           nil)
+       t)
 
-   (if (equal (cnblogs-get-src-file-state (buffer-file-name))
-              "PUBLISHED")
-       (progn
-         (message "This post has been published, you can update it, using M-x cnblogs-edit-post")
-         nil)
-     t)))
+     (if (equal (cnblogs-get-src-file-state (buffer-file-name)) "PUBLISHED")
+         (progn
+           (message "This post has been published, you can update it, using M-x cnblogs-edit-post")
+           (setq legal-state 2)
+           nil)
+       t))
+    legal-state))
 
 (defun cnblogs-check-legal-for-delete (src-file)
   "检查文件是否可以删除相应的博文"
@@ -460,7 +463,7 @@
 
              ;; description
              (cons "description"
-                   (with-current-buffer (org-html-export-as-html 3 nil nil "*Org HTML Export*")
+                   (with-current-buffer (org-html-export-as-html nil nil nil nil nil)
                      (let ((buf-str
                             (cnblogs-replace-media-object-location
                              (buffer-substring-no-properties
@@ -601,10 +604,8 @@
 
 (defun cnblogs-current-buffer-to-post ()
   (cond
-   ((equal mode-name "Org")
-    (cnblogs-org-mode-buffer-to-post))
-   (t
-    (cnblogs-other-mode-buffer-to-post))))
+   ((equal mode-name "Org") (cnblogs-org-mode-buffer-to-post))
+   (t (cnblogs-other-mode-buffer-to-post))))
 
 (defun cnblogs-check-file-in-entry-list (src-file)
   "检查文件是否已经在列表项中"
@@ -727,41 +728,42 @@
 
 (defun cnblogs-new-post ()
   (interactive)
+  (let ((legal-state (cnblogs-check-legal-for-publish (buffer-file-name))))
+    (print legal-state)
+    (cond
+     ((eq 1 legal-state) ; file type not supported
+      nil)
+     ((eq 2 legal-state) ; PUBLISHED
+      (cnblogs-edit-post))
+     (t ; new post
+      (if (yes-or-no-p "Do you want to post this blog to cnblogs?")
+          ;; 下面发布处理
+          (let* ((postid  ;得到博文id
+                  (cnblogs-metaweblog-new-post (cnblogs-current-buffer-to-post) t))
+                 ;; 得到博文内容
+                 (post (cnblogs-metaweblog-get-post postid)))
 
-  (if (cnblogs-check-legal-for-publish (buffer-file-name))
-      ;; 下面发布处理
-      (let* ((postid  ;得到博文ｉｄ
-              (cnblogs-metaweblog-new-post (cnblogs-current-buffer-to-post)
-                                           t))
-                                        ;得到博文内容
-             (post
-              (cnblogs-metaweblog-get-post postid)))
+            ;; todo:这里要刷新列表
+            ;; 保存博文项和博文内容
+            (if (integerp postid)
+                (setq postid (int-to-string postid)))
+            ;; 保存博文
+            (with-temp-file (concat cnblogs-file-post-path postid)
+              (print post (current-buffer)))
 
-                                        ;todo:这里要刷新列表
-        ;;保存博文项和博文内容
-        (if (integerp postid)
-            (setq postid (int-to-string postid)))
-        ;;保存博文
-        (with-temp-file (concat cnblogs-file-post-path postid)
-          (print post (current-buffer)))
-
-        (if (cnblogs-check-file-in-entry-list (buffer-file-name))
-            (cnblogs-assign-post-to-file post (buffer-file-name))
-          (push
-                                        ;id
-           (list (cnblogs-gen-id)
-                                        ;title
-                 (cdr (assoc "title" post))
-                                        ;postid
-                 postid
-                                        ;categories
-                 (cdr (assoc "categories" post))
-                 (buffer-file-name)
-                 "PUBLISHED")
-           cnblogs-entry-list))
-                                        ;保存博文项列表
-        (cnblogs-save-entry-list)
-        (message "Post published！"))))
+            (if (cnblogs-check-file-in-entry-list (buffer-file-name))
+                (cnblogs-assign-post-to-file post (buffer-file-name))
+              (push
+               (list (cnblogs-gen-id)                ; id
+                     (cdr (assoc "title" post))      ; title
+                     postid                          ; postid
+                     (cdr (assoc "categories" post)) ; categories
+                     (buffer-file-name)
+                     "PUBLISHED")
+               cnblogs-entry-list))
+            ;; 保存博文项列表
+            (cnblogs-save-entry-list)
+            (message "The blog has been published cuccessfully!")))))))
 
 (defun cnblogs-save-draft ()
   (interactive)
@@ -773,7 +775,7 @@
            (cnblogs-metaweblog-get-post postid)
            cnblogs-entry-list))
     (cnblogs-save-entry-list))
-  (message "保存草稿成功！"))
+  (message "The draft has been saved cuccessfully!"))
 
 (defun cnblogs-delete-post ()
   (interactive)
@@ -781,22 +783,19 @@
       (let ((postid
              (cnblogs-get-postid-by-src-file-name (buffer-file-name))))
         (if (and postid
-                 (yes-or-no-p "Are you sure?")
+                 (yes-or-no-p "Are you sure to delete?")
                  (cnblogs-metaweblog-delete-post postid t)
                  (cnblogs-delete-post-from-entry-list postid)
                  (cnblogs-save-entry-list))
-
-            (message "Succeed！")
-          (message "Failed！")))))
+            (message "The blog has been deleted!")
+          (message "Failed!")))))
 
 (defun cnblogs-edit-post ();;todo:更新本地
   (interactive)
   (if (cnblogs-check-legal-for-edit (buffer-file-name))
-      (let ((postid
-             (cnblogs-get-postid-by-src-file-name
-              (buffer-file-name))))
+      (let ((postid (cnblogs-get-postid-by-src-file-name (buffer-file-name))))
         (if (and postid
-                 (yes-or-no-p "Are you sure to update?")
+                 (yes-or-no-p "Already published! Do you want to update this blog to cnblogs?")
                  (cnblogs-metaweblog-edit-post postid
                                                (cnblogs-current-buffer-to-post)
                                                t)
@@ -804,7 +803,7 @@
                                               (buffer-file-name))
                  (cnblogs-save-entry-list))
 
-            (message "Succeed!")
+            (message "The blog has be updated cuccessfully!")
           (message "Failed!")))))
 
 (defun cnblogs-get-post ()
@@ -865,6 +864,7 @@
   "将faces属性plist赋给str，并返回这个str"
   (set-text-properties 0 (length str) plist str)
   str)
+
 ;;[c][b]
 (defun cnblogs-category-selection-toggle (c)
   "根据字符c查找要触发的分类，然后触发这个分类"
@@ -873,6 +873,7 @@
 
                 (substring (buffer-substring (point-min) (point-max)) 23728 23731 )
                 ))))
+
 (defun cnblogs-category-selection ()
   (interactive)
   (save-window-excursion
@@ -924,14 +925,14 @@
           (cond
            ((= c ?\r) (throw 'exit t))
            (t nil)))))))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;mode设置;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(cnblogs-define-variables)        ;定义变量，可以不用定义成函数
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;mode设置;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 定义变量，可以不用定义成函数
+(cnblogs-define-variables)
 ;; 下面是关于minor mode的内容
 (defun cnblogs-init ()
   "Cnblogs的所有初始化工作"
-  (cnblogs-load-variables)
-  )
+  (cnblogs-load-variables))
 
 ;; 定义菜单
 (define-key cnblogs-mode-map [menu-bar menu-bar-cnblogs-menu]
@@ -940,10 +941,11 @@
 (define-minor-mode cnblogs-minor-mode
   "cnblogs-minor-mode"
   :init-value nil
-  :lighter " Cnblogs"
-  :keymap cnblogs-mode-map
-  :group Cnblogs)
+  :lighter    " Cnblogs"
+  :keymap     cnblogs-mode-map
+  :group      Cnblogs)
 
-(add-hook 'cnblogs-minor-mode-hook 'cnblogs-init) ;打开cnblogs-minor-mode时再加载数据等初始化
+;; 打开cnblogs-minor-mode时再加载数据等初始化
+(add-hook 'cnblogs-minor-mode-hook 'cnblogs-init)
 
 (provide 'cnblogs)
