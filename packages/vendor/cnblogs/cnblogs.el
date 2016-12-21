@@ -463,14 +463,13 @@
 
              ;; description
              (cons "description"
-                   (with-current-buffer (org-html-export-as-html nil nil nil nil nil)
-                     (let ((buf-str
-                            (cnblogs-replace-media-object-location
-                             (buffer-substring-no-properties
-                              (point-min)
-                              (point-max)))))
-                       (kill-buffer)
-                       buf-str))))))
+                   (let ((org-export-show-temporary-export-buffer nil))
+                     (with-current-buffer (org-html-export-as-html nil nil nil nil nil)
+                       (let ((buf-str (cnblogs-replace-media-object-location
+                                       (buffer-substring-no-properties
+                                        (point-min) (point-max)))))
+                         (kill-buffer)
+                         buf-str)))))))
 
 (defun cnblogs-other-mode-buffer-to-post () ;todo: post还不完全
   (delq nil
