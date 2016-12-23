@@ -25,6 +25,16 @@
                ("C-c c e" . cnblogs-edit-post)
                ("C-c c d" . cnblogs-delete-post))
     )
+  (use-package org-download
+    :bind ("C-S-y" . org-download-clipboard)
+    :init
+    (defun org-download-clipboard ()
+      "Save the captured image from clipboard to file, and insert into buffer. Or org-download-yank."
+      (interactive)
+      (let ((link "d:/temp/screenshot.png"))
+        (if (eq 0 (shell-command (format "\"c:/Program\sFiles/ImageMagick-6.9.3-Q16/convert.exe\" clipboard:myimage %s" link) "*screenshot2file*" "*screenshot2file*"))
+              (org-download-image link)
+          (org-download-yank)))))
 
   (defun org-make-code-block ()
     (interactive)
