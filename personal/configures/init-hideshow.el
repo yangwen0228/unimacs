@@ -7,6 +7,7 @@
   :init (add-hook 'prog-mode-hook 'hs-minor-mode)
   :config
   (use-package hideshowvis
+    :disabled
     :init (add-hook 'prog-mode-hook 'hideshowvis-enable)
     :config
     (hideshowvis-symbols)

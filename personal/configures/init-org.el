@@ -21,13 +21,14 @@
              :confirm t
              :wp-code nil
              :tags-as-categories nil)))
-    (bind-keys ("C-c c p" . cnblogs-new-post)
+    (bind-keys ("C-c c p" . cnblogs-post)
+               ("C-c c n" . cnblogs-new-post)
                ("C-c c e" . cnblogs-edit-post)
                ("C-c c d" . cnblogs-delete-post))
     )
   (use-package org-download
     :bind ("C-S-y" . org-download-clipboard)
-    :init
+    :config
     (defun org-download-clipboard ()
       "Save the captured image from clipboard to file, and insert into buffer. Or org-download-yank."
       (interactive)

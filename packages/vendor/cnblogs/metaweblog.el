@@ -83,6 +83,14 @@
                        cnblogs-user-passwd
                        publishp))
 
+;; wp.newCategory
+(defun cnblogs-metaweblog-new-category (category)
+  (xml-rpc-method-call cnblogs-server-url
+                       "wp.newCategory"
+                       cnblogs-blog-id
+                       cnblogs-user-name
+                       cnblogs-user-passwd
+                       category))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

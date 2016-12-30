@@ -97,7 +97,7 @@
     '(menu-item "--"))
 
   (define-key cnblogs-mode-map [tags-editPost]
-    '(menu-item "Update post" cnblogs-edit-post
+    '(menu-item "Update post" cnblogs-update-post
                 :help "更新已发布的博客"))
 
   (define-key cnblogs-mode-map [tags-deletePost]
@@ -116,10 +116,11 @@
     cnblogs-mode-map)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;KeyMap;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (define-key cnblogs-mode-map (kbd "\C-c c p") 'cnblogs-new-post)
+  (define-key cnblogs-mode-map (kbd "\C-c c p") 'cnblogs-post)
+  (define-key cnblogs-mode-map (kbd "\C-c c n") 'cnblogs-new-post)
   (define-key cnblogs-mode-map (kbd "\C-c c s") 'cnblogs-save-draft)
   (define-key cnblogs-mode-map (kbd "\C-c c d") 'cnblogs-delete-post)
-  (define-key cnblogs-mode-map (kbd "\C-c c e") 'cnblogs-edit-post)
+  (define-key cnblogs-mode-map (kbd "\C-c c e") 'cnblogs-update-post)
   (define-key cnblogs-mode-map (kbd "\C-c c g") 'cnblogs-get-post)
   (define-key cnblogs-mode-map (kbd "\C-c c c") 'cnblogs-get-categories)
   (define-key cnblogs-mode-map (kbd "\C-c c r") 'cnblogs-get-recent-posts)
@@ -186,7 +187,7 @@
 
      (if (equal (cnblogs-get-src-file-state (buffer-file-name)) "PUBLISHED")
          (progn
-           (message "This post has been published, you can update it, using M-x cnblogs-edit-post")
+           (message "This post has been published, you can update it, using M-x cnblogs-update-post")
            (setq legal-state 2)
            nil)
        t))
@@ -725,44 +726,50 @@
         (message "设置成功"))
     (message "设置失败")))
 
-(defun cnblogs-new-post ()
+(defun cnblogs-post ()
+  "NewPost if has not post before, otherwise, update post!"
   (interactive)
   (let ((legal-state (cnblogs-check-legal-for-publish (buffer-file-name))))
-    (print legal-state)
     (cond
-     ((eq 1 legal-state) ; file type not supported
-      nil)
-     ((eq 2 legal-state) ; PUBLISHED
-      (cnblogs-edit-post))
-     (t ; new post
-      (if (yes-or-no-p "Do you want to post this blog to cnblogs?")
-          ;; 下面发布处理
-          (let* ((postid  ;得到博文id
-                  (cnblogs-metaweblog-new-post (cnblogs-current-buffer-to-post) t))
-                 ;; 得到博文内容
-                 (post (cnblogs-metaweblog-get-post postid)))
+     ((eq 1 legal-state) nil)   ; file type not supported
+     ((eq 2 legal-state)        ; PUBLISHED
+      (cnblogs-new-category)
+      (cnblogs-update-post))
+     (t                         ; new post
+      (cnblogs-new-category)
+      (cnblogs-new-post)))))
 
-            ;; todo:这里要刷新列表
-            ;; 保存博文项和博文内容
-            (if (integerp postid)
-                (setq postid (int-to-string postid)))
-            ;; 保存博文
-            (with-temp-file (concat cnblogs-file-post-path postid)
-              (print post (current-buffer)))
+(defun cnblogs-new-post ()
+  "New post!"
+  (interactive)
+  (if (yes-or-no-p "Do you want to post this blog to cnblogs?")
+      ;; 下面发布处理
+      (let* ((postid  ;得到博文id
+              (cnblogs-metaweblog-new-post (cnblogs-current-buffer-to-post) t))
+             ;; 得到博文内容
+             (post (cnblogs-metaweblog-get-post postid)))
 
-            (if (cnblogs-check-file-in-entry-list (buffer-file-name))
-                (cnblogs-assign-post-to-file post (buffer-file-name))
-              (push
-               (list (cnblogs-gen-id)                ; id
-                     (cdr (assoc "title" post))      ; title
-                     postid                          ; postid
-                     (cdr (assoc "categories" post)) ; categories
-                     (buffer-file-name)
-                     "PUBLISHED")
-               cnblogs-entry-list))
-            ;; 保存博文项列表
-            (cnblogs-save-entry-list)
-            (message "The blog has been published cuccessfully!")))))))
+        ;; todo:这里要刷新列表
+        ;; 保存博文项和博文内容
+        (if (integerp postid)
+            (setq postid (int-to-string postid)))
+        ;; 保存博文
+        (with-temp-file (concat cnblogs-file-post-path postid)
+          (print post (current-buffer)))
+
+        (if (cnblogs-check-file-in-entry-list (buffer-file-name))
+            (cnblogs-assign-post-to-file post (buffer-file-name))
+          (push
+           (list (cnblogs-gen-id)                ; id
+                 (cdr (assoc "title" post))      ; title
+                 postid                          ; postid
+                 (cdr (assoc "categories" post)) ; categories
+                 (buffer-file-name)
+                 "PUBLISHED")
+           cnblogs-entry-list))
+        ;; 保存博文项列表
+        (cnblogs-save-entry-list)
+        (message "The blog has been published cuccessfully!"))))
 
 (defun cnblogs-save-draft ()
   (interactive)
@@ -789,7 +796,7 @@
             (message "The blog has been deleted!")
           (message "Failed!")))))
 
-(defun cnblogs-edit-post ();;todo:更新本地
+(defun cnblogs-update-post ();;todo:更新本地
   (interactive)
   (if (cnblogs-check-legal-for-edit (buffer-file-name))
       (let ((postid (cnblogs-get-postid-by-src-file-name (buffer-file-name))))
@@ -820,6 +827,18 @@
                    (cons post cnblogs-entry-list)))
         (message "获取成功！")
       (message "获取失败"))))
+
+(defun cnblogs-new-category ()
+  "Add a new category according to the CATEGORIES tag in article."
+  (interactive)
+  (let ((categories-list (cnblogs-categories-string-to-list
+                          (cnblogs-fetch-field "CATEGORIES"))))
+    (dolist (categories categories-list)
+      (unless (member categories cnblogs-category-list)
+        (print (cnblogs-metaweblog-new-category (list (cons "name" categories)
+                                                      (cons "description" categories)
+                                                      (cons "slug" "slug")
+                                                      (cons "parent_id" 0))))))))
 
 ;; 获取并保存分类
 (defun cnblogs-get-categories ()
