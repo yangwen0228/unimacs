@@ -1,10 +1,18 @@
 # unimacs
 * Unimacs means universal emacs
-It's at first forked from [[https://github.com/bbatsov/prelude][prelude]], because I used GVIM before. And used prelude's evil mode a lot for months after that.
+It's at first forked from [[https://github.com/bbatsov/prelude][prelude]], because I used GVIM before.
+And used prelude's evil mode a lot for months after that.
 I believe that would be the best way to use Emacs at that time. Fast movement, good window management, friendly file opening interface...
-But when use the help inside Emacs, it becomes very annoying. I should switch between Evil-mode(VIM) and Emacs key bindings.
-At the same time, I use a lot settings from [[https://github.com/purcell/emacs.d][purcell]]. Purcell uses Evil-mode before, too. But he stop using Evil-mode someday, and use the Emacs keybindings completely. A lot of people doubt him why to do like that, and I don't know why, either. But after a couple of days later, I decide to use Emacs keybindings, too.
-Then I create a new emacs configuring package named Unimacs. I hope it can use the Emacs keybindings and use some ideas, behaviors from Vim.
+
+But when use the help inside Emacs, it becomes very annoying. I should switch between Evil-mode(VIM) and Emacs key bindings often.
+
+At the same time, I use a lot settings from [[https://github.com/purcell/emacs.d][purcell]]. Purcell uses Evil-mode before, too. But he stop using Evil-mode someday, and use the Emacs keybindings completely. 
+
+A lot of people doubt him why to do like that, and I don't know why, either. 
+
+But after a couple of days later, I decide to use Emacs keybindings, too.
+
+Then I create a new emacs configuring package named Unimacs. I hope I can use the Emacs keybindings consistently and merge some ideas, behaviors from Vim.
 
 * Structure of Unimacs
 - init.el
@@ -37,3 +45,5 @@ Then I create a new emacs configuring package named Unimacs. I hope it can use t
 ** company
 *** company-gtags
 ** tcl-hm-mode
+* Other website
+[[http://www.cnblogs.com/yangwen0228/]]
