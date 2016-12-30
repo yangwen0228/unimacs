@@ -1,2 +1,39 @@
 # unimacs
-* test
+* Unimacs means universal emacs
+It's at first forked from [[https://github.com/bbatsov/prelude][prelude]], because I used GVIM before. And used prelude's evil mode a lot for months after that.
+I believe that would be the best way to use Emacs at that time. Fast movement, good window management, friendly file opening interface...
+But when use the help inside Emacs, it becomes very annoying. I should switch between Evil-mode(VIM) and Emacs key bindings.
+At the same time, I use a lot settings from [[https://github.com/purcell/emacs.d][purcell]]. Purcell uses Evil-mode before, too. But he stop using Evil-mode someday, and use the Emacs keybindings completely. A lot of people doubt him why to do like that, and I don't know why, either. But after a couple of days later, I decide to use Emacs keybindings, too.
+Then I create a new emacs configuring package named Unimacs. I hope it can use the Emacs keybindings and use some ideas, behaviors from Vim.
+
+* Structure of Unimacs
+- init.el
+
+  The start file: load the core and packages, and init the environment variables.
+- core
+
+  The unimacs framework: based on [[https://github.com/bbatsov/prelude][prelude]]
+- packages
+  - elpa
+
+    The official packages from [[http://melpa.milkbox.net/packages/][melpa]], or [[http://elpa.popkit.org/packages/][popkit]] .
+  - vendor
+
+    From github or other resouces. I write or modified some packages, too.
+- utils
+  
+  The snippets or executable tools under Windows system.
+- tempfiles
+- personal
+
+  The configuring files are placed here. Use use-package (improve the start-up speed rapidly) to load and configure the packages. And select-packages.el to choose the packages to use.
+  
+* Often Used packages
+** helm
+** helm-projectile
+** helm-gtags
+** vc-mode
+** w3m
+** company
+*** company-gtags
+** tcl-hm-mode
