@@ -12,7 +12,7 @@ A lot of people doubt him why to do like that, and I don't know why, either.
 
 But after a couple of days later, I decide to use Emacs keybindings, too.
 
-Then I create a new emacs configuring package named Unimacs. I hope I can use the Emacs keybindings consistently and merge some ideas, behaviors from Vim.
+Then I create a new emacs configuration package named Unimacs. I hope I can use the Emacs keybindings consistently and merge some ideas, behaviors from Vim.
 
 * Structure of Unimacs
 - init.el
@@ -34,7 +34,7 @@ Then I create a new emacs configuring package named Unimacs. I hope I can use th
 - tempfiles
 - personal
 
-  The configuring files are placed here. Use use-package (improve the start-up speed rapidly) to load and configure the packages. And select-packages.el to choose the packages to use.
+  The configuration files are placed here. Use use-package (improve the start-up speed rapidly) to load and configure the packages. And select-packages.el to choose the packages to use.
   
 * Often Used packages
 ** helm
