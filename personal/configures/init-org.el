@@ -7,20 +7,28 @@
   :mode ("\\.org\\'" . org-mode)
   :config
   (add-hook 'org-mode-hook 'org-indent-mode)
+
+  ;; @ http://emacs.stackexchange.com/questions/3374/set-the-background-of-org-exported-code-blocks-according-to-theme
+  (defun my/org-inline-css-hook (exporter)
+    "Insert custom inline css to automatically set the
+background of code to whatever theme I'm using's background"
+    (when (eq exporter 'html)
+      (let* ((my-pre-bg (face-background 'default))
+             (my-pre-fg (face-foreground 'default)))
+        (setq
+         org-html-head-extra
+         (concat
+          org-html-head-extra
+          (format "<style type=\"text/css\">\n pre.src {background-color: %s; color: %s;}</style>\n"
+                  my-pre-bg my-pre-fg))))))
+  (add-hook 'org-export-before-processing-hook 'my/org-inline-css-hook)
+
   (use-package cnblogs
     :ensure nil
     :init
     (require 'cnblogs)
     (cnblogs-minor-mode t)
-    (setq org2blog/wp-blog-alist
-          '(("cnblogs"
-             :url "http://www.cnblogs.com/yangwen0228/services/metaWeblog.aspx"
-             :username "yangwen0228"
-             :default-categories ("emacs")
-             :keep-new-lines t
-             :confirm t
-             :wp-code nil
-             :tags-as-categories nil)))
+    ;; Run command: cnblogs-setup-blog to set up, blog-id == username.
     (bind-keys ("C-c c p" . cnblogs-post)
                ("C-c c n" . cnblogs-new-post)
                ("C-c c e" . cnblogs-edit-post)
