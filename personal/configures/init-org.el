@@ -307,14 +307,6 @@ background of code to whatever theme I'm using's background"
                     (w3m-browse-url url t))))))
       ad-do-it))
 
-  ;; {{ org2nikola set up
-  (setq org2nikola-output-root-directory (expand-file-name "projs/blog.yangwen0228.org" unimacs-personal-dir))
-  (setq org2nikola-use-google-code-prettify t)
-  (setq org2nikola-prettify-unsupported-language
-        '(elisp "lisp"
-                emacs-lisp "lisp"))
-  ;; }}
-
   ;; @see http://stackoverflow.com/questions/6014181/org-mode-exporting-to-pdf-for-emacs-app-on-mac-os-x
   ;; Export org docments to pdf files.
   ;; (require 'org-docbook)
