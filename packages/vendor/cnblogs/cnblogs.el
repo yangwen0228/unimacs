@@ -142,6 +142,8 @@
            (push entry (cdr (assoc categorie cnblogs-posts-in-category)))))))
 
 (defun cnblogs-load-entry-list ()
+  "从cnblogs-entry-list加载，成功返回t，否则返回nil"
+  (interactive)
   (setq cnblogs-entry-list
         (condition-case ()
             (with-temp-buffer
@@ -151,6 +153,7 @@
 
 (defun cnblogs-save-entry-list ()
   "保存cnblogs-entry-list，成功返回t，否则返回nil"
+  (interactive)
   (condition-case ()
       (with-temp-file cnblogs-entry-list-file
         (print cnblogs-entry-list (current-buffer)))
@@ -729,6 +732,7 @@
 (defun cnblogs-post ()
   "NewPost if has not post before, otherwise, update post!"
   (interactive)
+  (cnblogs-load-entry-list)
   (let ((legal-state (cnblogs-check-legal-for-publish (buffer-file-name))))
     (cond
      ((eq 1 legal-state) nil)   ; file type not supported

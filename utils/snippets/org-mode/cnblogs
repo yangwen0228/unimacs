@@ -1,6 +1,6 @@
-#+TITLE: $1
-#+CATEGORIES: ${2:Emacs}
+#+TITLE: ${1:`(f-no-ext (f-filename (buffer-file-name)))`}
+#+CATEGORIES: ${2:`(f-filename (f-dirname (buffer-file-name)))`}
 #+DESCRIPTION: ${3:}
-#+KEYWORDS: $4
+#+KEYWORDS: ${4:`(f-filename (f-dirname (buffer-file-name)))`}
 #+DATE: `(format-time-string "%Y-%m-%d %H:%M")`
 

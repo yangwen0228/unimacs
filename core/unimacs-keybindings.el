@@ -78,6 +78,8 @@
 (bind-key "C-x M-S-r"       'unimacs-rename-file-and-buffer)
 (bind-key "C-x M-S-c"       'unimacs-copy-file-and-rename-buffer)
 (bind-key "C-x M-p"         'unimacs-copy-file-name-to-clipboard)
+(bind-key "C-S-M-h"         'unimacs-copy-func)
+(bind-key "C-x H"           'unimacs-copy-whole-buffer)
 
 (provide 'unimacs-keybindings)
 ;;; unimacs-keybindings.el ends here

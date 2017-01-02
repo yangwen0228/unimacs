@@ -414,6 +414,11 @@ Doesn't mess with normal buffers."
                            (t (error "Unknown shell")))))
     (find-file-other-window (expand-file-name shell-init-file (getenv "HOME")))))
 
+(defun unimacs-open-configure-dir ()
+  "Open the configuration dir to edit configuration files!"
+  (interactive)
+  (ido-find-file-in-dir unimacs-configures-dir))
+
 (defun unimacs-toggle-list-bookmarks ()
   (interactive)
   (if (equalp "*Bookmark List*" (buffer-name))
@@ -459,6 +464,20 @@ The numth of occurences is determined by ARG."
               (and (buffer-file-name)
                    (file-writable-p buffer-file-name)))
     (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+
+(defun unimacs-copy-func ()
+  "Copy the function content."
+  (interactive)
+  (save-excursion
+    (mark-defun)
+    (whole-line-or-region-kill-ring-save nil)))
+
+(defun unimacs-copy-whole-buffer ()
+  "Copy the whole beffer content."
+  (interactive)
+  (save-excursion
+    (mark-whole-buffer)
+    (whole-line-or-region-kill-ring-save nil)))
 
 (provide 'unimacs-funcs)
 ;;; unimacs-funcs.el ends here
