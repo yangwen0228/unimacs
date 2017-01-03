@@ -470,14 +470,21 @@ The numth of occurences is determined by ARG."
   (interactive)
   (save-excursion
     (mark-defun)
-    (whole-line-or-region-kill-ring-save nil)))
+    (whole-line-or-region-kill-ring-save nil))
+  (message "The function has been copied!"))
 
 (defun unimacs-copy-whole-buffer ()
   "Copy the whole beffer content."
   (interactive)
   (save-excursion
     (mark-whole-buffer)
-    (whole-line-or-region-kill-ring-save nil)))
+    (whole-line-or-region-kill-ring-save nil))
+  (message "The whole buffer has been copied!"))
+
+(defun unimacs-open-current-buffer-directory ()
+  "Open current buffer directory under Windows system."
+  (interactive)
+  (shell-command (concat "explorer.exe /e, \"" (replace-regexp-in-string "/" "\\\\" (f-dirname (buffer-file-name))) "\"")))
 
 (provide 'unimacs-funcs)
 ;;; unimacs-funcs.el ends here
