@@ -114,16 +114,18 @@ point reaches the beginning or end of the buffer, stop there."
   (when (/= arg 1)
     (forward-line (1- arg)))
 
-  (if (bolp)
-      (back-to-indentation)
+  (let ((orig-point (point)))
     (if line-move-visual
-        (beginning-of-visual-line)
-      (beginning-of-line)))
-  ;; (let ((orig-point (point)))
-  ;;   (back-to-indentation)
-  ;;   (when (= orig-point (point))
-  ;;     (move-beginning-of-line 1)))
-  )
+        ;; Move by visual
+        (progn
+          (beginning-of-visual-line)
+          (search-forward-regexp "^\s*" (line-end-position))
+          (when (= orig-point (point))
+            (beginning-of-visual-line)))
+      ;; Not move by visual
+      (back-to-indentation)
+      (when (= orig-point (point))
+        (beginning-of-line)))))
 
 (defun unimacs-indent-current-line-or-region ()
   "Indent the currently visited buffer."
