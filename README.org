@@ -1,18 +1,20 @@
 # unimacs
 * Unimacs means universal emacs
 It's at first forked from [[https://github.com/bbatsov/prelude][prelude]], because I used GVIM before.
-And used prelude's evil mode a lot for months after that.
-I believe that would be the best way to use Emacs at that time. Fast movement, good window management, friendly file opening interface...
 
-But when use the help inside Emacs, it becomes very annoying. I should switch between Evil-mode(VIM) and Emacs key bindings often.
+Prelude's configuration contains many good packages, zenburn theme, very good framework to manage and extend packages, and many other good things. But most important thing is that it contains an Evil mode(VIM), which is a emulator of Vim in Emacs, and I used Evil mode a lot for months after that.
 
-At the same time, I use a lot settings from [[https://github.com/purcell/emacs.d][purcell]]. Purcell uses Evil-mode before, too. But he stop using Evil-mode someday, and use the Emacs keybindings completely. 
+I believe that Evil mode means Vim + Emacs, which would be the best way to use Emacs at that time. Fast movement and edit, good window management, friendly file opening interface, etc.
 
-A lot of people doubt him why to do like that, and I don't know why, either. 
+But when use the help system inside Emacs, it becomes very annoying. I should switch between Evil-mode and Emacs key bindings often.
 
-But after a couple of days later, I decide to use Emacs keybindings, too.
+At the same time, I use a lot settings from [[https://github.com/purcell/emacs.d][purcell]]. Purcell uses Evil-mode before, too. But he stop using Evil-mode someday, and use the Emacs keybindings completely.
 
-Then I create a new emacs configuration package named Unimacs. I hope I can use the Emacs keybindings consistently and merge some ideas, behaviors from Vim.
+A lot of people doubt him why to do like that, "Evil mode is the best way to use Vim and Emacs", why?
+
+But after a couple of days struggling with Evil-mode mode switch and Emacs's keybindings, I decided to follow Purcell and use Emacs keybindings, too.
+
+Then I create a new emacs configuration package named Unimacs. I hope I can use the Emacs keybindings consistently and merge some ideas or behaviors from Vim, and finally combine both of them.
 
 * Structure of Unimacs
 - init.el
@@ -29,13 +31,13 @@ Then I create a new emacs configuration package named Unimacs. I hope I can use 
 
     From github or other resouces. I write or modified some packages, too.
 - utils
-  
+
   The snippets or executable tools under Windows system.
 - tempfiles
 - personal
 
   The configuration files are placed here. Use use-package (improve the start-up speed rapidly) to load and configure the packages. And select-packages.el to choose the packages to use.
-  
+
 * Often Used packages
 ** helm
 ** helm-projectile
