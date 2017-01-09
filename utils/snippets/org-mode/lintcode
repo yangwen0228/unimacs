@@ -1,0 +1,15 @@
+#+HTML_HEAD: <style type="text/css">code {color: #FF0000}</style>
+# --
+#+TITLE: ${1:`(f-no-ext (f-filename (buffer-file-name)))`}
+#+CATEGORIES: ${2:`(f-filename (f-dirname (buffer-file-name)))`}
+#+DESCRIPTION: ${3:}
+#+KEYWORDS: ${4:`(f-filename (f-dirname (buffer-file-name)))`}
+#+DATE: `(format-time-string "%Y-%m-%d %H:%M")`
+
+* 题目
+
+* 样例
+
+* 挑战
+
+* 思路

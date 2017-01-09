@@ -26,7 +26,7 @@
   (custom-set-variables
    '(jumplist-hook-commands
      '(helm-swoop
-       helm-imenu
+       helm-imenu mark-defun mark-whole-buffer
        helm-for-files helm-projectile-switch-project helm-projectile-find-file
        ido-find-file find-file find-function find-variable
        avy-goto-char avy-goto-char-2

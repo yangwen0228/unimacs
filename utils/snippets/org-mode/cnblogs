@@ -1,3 +1,5 @@
+#+HTML_HEAD: <style type="text/css">code {color: #FF0000}</style>
+# --
 #+TITLE: ${1:`(f-no-ext (f-filename (buffer-file-name)))`}
 #+CATEGORIES: ${2:`(f-filename (f-dirname (buffer-file-name)))`}
 #+DESCRIPTION: ${3:}

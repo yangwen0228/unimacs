@@ -19,10 +19,16 @@ background of code to whatever theme I'm using's background"
          org-html-head-extra
          (concat
           org-html-head-extra
-          (format "<style type=\"text/css\">\n pre.src {background-color: %s; color: %s;}</style>\n"
+          (format "<style type=\"text/css\">\n code {color: #FF0000}\n pre.src {background-color: %s; color: %s;}</style>\n"
                   my-pre-bg my-pre-fg))))))
   (add-hook 'org-export-before-processing-hook 'my/org-inline-css-hook)
-
+  (setq org-emphasis-alist '(("*" bold)
+                            ("/" italic)
+                            ("_" underline)
+                            ("=" org-verbatim verbatim)
+                            ("~" (:foreground "red"))
+                            ("+"
+                             (:strike-through t))))
   (use-package cnblogs
     :ensure nil
     :init
@@ -188,7 +194,7 @@ background of code to whatever theme I'm using's background"
       (interactive)
       (let ((link "d:/temp/screenshot.png"))
         (if (eq 0 (shell-command (format "\"c:/Program\sFiles/ImageMagick-6.9.3-Q16/convert.exe\" clipboard:myimage %s" link) "*screenshot2file*" "*screenshot2file*"))
-              (org-download-image link)
+            (org-download-image link)
           (org-download-yank)))))
 
   (defun org-make-code-block ()
