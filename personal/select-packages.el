@@ -67,6 +67,7 @@
         ;; programming languages
         ;;-------------------------------------------------------------------
         ;; init-header2
+        init-chm-help
         init-emacs-w3m
         init-python-mode
         init-tcl-hm-mode

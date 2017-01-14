@@ -20,10 +20,9 @@
       (add-to-list 'exec-path emacs-bin-dir))
 
     ;; setting extra bin dir
-    (let ((paths '("Aspell" "glo651wb" "ctags5.8" "irony" "msys64")))
+    (let ((paths (f-directories unimacs-extra-bin-dir)))
       (dolist (path paths)
-        (let ((full-path (expand-file-name (concat path "/bin")
-                                           unimacs-extra-bin-dir)))
+        (let ((full-path (expand-file-name "bin" path)))
           (setenv "PATH" (concat (replace-regexp-in-string "\/" "\\\\" full-path)
                                  ";" (getenv "PATH")))
           (add-to-list 'exec-path full-path))))

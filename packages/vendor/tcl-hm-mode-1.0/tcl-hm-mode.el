@@ -187,14 +187,17 @@ If nil, TAB always indents current line."
     )
   "List of Tcl keywords.")
 
-(defvar tcl-hm-keywords-file-name (expand-file-name "tcl_hm.keywords" (file-name-directory load-file-name)))
+(defvar tcl-hm-keywords-file-name
+  (expand-file-name
+   "tcl_hm.keywords"
+   (file-name-directory load-file-name)))
+
+(defvar tcl-hm-init-flag nil)
 
 (defconst tcl-hm-commands
-  (condition-case ()
-      (with-temp-buffer
-        (insert-file-contents-literally tcl-hm-keywords-file-name)
-        (split-string (buffer-string)))
-      (error nil))
+  (with-temp-buffer
+    (insert-file-contents-literally tcl-hm-keywords-file-name)
+    (split-string (buffer-string)))
   "List of HM commands (2014.06 release).")
 
 (defconst tcl-hm-extra-commands
@@ -265,51 +268,57 @@ If nil, TAB always indents current line."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq tcl-font-lock-keywords
-  (list
-   ;; highlight function names
-   '("\\<proc\\s-+\\([^\{\s-]+\\|{.*?}\\)" 1 'font-lock-function-name-face)
-   ;; highlight predefined HM variables
-   (list (concat "\\(\${?\\|\\<\\(set\\|global\\|variable\\)\\s-+\\)"
-                 tcl-hm-variables-regexp)
-         3 'font-lock-type-face)
-   ;; highlight extra variables
-   (list (concat "\\(\${?\\|\\<\\(set\\|global\\|variable\\)\\s-+\\)"
-                 tcl-hm-extra-variables-regexp)
-         3 'font-lock-warning-face)
-   ;; highlight Tcl variables
-   '("\\(\${?\\|\\<\\(set\\|global\\|variable\\)\\s-+\\)\\(\\w+\\)"
-     3 'font-lock-variable-name-face)
-   ;; highlight HM command options
-   '("\\s-\\(-[a-z][_0-9a-z]*\\)\\>" 1 'font-lock-warning-face)
-   ;; highlight Tcl keywords
-   (list tcl-hm-keywords-regexp 1 'font-lock-keyword-face)
-   ;; highlight extra commands
-   (list tcl-hm-extra-commands-regexp 1 'font-lock-hm-face)
-   ;; highlight predefined HM attributes
-   (list tcl-hm-attributes-regexp 1 'font-lock-constant-face)
-   ))
+      (list
+       ;; highlight function names
+       '("\\<proc\\s-+\\([^\{\s-]+\\|{.*?}\\)" 1 'font-lock-function-name-face)
+       ;; highlight predefined HM variables
+       (list (concat "\\(\${?\\|\\<\\(set\\|global\\|variable\\)\\s-+\\)"
+                     tcl-hm-variables-regexp)
+             3 'font-lock-type-face)
+       ;; highlight extra variables
+       (list (concat "\\(\${?\\|\\<\\(set\\|global\\|variable\\)\\s-+\\)"
+                     tcl-hm-extra-variables-regexp)
+             3 'font-lock-warning-face)
+       ;; highlight Tcl variables
+       '("\\(\${?\\|\\<\\(set\\|global\\|variable\\)\\s-+\\)\\(\\w+\\)"
+         3 'font-lock-variable-name-face)
+       ;; highlight HM command options
+       '("\\s-\\(-[a-z][_0-9a-z]*\\)\\>" 1 'font-lock-warning-face)
+       ;; highlight Tcl keywords
+       (list tcl-hm-keywords-regexp 1 'font-lock-keyword-face)
+       ;; highlight extra commands
+       (list tcl-hm-extra-commands-regexp 1 'font-lock-hm-face)
+       ;; highlight predefined HM attributes
+       (list tcl-hm-attributes-regexp 1 'font-lock-constant-face)
+       ))
 
 ;; Why? Because font-lock support keywords less than 1000, we must split the long list into small sublists.
 ;; (font-lock-add-keywords 'tcl-mode (list (list tcl-hm-commands-regexp 1 'font-lock-keyword-face)))
 (defun tcl-hm-add-keywords-hm-commands ()
   "Highlight all the commands defined in the tcl_hm.keywords."
-  (condition-case ()
-      (with-temp-buffer
-        (insert-file-contents-literally tcl-hm-keywords-file-name)
-        (let ((tcl-hm-all-commands-list (split-string (buffer-string)))
-              (tcl-hm-commands-length-limit nil)
-              (tcl-hm-commands-regexp nil)
-              (length-limit 901))
-          (while tcl-hm-all-commands-list
-            (setq tcl-hm-commands-length-limit (subseq tcl-hm-all-commands-list 0 (- length-limit 1)))
-            (setq tcl-hm-all-commands-list (subseq tcl-hm-all-commands-list length-limit))
-            (setq tcl-hm-commands-regexp (concat "\\<\\(" (regexp-opt (append tcl-hm-commands-length-limit
-                                                                              (unless tcl-hm-extra-highlight
-                                                                                tcl-hm-extra-commands))) "\\)\\>"))
-            (font-lock-add-keywords 'tcl-mode (list (list tcl-hm-commands-regexp 1 'font-lock-hm-face))))))
-    (error nil)))
-
-(tcl-hm-add-keywords-hm-commands)
+  (unless tcl-hm-init-flag
+    (set tcl-hm-init-flag t)
+    (with-temp-buffer
+    (insert-file-contents-literally tcl-hm-keywords-file-name)
+    (let ((tcl-hm-all-commands-list (split-string (buffer-string)))
+          (tcl-hm-commands-length-limit nil)
+          (tcl-hm-commands-regexp nil)
+          (length-limit 901))
+      (while tcl-hm-all-commands-list
+        (setq tcl-hm-commands-length-limit
+              (subseq tcl-hm-all-commands-list 0 (- length-limit 1)))
+        (setq tcl-hm-all-commands-list
+              (subseq tcl-hm-all-commands-list length-limit))
+        (setq tcl-hm-commands-regexp
+              (concat "\\<\\("
+                      (regexp-opt
+                       (append
+                        tcl-hm-commands-length-limit
+                        (unless tcl-hm-extra-highlight
+                          tcl-hm-extra-commands))) "\\)\\>"))
+        (font-lock-add-keywords
+         'tcl-mode
+         (list (list tcl-hm-commands-regexp 1 'font-lock-hm-face))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Completion
@@ -511,7 +520,7 @@ to update the alist.")
       (cond
        ((not (file-directory-p file))
         (if (not (string= (subseq filename -5 -5) ")"))
-          (push (cons (tcl-hm-get-command filename) file) alist)))
+            (push (cons (tcl-hm-get-command filename) file) alist)))
        ((member filename '("." "..")))
        (t (setq alist (tcl-hm-files-alist file alist)))))))
 
@@ -554,20 +563,6 @@ Otherwise scans backward for most likely Tcl command word."
                 (tcl-hm-word-no-props)))
         (error nil))
     (tcl-hm-word-no-props)))
-
-(defun delete-all-html-tags ()
-  (perform-replace "<.*?>" "" nil t nil nil nil (buffer-end 0) (buffer-end 1))
-  (perform-replace "&nbsp;" "\t" nil t nil nil nil (buffer-end 0) (buffer-end 1))
-  (beginning-of-buffer)
-  (let ((index (search-forward "NAME")))
-    (delete-region 1 index))
-  (message "")
-  )
-
-(defun insert-html-plain-contents (file)
-  (insert-file-contents file)
-  (delete-all-html-tags)
-  )
 
 (defun tcl-help-on-hm-word (command &optional arg)
   "Get help on Tcl command.  Default is word at point.
@@ -726,6 +721,7 @@ Key bindings:
           '(tcl-font-lock-keywords)))
   ;; miscellaneous
   (set (make-local-variable 'hippie-expand-dabbrev-as-symbol) nil)
+  (tcl-hm-add-keywords-hm-commands)
   (when tcl-hm-mode
     (message "Tcl HM Mode %s.  Type C-c C-h for documentation." tcl-hm-version)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
