@@ -27,7 +27,7 @@
   (global-company-mode t)
   (define-company-backends
     '(((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers))
-      ((tcl-hm-mode tcl-mode)      . ((company-keywords company-dabbrev-code) company-files))
+      ((tcl-hm-mode tcl-mode)      . ((company-keywords company-dabbrev-code company-dabbrev) company-files))
       ;; ((js-mode js2-mode)          . (company-tern))
       ;; ((web-mode)                  . (company-web-html company-tern company-dabbrev-code company-css company-files))
       ((web-mode)                  . (company-web-html company-dabbrev-code company-css company-files))
@@ -61,7 +61,7 @@
 ;;     (let ((file (expand-file-name ".tern-project" dir)))
 ;;       (with-temp-file file
 ;;         (erase-buffer)
-;;         (insert-string "
+;;         (insert "
 ;; {
 ;; \"libs\": [
 ;;          \"browser\",
@@ -189,8 +189,11 @@
 Otherwise, if point is not inside a symbol, return an empty string."
     (if (or (looking-at "\\_>")
             (looking-at "$"))
-        (buffer-substring (point) (save-excursion (skip-syntax-backward "w_.")
-                                                  (point)))
+        (string-remove-prefix
+         "::"
+         (buffer-substring (point)
+                           (save-excursion (skip-syntax-backward "w_.")
+                                           (point))))
       (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_)))
         "")))
 

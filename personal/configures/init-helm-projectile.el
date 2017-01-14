@@ -13,7 +13,7 @@
       (let ((file (expand-file-name ".projectile" dir)))
         (with-temp-file file
           (erase-buffer)
-          (insert-string "
+          (insert "
 ;; - means ignore this pattern, must has a lead \"/\", using the regexp rule.
 ;; + means add this subdir, it will block the root dir.
 -/GTAGS

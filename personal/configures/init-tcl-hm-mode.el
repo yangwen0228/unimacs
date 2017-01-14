@@ -26,6 +26,15 @@
         (replace-regexp "(\\|," " " nil beg end)
         (replace-regexp ")" "" nil beg end))
       ))
+  (defun tcl-hm-copy-path-source-this-file ()
+    (interactive)
+    (let ((filename (if (equal major-mode 'dired-mode)
+                      default-directory
+                    (buffer-file-name))))
+    (when filename
+      (kill-new (concat "source {" filename "}"))
+      (message "Copied command 'source {%s}' to the clipboard." filename))))
+
   (define-key tcl-hm-mode-map "{"        'tcl-electric-char)
   (define-key tcl-hm-mode-map "}"        'tcl-electric-brace)
   (define-key tcl-hm-mode-map "["        'tcl-electric-char)

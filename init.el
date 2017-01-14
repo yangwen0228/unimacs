@@ -26,7 +26,7 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(setq my-benchmark nil)
+(setq my-benchmark t)
 ;; (setq max-lisp-eval-depth 5000)
 ;; (setq debug-on-error t)
 (setq inhibit-default-init t) ; bug @ ido.el about 'seq

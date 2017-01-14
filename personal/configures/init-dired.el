@@ -40,6 +40,8 @@
     (unbind-key "M-s f" dired-mode-map))
 
   (bind-key "l" #'dired-up-directory dired-mode-map)
+  (put 'dired-find-alternate-file 'disabled nil)
+  (bind-key "RET" #'dired-find-alternate-file dired-mode-map)
 
   (defun my-dired-switch-window ()
     (interactive)
