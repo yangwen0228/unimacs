@@ -488,5 +488,16 @@ The numth of occurences is determined by ARG."
   (interactive)
   (shell-command (concat "explorer.exe /e, \"" (replace-regexp-in-string "/" "\\\\" (f-dirname (buffer-file-name))) "\"")))
 
+(defun unimacs-describe-command-key (command key-map)
+  "Describe the COMMAND key."
+  (let* ((keys (where-is-internal (intern command) key-map))
+         (keys (mapconcat (if (fboundp 'naked-key-description)
+                                   #'naked-key-description
+                                 #'key-description)
+                          keys "', `")))
+    (print keys)
+    ))
+
+
 (provide 'unimacs-funcs)
 ;;; unimacs-funcs.el ends here

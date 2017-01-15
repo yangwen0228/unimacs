@@ -28,6 +28,7 @@
 ;;; Code:
 (setq my-benchmark t)
 ;; (setq max-lisp-eval-depth 5000)
+(setq max-specpdl-size 5000)
 ;; (setq debug-on-error t)
 (setq inhibit-default-init t) ; bug @ ido.el about 'seq
 
