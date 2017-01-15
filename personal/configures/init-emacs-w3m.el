@@ -48,16 +48,16 @@
   (setq w3m-show-graphic-icons-in-header-line t)
   (setq w3m-show-graphic-icons-in-mode-line t)
 
-  (setq w3m-search-default-engine "b")
+  (setq w3m-search-default-engine "g")
   (eval-after-load "w3m-search"
     '(progn
        ;; C-u S g RET <search term> RET
        (add-to-list 'w3m-search-engine-alist '("b" "http://www.baidu.com/search?hl=en&q=%s" utf-8))
-       (add-to-list 'w3m-search-engine-alist '("g" "http://www.google.com.au/search?hl=en&q=%s" utf-8))
+       (add-to-list 'w3m-search-engine-alist '("g" "http://www.google.com.hk/search?hl=cn&q=%s" utf-8))
        (add-to-list 'w3m-search-engine-alist '("wz" "http://zh.wikipedia.org/wiki/Special:Search?search=%s" utf-8))
        (add-to-list 'w3m-search-engine-alist '("q" "http://www.google.com.au/search?hl=en&q=%s+site:stackoverflow.com" utf-8))
        (add-to-list 'w3m-search-engine-alist '("s" "http://code.ohloh.net/search?s=%s&browser=Default"  utf-8))
-       (add-to-list 'w3m-search-engine-alist '("bl" "http://blogsearch.google.com.au/blogsearch?q=%s" utf-8))
+       (add-to-list 'w3m-search-engine-alist '("bl" "http://blogsearch.google.com.hk/blogsearch?q=%s" utf-8))
        (add-to-list 'w3m-search-engine-alist '("w" "http://en.wikipedia.org/wiki/Special:Search?search=%s" utf-8))
        (add-to-list 'w3m-search-engine-alist '("d" "http://dictionary.reference.com/search?q=%s" utf-8))
        (add-to-list 'w3m-search-engine-alist '("j" "http://www.google.com.au/search?ie=UTF-8&oe=UTF-8&sourceid=navclient&btnI=1&q=%s+site:developer.mozilla.org" utf-8))
@@ -78,6 +78,7 @@
         (cond
          (*is-a-mac* "open")
          (*linux* (executable-find "firefox"))
+         (*win32* (executable-find "firefox"))
          ))
   (setq browse-url-browser-function 'browse-url-generic)
 
@@ -89,14 +90,14 @@
     (let ((keyword (w3m-url-encode-string (thing-at-point 'symbol))))
       ;; google
       (browse-url-generic
-       (concat "http://www.google.com.au/search?hl=en&q=%22"
+       (concat "http://www.google.com.hk/search?hl=cn&q=%22"
                keyword
                "%22"
                (if buffer-file-name
                    (concat "+filetype%3A" (file-name-extension buffer-file-name))
                  "")  ))
       (browse-url-generic
-       (concat "http://www.google.com.au/search?hl=en&q="
+       (concat "http://www.google.com.hk/search?hl=cn&q="
                keyword
                "+site:stackoverflow.com" ))
       ;; koders.com

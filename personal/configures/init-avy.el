@@ -3,13 +3,15 @@
 ;; comments
 
 ;;; Code:
-(use-package avy
-  :bind (("M-g j" . avy-goto-char)
-         ("M-g k" . avy-goto-char-2)
-         ("C-M-g" . avy-goto-char-2)
-         ("M-g s" . avy-goto-word-or-subword-1))
+(use-package ace-pinyin
+  :bind (("M-g j"   . ace-pinyin-jump-char)
+         ("M-g M-g" . ace-pinyin-jump-char-2)
+         ("M-g s"   . avy-goto-word-or-subword-1))
   :config
-  )
+  (use-package avy)
+  (setq ace-pinyin-use-avy t)
+  (ace-pinyin-global-mode)
+  :diminish (ace-pinyin-mode))
 
 (provide 'init-avy)
 ;;; init-avy.el ends here

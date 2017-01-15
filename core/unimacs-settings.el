@@ -72,6 +72,7 @@
 (set-keyboard-coding-system  'utf-8)
 (set-selection-coding-system 'utf-8)
 (set-clipboard-coding-system 'utf-8)
+(set-file-name-coding-system 'utf-8)
 (setq-default buffer-file-coding-system 'utf-8)
 
 ;; Chinese filenames in shell commands.
@@ -80,6 +81,7 @@
   (set-selection-coding-system 'gbk-dos)
   (set-clipboard-coding-system 'gbk-dos)
   (setq default-process-coding-system '(gbk-dos . gbk-dos))
+  (set-file-name-coding-system 'gbk-dos)
   (set-default 'process-coding-system-alist
                '(("find"   gbk-dos . gbk-dos)
                  ("global" gbk-dos . gbk-dos)

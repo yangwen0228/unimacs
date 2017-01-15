@@ -74,6 +74,9 @@
   :init
   (global-font-lock-mode t) ; turn on syntax highlighting for all buffers
   )
+(use-package help+)
+(use-package help-fns+)
+(use-package help-mode+)
 
 (use-package hippie-exp
   :disabled t

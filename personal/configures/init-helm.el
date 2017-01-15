@@ -5,8 +5,8 @@
 ;;; Code:
 (use-package helm
   :bind (("M-x"     . helm-M-x)
-         ("C-x C-o" . helm-find-files)
-         ("C-c f"   . helm-for-files)
+         ("C-x C-f" . helm-find-files)
+         ("C-x b"   . helm-for-files)
          ("C-c i"   . helm-imenu))
   :config
   (require 'helm-config)
@@ -41,8 +41,8 @@
           ))
 
   ;; helm-do-grep recursive
-  ;; Don't use this function, but use helm-ag-select-dir instead,
-  ;; which is much faster than this. But sometimes that doesn't work,
+  ;; don't use this function, but use helm-ag-select-dir instead,
+  ;; which is much faster than this. but sometimes that doesn't work,
   ;; so I still keep this.
   (defun helm-do-grep-recursive (&optional non-recursive)
     "Like `helm-do-grep', but greps recursively by default."

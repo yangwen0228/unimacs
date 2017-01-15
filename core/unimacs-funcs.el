@@ -444,7 +444,7 @@ Doesn't mess with normal buffers."
 (defun unimacs-goto-char-current-line (char &optional arg)
   "Jump to the first CHAR in current line.
 The numth of occurences is determined by ARG."
-  (interactive (list (read-char "char: " t)
+  (interactive (list (read-char "Goto char forward: " t)
                      current-prefix-arg))
   (unless (= (point) (line-end-position))
     (goto-char (1+ (point)))
@@ -454,7 +454,7 @@ The numth of occurences is determined by ARG."
 (defun unimacs-goto-char-current-line-backward (char &optional arg)
   "Jump backward to the first CHAR in current line.
 The numth of occurences is determined by ARG."
-  (interactive (list (read-char "char: " t)
+  (interactive (list (read-char "Goto char backward: " t)
                      current-prefix-arg))
   (search-backward (char-to-string char) (line-beginning-position) t arg))
 

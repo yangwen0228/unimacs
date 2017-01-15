@@ -24,13 +24,16 @@
         init-exec-path
         init-dired
         init-maxframe
+        init-seethru
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
+        init-revive ; save and restore current window and buffer status
+        init-resize-window
         init-window-numbering
         init-switch-window
         init-rainbow-delimiters
-        init-ido
+        ;; init-ido
         init-helm
         init-helm-projectile
         init-helm-swoop
