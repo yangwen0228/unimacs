@@ -9,9 +9,9 @@
   :config
   (require 'eclimd)
   (custom-set-variables
-   '(eclim-eclipse-dirs '("C:\\Program Files (x86)\\eclipse"))
-   '(eclim-executable "C:\\Program Files (x86)\\eclipse\\eclim.bat")
-   '(eclimd-executable "C:\\Program Files (x86)\\eclipse\\eclimd.bat"))
+   '(eclim-eclipse-dirs '("C:/Program Files (x86)/eclipse"))
+   '(eclim-executable "\"C:/Program Files (x86)/eclipse/eclim.bat\"")
+   '(eclimd-executable "C:/Program Files (x86)/eclipse/eclimd.bat"))
   (setq help-at-pt-display-when-idle t)
   (setq help-at-pt-timer-delay 0.1)
   (help-at-pt-set-timer))
