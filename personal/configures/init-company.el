@@ -31,6 +31,7 @@
       ;; ((js-mode js2-mode)          . (company-tern))
       ;; ((web-mode)                  . (company-web-html company-tern company-dabbrev-code company-css company-files))
       ((web-mode)                  . (company-web-html company-dabbrev-code company-css company-files))
+      ((java-mode) . (company-eclim))
       ))
 
   (setq company-idle-delay            0.1

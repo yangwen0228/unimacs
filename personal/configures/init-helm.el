@@ -13,12 +13,12 @@
   (helm-mode 1)                       ;turn helm-mode on, don't turn ido-mode on
 
   (setq helm-completing-read-handlers-alist
-        '((describe-function . helm-completing-read-symbols)
-          (describe-variable . helm-completing-read-symbols)
-          (debug-on-entry . helm-completing-read-symbols)
-          (find-function . helm-completing-read-symbols)
-          (find-tag . helm-completing-read-with-cands-in-buffer)
-          (execute-extended-command . helm-completing-read-symbols)
+        '((execute-extended-command . helm-completing-read-symbols)
+          (describe-function        . helm-completing-read-symbols)
+          (describe-variable        . helm-completing-read-symbols)
+          (debug-on-entry           . helm-completing-read-symbols)
+          (find-function            . helm-completing-read-symbols)
+          (find-tag                 . helm-completing-read-with-cands-in-buffer)
           (ffap-alternate-file . nil)
           (tmm-menubar . nil)
           (dired-do-copy . nil)

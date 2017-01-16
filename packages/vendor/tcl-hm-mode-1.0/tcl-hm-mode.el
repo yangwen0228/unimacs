@@ -297,7 +297,7 @@ If nil, TAB always indents current line."
 (defun tcl-hm-add-keywords-hm-commands ()
   "Highlight all the commands defined in the tcl_hm.keywords."
   (unless tcl-hm-init-flag
-    (set tcl-hm-init-flag t)
+    (setq tcl-hm-init-flag t)
     (with-temp-buffer
     (insert-file-contents-literally tcl-hm-keywords-file-name)
     (let ((tcl-hm-all-commands-list (split-string (buffer-string)))
