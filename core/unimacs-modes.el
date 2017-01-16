@@ -221,6 +221,7 @@
 
 (use-package whitespace
   ;; display special chars, like tabs and trailing whitespace.
+  :disabled
   :init
   (global-whitespace-mode)
   :config
