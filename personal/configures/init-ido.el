@@ -6,9 +6,7 @@
 (use-package ido
   :ensure nil
   :demand t
-  :bind (("C-x b" . ido-switch-buffer)
-         ("C-x B" . ido-switch-buffer-other-window))
-  :config
+  :init
   (ido-mode 'buffer) ; use 'buffer rather than t to use only buffer switching
   (ido-everywhere t)
   (setq ido-use-filename-at-point nil)

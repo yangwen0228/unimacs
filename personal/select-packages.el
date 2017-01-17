@@ -32,7 +32,7 @@
         init-window-numbering
         init-switch-window
         init-rainbow-delimiters
-        ;; init-ido
+        init-ido
         init-helm
         init-helm-projectile
         init-helm-swoop

@@ -296,19 +296,17 @@ If nil, TAB always indents current line."
 ;; (font-lock-add-keywords 'tcl-mode (list (list tcl-hm-commands-regexp 1 'font-lock-keyword-face)))
 (defun tcl-hm-add-keywords-hm-commands ()
   "Highlight all the commands defined in the tcl_hm.keywords."
-  (unless tcl-hm-init-flag
-    (setq tcl-hm-init-flag t)
-    (with-temp-buffer
+  (with-temp-buffer
     (insert-file-contents-literally tcl-hm-keywords-file-name)
     (let ((tcl-hm-all-commands-list (split-string (buffer-string)))
           (tcl-hm-commands-length-limit nil)
           (tcl-hm-commands-regexp nil)
-          (length-limit 901))
+          (length-limit 900))
       (while tcl-hm-all-commands-list
         (setq tcl-hm-commands-length-limit
-              (subseq tcl-hm-all-commands-list 0 (- length-limit 1)))
+              (subseq tcl-hm-all-commands-list 0 (min (length tcl-hm-all-commands-list) length-limit)))
         (setq tcl-hm-all-commands-list
-              (subseq tcl-hm-all-commands-list length-limit))
+              (subseq tcl-hm-all-commands-list (max (length tcl-hm-all-commands-list) (1+ length-limit))))
         (setq tcl-hm-commands-regexp
               (concat "\\<\\("
                       (regexp-opt
@@ -318,7 +316,10 @@ If nil, TAB always indents current line."
                           tcl-hm-extra-commands))) "\\)\\>"))
         (font-lock-add-keywords
          'tcl-mode
-         (list (list tcl-hm-commands-regexp 1 'font-lock-hm-face))))))))
+         (list (list tcl-hm-commands-regexp 1 'font-lock-hm-face)))))))
+;; auto run once.
+(tcl-hm-add-keywords-hm-commands)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Completion
@@ -721,7 +722,6 @@ Key bindings:
           '(tcl-font-lock-keywords)))
   ;; miscellaneous
   (set (make-local-variable 'hippie-expand-dabbrev-as-symbol) nil)
-  (tcl-hm-add-keywords-hm-commands)
   (when tcl-hm-mode
     (message "Tcl HM Mode %s.  Type C-c C-h for documentation." tcl-hm-version)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
