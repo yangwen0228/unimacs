@@ -11,6 +11,7 @@
          ("\\.wgt\\'"  . tcl-hm-mode)
          ("\\.msg\\'"  . tcl-hm-mode))
   :config
+  (unbind-key "C-c C-i" tcl-mode-map)
   (use-package tcl-hm-eldoc
     :ensure nil
     :init (add-hook 'tcl-mode-hook 'tcl-hm-eldoc))

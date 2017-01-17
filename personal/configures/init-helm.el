@@ -7,10 +7,12 @@
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
          ("C-x b"   . helm-for-files)
-         ("C-c i"   . helm-imenu))
+         ("C-c C-i"   . helm-imenu))
   :config
   (require 'helm-config)
   (helm-mode 1)                       ;turn helm-mode on, don't turn ido-mode on
+
+  (setq helm-autoresize-mode t)
 
   (setq helm-completing-read-handlers-alist
         '((execute-extended-command . helm-completing-read-symbols)
