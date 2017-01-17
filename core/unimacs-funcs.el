@@ -119,7 +119,7 @@ point reaches the beginning or end of the buffer, stop there."
         ;; Move by visual
         (progn
           (beginning-of-visual-line)
-          (search-forward-regexp "^\s*" (line-end-position))
+          (search-forward-regexp "^[\s\t]*" (line-end-position))
           (when (= orig-point (point))
             (beginning-of-visual-line)))
       ;; Not move by visual
