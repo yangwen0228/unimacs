@@ -17,7 +17,15 @@
     :disabled
     :config
     (use-package jedi-core)
-    (use-package company-jedi))
+    (use-package company-jedi
+  :commands (company-jedi)
+  :config
+  (add-hook 'python-mode-hook 'jedi:setup)
+  ;; Standard Jedi.el setting
+  (setq jedi:mode-function 'jedi:get-in-function-call-when-idle)
+  (setq jedi:setup-keys t)
+  (setq jedi:complete-on-dot t)))
+  
   (use-package elpy
     :init
     (elpy-enable)

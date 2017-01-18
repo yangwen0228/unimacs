@@ -42,9 +42,8 @@
             ;; --path options does not support searching under GTAGSLIBPATH
             (when (eq type 'find-file)
               (helm-gtags--print-path-in-gtagslibpath args))
-            (print (helm-gtags--remove-carrige-returns))
+            (helm-gtags--remove-carrige-returns)
             (helm-gtags--recode-windows-file-names)
-            (print detail)
             (when detail
               (helm-gtags--show-detail)))))))
 

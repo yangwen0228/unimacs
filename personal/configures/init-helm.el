@@ -6,7 +6,7 @@
 (use-package helm
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
-         ("C-x b"   . helm-for-files)
+         ("C-x b"   . helm-multi-files)
          ("C-c i"   . helm-imenu))
   :config
   (require 'helm-config)

@@ -11,27 +11,27 @@
   :preface
   (defun define-company-backends (list)
     (dolist (cons list)
-      (let ((modes    (car cons))
-            (backends (cdr cons)))
-        (dolist (mode modes)
-          (let* ((modename (symbol-name mode))
-                 (funcname (concat "company-backends-for-" modename))
-                 (func (intern funcname))
-                 (hook (intern (concat modename "-hook"))))
-            (setf (symbol-function func)
-                  `(lambda ()
-                     (set (make-local-variable 'company-backends)
-                          ',backends)))
-            (add-hook hook func))))))
+      (unimacs-company-define-backends cons)))
+  (defun unimacs-company-define-backends (modes-backends-cons)
+    (let ((modes    (car modes-backends-cons))
+          (backends (cdr modes-backends-cons)))
+      (dolist (mode modes)
+        (let* ((modename (symbol-name mode))
+               (funcname (concat "company-backends-for-" modename))
+               (func (intern funcname))
+               (hook (intern (concat modename "-hook"))))
+          (setf (symbol-function func)
+                `(lambda ()
+                   (set (make-local-variable 'company-backends)
+                        ',backends)))
+          (add-hook hook func)))))
   :init
   (global-company-mode t)
   (define-company-backends
     '(((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers))
       ((tcl-hm-mode tcl-mode)      . ((company-keywords company-dabbrev-code company-dabbrev) company-files))
       ;; ((js-mode js2-mode)          . (company-tern))
-      ;; ((web-mode)                  . (company-web-html company-tern company-dabbrev-code company-css company-files))
       ((web-mode)                  . (company-web-html company-dabbrev-code company-css company-files))
-      ((java-mode) . (company-eclim))
       ))
 
   (setq company-idle-delay            0.1
@@ -41,17 +41,9 @@
         company-require-match         nil
         company-show-numbers          t)
 
-  (require 'tcl-hm-mode)
-  (add-to-list 'company-keywords-alist
-               (append '(tcl-mode) tcl-hm-commands-list))
-
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "C-j") 'company-show-location)
-  ;; (define-key company-active-map (kbd "C-n") 'company-select-next)
-  ;; (define-key company-active-map (kbd "C-p") 'company-select-previous)
   (define-key company-search-map (kbd "C-j") 'company-show-location)
-  ;; (define-key company-search-map (kbd "C-n") 'company-select-next)
-  ;; (define-key company-search-map (kbd "C-p") 'company-select-previous)
   )
 
 ;; (use-package company-tern
@@ -155,79 +147,6 @@
         )
       candidates
       )))
-
-(use-package company-gtags
-  :ensure nil
-  :bind* ("C-<tab>" . company-gtags-tcl-rigid)
-  :commands (company-gtags company-gtags-tcl-rigid)
-  :preface
-  (defun company-gtags--fetch-tcl-tags-rigid (prefix)
-    (with-temp-buffer
-      (let (tags)
-        (when (= 0 (call-process company-gtags-executable nil
-                                 (list (current-buffer) nil) nil "-xgq" (concat "" prefix)))
-          ;; (print (buffer-string))
-          (goto-char (point-min))
-          (cl-loop while
-                   (re-search-forward (concat
-                                       "^" prefix ; echo pattern
-                                       "[ \t]+\\([[:digit:]]+\\)" ; linum
-                                       "[ \t]+\\([^ \t]+\\)" ;; file
-                                       "[ \t]*\\(proc[ \t]+\\|.*?\\[\\)\\(::\\)?\\([a-zA-Z0-9:._-]+::\\)*?" ; filter
-                                       "\\(" prefix "[a-zA-Z0-9:._-]*\\)" ; completion
-                                       "\\(.*\\)" ; definition
-                                       ;; "[ \t]+\\(.*\\)" ; definition
-                                       "$"
-                                       ) nil t)
-                   collect
-                   (propertize (concat (match-string 4) (match-string 5) (match-string 6))
-                               'meta (concat (match-string 3) (match-string 4) (match-string 5) (match-string 6) (match-string 7))
-                               'location (cons (expand-file-name (match-string 2))
-                                               (string-to-number (match-string 1)))))))))
-
-  (defun company-grab-symbol-for-tcl-rigid ()
-    "If point is at the end of a symbol, return it.
-Otherwise, if point is not inside a symbol, return an empty string."
-    (if (or (looking-at "\\_>")
-            (looking-at "$"))
-        (string-remove-prefix
-         "::"
-         (buffer-substring (point)
-                           (save-excursion (skip-syntax-backward "w_.")
-                                           (point))))
-      (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_)))
-        "")))
-
-  (defun company-gtags-tcl-rigid (command &optional arg &rest ignored)
-    "Support for tcl ns::proc kind of command.  COMMAND ARG IGNORED."
-    (interactive (list 'interactive))
-    (cl-case command
-      (interactive (company-begin-backend 'company-gtags-tcl-rigid))
-      (prefix (and company-gtags-executable
-                   buffer-file-name
-                   (apply #'derived-mode-p company-gtags-modes)
-                   (not (company-in-string-or-comment))
-                   (company-gtags--tags-available-p)
-                   (or (company-grab-symbol-for-tcl-rigid) 'stop)))
-      (candidates (company-gtags--fetch-tcl-tags-rigid arg))
-      (sorted t)
-      (duplicates t)
-      (annotation (company-gtags--annotation arg))
-      (meta (get-text-property 0 'meta arg))
-      (location (get-text-property 0 'location arg))
-      (post-completion (let ((anno (company-gtags--annotation arg)))
-                         (when (and company-gtags-insert-arguments anno)
-                           (insert anno)
-                           (company-template-c-like-templatify anno)))))))
-
-(use-package company-jedi
-  :commands (company-jedi)
-  :config
-  (add-hook 'python-mode-hook 'jedi:setup)
-  ;; Standard Jedi.el setting
-  (setq jedi:mode-function 'jedi:get-in-function-call-when-idle)
-  (setq jedi:setup-keys t)
-  (setq jedi:complete-on-dot t))
 
 (provide 'init-company)
 ;;; init-company.el ends here

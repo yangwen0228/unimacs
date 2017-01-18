@@ -77,6 +77,7 @@
         init-markdown
         init-web-mode
         init-emmet
+        init-java
         init-javascript
         init-css
         ;; init-html

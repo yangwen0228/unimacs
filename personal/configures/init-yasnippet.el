@@ -25,7 +25,7 @@
              (not (member unimacs-yasnippet-dir yas-snippet-dirs)))
     (add-to-list 'yas-snippet-dirs unimacs-yasnippet-dir))
   ;; give yas-dropdown-prompt in yas-prompt-functions a chance.(others: yas-ido-prompt yas-completing-prompt)
-  (require 'dropdown-list)
+  (use-package dropdown-list)
   (setq yas-prompt-functions '(yas-dropdown-prompt yas-completing-prompt))
   ;; use yas-completing-prompt when ONLY when `M-x yas-insert-snippet'
   ;; thanks to capitaomorte for providing the trick.
