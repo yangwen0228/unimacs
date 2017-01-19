@@ -12,7 +12,39 @@
   (require 'helm-config)
   (helm-mode 1)                       ;turn helm-mode on, don't turn ido-mode on
 
-  (setq helm-autoresize-mode t)
+  (setq helm-autoresize-mode t
+        helm-ff-newfile-prompt-p nil
+        helm-ff-skip-boring-files t)
+  ;; Overwrite: don't need "." and "..".
+  (defun helm-ff-directory-files (directory &optional full)
+    "List contents of DIRECTORY.
+Argument FULL mean absolute path.
+It is same as `directory-files' but always returns the
+dotted filename '.' and '..' even on root directories in Windows
+systems."
+    (setq directory (file-name-as-directory
+                     (expand-file-name directory)))
+    (let* (file-error
+           (ls   (condition-case err
+                     (directory-files
+                      directory full directory-files-no-dot-files-regexp)
+                   ;; Handle file-error from here for Windows
+                   ;; because predicates like `file-readable-p' and friends
+                   ;; seem broken on emacs for Windows systems (always returns t).
+                   ;; This should never be called on GNU/Linux/Unix
+                   ;; as the error is properly intercepted in
+                   ;; `helm-find-files-get-candidates' by `file-readable-p'.
+                   (file-error
+                    (prog1
+                        (list (format "%s:%s"
+                                      (car err)
+                                      (mapconcat 'identity (cdr err) " ")))
+                      (setq file-error t)))))
+           (dot  (concat directory "."))
+           (dot2 (concat directory "..")))
+      (puthash directory (+ (length ls) 2) helm-ff--directory-files-hash)
+      ;; (append (and (not file-error) (list dot dot2)) ls) ; origin
+      ls))
 
   (setq helm-completing-read-handlers-alist
         '((execute-extended-command . helm-completing-read-symbols)
@@ -21,38 +53,24 @@
           (debug-on-entry           . helm-completing-read-symbols)
           (find-function            . helm-completing-read-symbols)
           (find-tag                 . helm-completing-read-with-cands-in-buffer)
-          (ffap-alternate-file . nil)
-          (tmm-menubar . nil)
-          (dired-do-copy . nil)
-          (dired-do-rename . nil)
-          (dired-create-directory . nil)
-          (find-file . ido)
-          (ido-find-file . ido)
-          (ido-edit-input . nil)
-          (mml-attach-file . ido)
-          (read-file-name . ido)
-          (read-directory-name . ido)
-          (yas-compile-directory . ido)
+          (find-file                . helm-completing-read-default-1)
+          (ido-find-file            . helm-completing-read-default-1)
+          (mml-attach-file          . helm-completing-read-default-1)
+          (read-file-name           . helm-completing-read-default-1)
+          (read-directory-name      . helm-completing-read-default-1)
+          (yas-compile-directory    . helm-completing-read-default-1)
+          (ffap-alternate-file      . helm-completing-read-default-1)
+          (tmm-menubar                . nil)
+          (dired-do-copy              . nil)
+          (dired-do-rename            . nil)
+          (dired-create-directory     . nil)
+          (ido-edit-input             . nil)
           (minibuffer-completion-help . nil)
-          (minibuffer-complete . nil)
-          (wg-load . ido)
-          (rgrep . nil)
-          (w3m-goto-url . nil)
-          (unimacs-copy-file-and-rename-buffer . nil)
-          (unimacs-rename-file-and-buffer . nil)
+          (minibuffer-complete        . nil)
+          (rgrep                      . nil)
+          (w3m-goto-url               . nil)
           ))
 
-  ;; helm-do-grep recursive
-  ;; don't use this function, but use helm-ag-select-dir instead,
-  ;; which is much faster than this. but sometimes that doesn't work,
-  ;; so I still keep this.
-  (defun helm-do-grep-recursive (&optional non-recursive)
-    "Like `helm-do-grep', but greps recursively by default."
-    (interactive "P")
-    (let* ((current-prefix-arg (not non-recursive))
-           (helm-current-prefix-arg non-recursive))
-      (call-interactively 'helm-do-grep)))
-  ;; (global-set-key (kbd "C-c M-r") 'helm-do-grep-recursive)
   :diminish (helm-mode)
   )
 

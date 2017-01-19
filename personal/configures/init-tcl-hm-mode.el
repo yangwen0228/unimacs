@@ -30,12 +30,11 @@
             (cl-loop while
                      (re-search-forward (concat
                                          "^" prefix ; echo pattern
-                                         "[ \t]+\\([[:digit:]]+\\)" ; linum
-                                         "[ \t]+\\([^ \t]+\\)" ;; file
-                                         "[ \t]*\\(proc[ \t]+\\|.*?\\[\\)\\(::\\)?\\([a-zA-Z0-9:._-]+::\\)*?" ; filter
-                                         "\\(" prefix "[a-zA-Z0-9:._-]*\\)" ; completion
-                                         "\\(.*\\)" ; definition
-                                         ;; "[ \t]+\\(.*\\)" ; definition
+                                         "[ \t]+\\([[:digit:]]+\\)" ;1 line
+                                         "[ \t]+\\([^ \t]+\\)"      ;2 file
+                                         "[ \t]*\\(proc[ \t]+\\|.*?\\[\\)\\(::\\)?\\([a-zA-Z0-9:._-]+::\\)*?" ; 3 4 5 filter
+                                         "\\(" prefix "[a-zA-Z0-9:._-]*\\)" ;6 completion text
+                                         "\\(.*\\)" ;7 definition
                                          "$"
                                          ) nil t)
                      collect

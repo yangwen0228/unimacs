@@ -220,29 +220,20 @@
   :diminish "")
 
 (use-package whitespace
-  ;; display special chars, like tabs and trailing whitespace.
-  :disabled
+  ;; display special chars, like tabs and trailing whitespace. Watched lead to freeze Emacs!
   :init
   (global-whitespace-mode)
-  :config
-  ;; For some reason, having these in settings.el gets ignored if whitespace
-  ;; loads lazily.
-  (setq whitespace-auto-cleanup t
-        whitespace-line-column 80
-        whitespace-rescan-timer-time nil
-        whitespace-silent t
-        ;;tabs newline space-mark trailing tab-mark newline-mark face lines-tail
-        whitespace-style '(face trailing tabs tab-mark))
+  (setq whitespace-line-column 80
+        whitespace-style '(face trailing tab))
   (setq whitespace-display-mappings
-        '((space-mark nil); 32 SPACE, 183 MIDDLE DOT
-          (newline-mark nil);(newline-mark 10 [172 10]) ; 10 LINE FEED
+        '(
+          ;; (space-mark nil); 32 SPACE, 183 MIDDLE DOT
+          ;; (newline-mark nil);(newline-mark 10 [172 10]) ; 10 LINE FEED
           (tab-mark 9 [8680 9] [92 9]); 9 TAB
           ))
   (setq whitespace-global-modes '(not org-mode eshell-mode shell-mode
                                       ;; emacs-lisp-mode clojure-mode lisp-mode
-                                      web-mode log4j-mode "Web" dired-mode))
-  ;; Just setq does not work! So must add a hook.
-  (add-hook 'find-file-hook (lambda () (setq show-trailing-whitespace t)))
+                                      web-mode log4j-mode dired-mode))
   :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode))
 
 (use-package whole-line-or-region
