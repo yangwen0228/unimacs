@@ -220,20 +220,22 @@
   :diminish "")
 
 (use-package whitespace
-  ;; display special chars, like tabs and trailing whitespace. Watched lead to freeze Emacs!
+  ;; display special chars, like tabs and trailing whitespace.
+  ;; tab-mark lead to freeze Emacs!
   :init
   (global-whitespace-mode)
-  (setq whitespace-line-column 80
-        whitespace-style '(face trailing tab))
+  (setq whitespace-line-column 120
+        whitespace-style '(face trailing tabs))
   (setq whitespace-display-mappings
         '(
           ;; (space-mark nil); 32 SPACE, 183 MIDDLE DOT
           ;; (newline-mark nil);(newline-mark 10 [172 10]) ; 10 LINE FEED
-          (tab-mark 9 [8680 9] [92 9]); 9 TAB
+          ;; (tab-mark 9 [8680 9] [92 9]); 9 TAB
           ))
-  (setq whitespace-global-modes '(not org-mode eshell-mode shell-mode
-                                      ;; emacs-lisp-mode clojure-mode lisp-mode
-                                      web-mode log4j-mode dired-mode))
+  ;; (setq whitespace-global-modes '(not org-mode eshell-mode shell-mode
+  ;;                                     ;; emacs-lisp-mode clojure-mode lisp-mode
+  ;;                                     web-mode log4j-mode dired-mode))
+
   :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode))
 
 (use-package whole-line-or-region

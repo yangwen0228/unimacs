@@ -201,11 +201,12 @@
       (when (overlay-get ov 'helm-gtags-deleted)
         (delete-overlay ov))))
 
-  (setq helm-gtags-mode-map
-        (let ((map (make-sparse-keymap)))
-          (set-keymap-parent map helm-map)
-          (define-key map (kbd "C-c C-e") 'helm-gtags-edit)
-          map))
+  ;; (setq helm-gtags-mode-map
+  ;;       (let ((map (make-sparse-keymap)))
+  ;;         (set-keymap-parent map helm-map)
+  ;;         (define-key map (kbd "C-c C-e") 'helm-gtags-edit)
+  ;;         map))
+  (bind-key "C-c C-e" 'helm-gtags-edit helm-map)
 
   (setq helm-gtags-edit-map
         (let ((map (make-sparse-keymap)))

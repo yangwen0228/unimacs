@@ -55,7 +55,7 @@ Because in China mainland, sometimes melpa doesn't work!"
                   '("SC"   . "http://joseito.republika.pl/sunrise-commander/") t)
      )))
 
-(unimacs-create-package-archives 'melpa)
+(unimacs-create-package-archives 'popkit)
 
 ;; ;; set package-user-dir to be relative to Unimacs install path
 (setq package-user-dir unimacs-elpa-dir)

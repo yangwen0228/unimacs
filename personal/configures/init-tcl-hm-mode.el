@@ -48,11 +48,9 @@
 Otherwise, if point is not inside a symbol, return an empty string."
       (if (or (looking-at "\\_>")
               (looking-at "$"))
-          (string-remove-prefix
-           "::"
-           (buffer-substring (point)
-                             (save-excursion (skip-syntax-backward "w_.")
-                                             (point))))
+          (buffer-substring (point)
+                            (save-excursion (skip-syntax-backward "w_.")
+                                            (point)))
         (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_)))
           "")))
 
@@ -96,11 +94,11 @@ Otherwise, if point is not inside a symbol, return an empty string."
   (defun tcl-hm-copy-path-source-this-file ()
     (interactive)
     (let ((filename (if (equal major-mode 'dired-mode)
-                      default-directory
-                    (buffer-file-name))))
-    (when filename
-      (kill-new (concat "source {" filename "}"))
-      (message "Copied command 'source {%s}' to the clipboard." filename))))
+                        default-directory
+                      (buffer-file-name))))
+      (when filename
+        (kill-new (concat "source {" filename "}"))
+        (message "Copied command 'source {%s}' to the clipboard." filename))))
 
   (define-key tcl-hm-mode-map "{"        'tcl-electric-char)
   (define-key tcl-hm-mode-map "}"        'tcl-electric-brace)

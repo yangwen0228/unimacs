@@ -44,7 +44,7 @@ systems."
            (dot2 (concat directory "..")))
       (puthash directory (+ (length ls) 2) helm-ff--directory-files-hash)
       ;; (append (and (not file-error) (list dot dot2)) ls) ; origin
-      ls))
+      (append (and (not file-error) (list dot)) ls)))
 
   (setq helm-completing-read-handlers-alist
         '((execute-extended-command . helm-completing-read-symbols)
