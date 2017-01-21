@@ -5,6 +5,7 @@
 ;;; Code:
 (use-package ido
   :ensure nil
+  :disabled
   :demand t
   :init
   (ido-mode 'buffer) ; use 'buffer rather than t to use only buffer switching

@@ -28,7 +28,7 @@
           (add-to-list 'exec-path full-path))))
 
     ;; setting gtags
-    (setenv "GTAGSCONF" (expand-file-name "glo651wb/share/gtags/gtags.conf"
+    (setenv "GTAGSCONF" (expand-file-name "glo656wb/share/gtags/gtags.conf"
                                           unimacs-extra-bin-dir)))
    (*is-a-mac*
     (setenv "PATH" (concat "/usr/local/texlive/2014/bin/universal-darwin:"

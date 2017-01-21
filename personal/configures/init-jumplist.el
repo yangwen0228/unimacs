@@ -5,8 +5,26 @@
 ;;; Code:
 (use-package jumplist
   :init
-  (global-set-key (kbd "C-,") 'jumplist-previous)
-  (global-set-key (kbd "C-.") 'jumplist-next)
+  ;; THe keybind C-, and C-. conflict with InputMethod.
+  (global-set-key (kbd "M-,") 'jumplist-previous)
+  (global-set-key (kbd "M-.") 'jumplist-next)
+  ;; add a point when no redo or undo points.
+  (defun jumplist-previous ()
+    "Jump back."
+    (interactive)
+    (if (or (not jumplist--list)
+            (and (not (jumplist--first?))
+                 (jumplist--last?)))
+        (progn
+          (jumplist--set) ; add a point when no undo points.
+          (message "No further undo point."))
+      (if jumplist-ex-mode
+          (unless jumplist--jumping
+            (jumplist--set)
+            (setq jumplist--jumping 't)))
+      (jumplist--inc-idx)
+      (let ((buff (nth jumplist--idx jumplist--list)))
+        (jumplist--do-jump buff))))
   (defun jumplist-next ()
     "Jump forward."
     (interactive)
@@ -26,13 +44,15 @@
   (custom-set-variables
    '(jumplist-hook-commands
      '(helm-swoop
-       helm-imenu mark-defun mark-whole-buffer
-       helm-for-files helm-projectile-switch-project helm-projectile-find-file
+       helm-imenu helm-for-files
+       mark-defun mark-whole-buffer
+       helm-projectile-switch-project helm-projectile-find-file
        ido-find-file find-file find-function find-variable
        avy-goto-char avy-goto-char-2
        helm-gtags-find-pattern helm-gtags-find-tag helm-gtags-find-rtag-adapter
        helm-ag-select-directory
-       isearch-forward end-of-buffer beginning-of-buffer))
+       isearch-forward
+       end-of-buffer beginning-of-buffer))
    '(jumplist-ex-mode t))
   )
 

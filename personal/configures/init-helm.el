@@ -55,6 +55,7 @@ systems."
           (find-tag                 . helm-completing-read-with-cands-in-buffer)
           (find-file                . helm-completing-read-default-1)
           (ido-find-file            . helm-completing-read-default-1)
+          (ido-kill-buffer          . helm-completing-read-default-1)
           (mml-attach-file          . helm-completing-read-default-1)
           (read-file-name           . helm-completing-read-default-1)
           (read-directory-name      . helm-completing-read-default-1)
