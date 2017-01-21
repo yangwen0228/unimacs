@@ -30,6 +30,10 @@ changes within the current region."
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; inform user if at branch point
     (when (> (undo-tree-num-branches) 1) (message "Undo branch point!")))
+
+  (global-undo-tree-mode)
+  (setq undo-tree-auto-save-history t)
+  (setq undo-tree-history-directory-alist `((".*" . ,(expand-file-name "undo" unimacs-tempfiles-dir))))
   )
 
 (provide 'init-undo-tree)
