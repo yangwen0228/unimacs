@@ -4,11 +4,11 @@
 
 ;;; Code:
 (use-package chm-help
-  :bind ("C-c h" . chm-help-lookup)
   :ensure nil
+  :bind ("C-c h" . chm-help-lookup)
   :config
   (setq chm-help-lookup-alist
-        '(("tcl-mode" . "c:/Tcl8.6/doc/ActiveTclHelp8.6.chm")
+        '(("tcl-mode" . "D:/softwares/work/tcl/apps/twapi/TclWinHelp-2015-05-01.chm")
           ("java-mode" . "e:/ebooks/JDK_API_1_6_zh_CN.CHM")))
   )
 

@@ -5,18 +5,14 @@
 ;;; Code:
 (use-package helm-flyspell
   ;; :bind ("C-c c" . helm-flyspell-correct)
-  :commands (helm-flyspell-correct)
+  :commands (helm-flyspell-correct flyspell-buffer)
   :config
   (use-package flyspell
     :init
     (flyspell-mode t)
-    (use-package ispell
-      :bind (("C-c c c" . ispell-comments-and-strings)
-             ("C-c c d" . ispell-change-dictionary)
-             ("C-c c k" . ispell-kill-ispell)
-             ("C-c c m" . ispell-message)
-             ("C-c c r" . ispell-region)
-             ))
+    (use-package flyspell-lazy
+      :init (flyspell-lazy-mode 1))
+    (use-package ispell)
     (unbind-key "C-." flyspell-mode-map)
     ;; flyspell set up for web-mode
     (defun web-mode-flyspell-verify ()
@@ -52,8 +48,6 @@
 
     (put 'web-mode 'flyspell-mode-predicate 'web-mode-flyspell-verify)
 
-    (use-package flyspell-lazy
-      :init (flyspell-lazy-mode 1))
     (setq flyspell-issue-message-flag nil)
 
     (defun flyspell-detect-ispell-args (&optional RUN-TOGETHER)
