@@ -5,6 +5,7 @@
 ;;; Code:
 (use-package org
   :mode ("\\.org\\'" . org-mode)
+  :bind ("C-c a" . org-agenda)
   :config
   (add-hook 'org-mode-hook 'org-indent-mode)
 
@@ -23,12 +24,12 @@ background of code to whatever theme I'm using's background"
                   my-pre-bg my-pre-fg))))))
   (add-hook 'org-export-before-processing-hook 'my/org-inline-css-hook)
   (setq org-emphasis-alist '(("*" bold)
-                            ("/" italic)
-                            ("_" underline)
-                            ("=" org-verbatim verbatim)
-                            ("~" (:foreground "red"))
-                            ("+"
-                             (:strike-through t))))
+                             ("/" italic)
+                             ("_" underline)
+                             ("=" org-verbatim verbatim)
+                             ("~" (:foreground "red"))
+                             ("+"
+                              (:strike-through t))))
   (use-package cnblogs
     :ensure nil
     :init
@@ -197,19 +198,6 @@ background of code to whatever theme I'm using's background"
             (org-download-image link)
           (org-download-yank)))))
 
-  (defun org-make-code-block ()
-    (interactive)
-    (let ((beg (if (region-active-p) (region-beginning) (point)))
-          (end (if (region-active-p) (region-end) (point))))
-      (goto-char beg)
-      (evil-open-above 1)
-      (insert "#+BEGIN_SRC ")
-      (goto-char (+ end 12))
-      (evil-open-below 0)
-      (insert "#+END_SRC")
-      (goto-char (+ beg 12))
-      ))
-
   ;; {{ export org-mode in Chinese into PDF
   ;; @see http://freizl.github.io/posts/tech/2012-04-06-export-orgmode-file-in-Chinese.html
   ;; and you need install texlive-xetex on different platforms
@@ -240,6 +228,7 @@ background of code to whatever theme I'm using's background"
         org-tags-column 80
         ;;org-startup-indented t
         org-export-with-creator t
+        org-src-fontify-natively t
         )
 
   ;; Refile targets include this file and any file contributing to the agenda - up to 5 levels deep
@@ -248,7 +237,7 @@ background of code to whatever theme I'm using's background"
   (setq org-refile-use-outline-path (quote file))
   ;; Targets complete in steps so we start with filename, TAB shows the next level of targets etc
   (setq org-outline-path-complete-in-steps t)
-
+  (setq org-agenda-files (list "d:/orgs/notes/todo.org"))
   (setq org-todo-keywords
         (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
                 (sequence "WAITING(w@/!)" "SOMEDAY(S)" "PROJECT(P@)" "|" "CANCELLED(c@/!)"))))
@@ -271,37 +260,13 @@ background of code to whatever theme I'm using's background"
   (defun sanityinc/hide-org-clock-from-header-line ()
     (setq-default header-line-format nil))
 
-  (add-hook 'org-clock-in-hook 'sanityinc/show-org-clock-in-header-line)
-  (add-hook 'org-clock-out-hook 'sanityinc/hide-org-clock-from-header-line)
-  (add-hook 'org-clock-cancel-hook 'sanityinc/hide-org-clock-from-header-line)
-
-  (eval-after-load 'org-clock
-    '(progn
-       (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
-       (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu)))
-
-  (eval-after-load 'org
-    '(progn
-       (require 'org-clock)
-                                        ; @see http://irreal.org/blog/?p=671
-       (setq org-src-fontify-natively t)
-       ;;(require 'org-checklist)
-       (require 'org-fstree)
-       (setq org-ditaa-jar-path (format "%s%s" (if *cygwin* "c:/cygwin" "")
-                                        (expand-file-name "contrib/scripts/ditaa.jar" unimacs-elpa-dir)) )
-       (define-key org-mode-map "\C-cb" 'org-make-code-block)
-
-       (defun soft-wrap-lines ()
-         "Make lines wrap at window edge and on word boundary,
-        in current buffer."
-         (interactive)
-         (setq truncate-lines nil)
-         (setq word-wrap t)
-         )
-       (add-hook 'org-mode-hook '(lambda ()
-                                   (setq evil-auto-indent nil)
-                                   (soft-wrap-lines)
-                                   ))))
+  (use-package org-clock
+    :ensure nil
+    :config
+    (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
+    (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu))
+  (use-package org-fstree
+    :disabled)
 
   (defadvice org-open-at-point (around org-open-at-point-choose-browser activate)
     (let ((browse-url-browser-function
