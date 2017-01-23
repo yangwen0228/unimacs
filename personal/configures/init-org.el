@@ -8,28 +8,6 @@
   :bind ("C-c a" . org-agenda)
   :config
   (add-hook 'org-mode-hook 'org-indent-mode)
-
-  ;; @ http://emacs.stackexchange.com/questions/3374/set-the-background-of-org-exported-code-blocks-according-to-theme
-  (defun my/org-inline-css-hook (exporter)
-    "Insert custom inline css to automatically set the
-background of code to whatever theme I'm using's background"
-    (when (eq exporter 'html)
-      (let* ((my-pre-bg (face-background 'default))
-             (my-pre-fg (face-foreground 'default)))
-        (setq
-         org-html-head-extra
-         (concat
-          org-html-head-extra
-          (format "<style type=\"text/css\">\n code {color: #FF0000}\n pre.src {background-color: %s; color: %s;}</style>\n"
-                  my-pre-bg my-pre-fg))))))
-  (add-hook 'org-export-before-processing-hook 'my/org-inline-css-hook)
-  (setq org-emphasis-alist '(("*" bold)
-                             ("/" italic)
-                             ("_" underline)
-                             ("=" org-verbatim verbatim)
-                             ("~" (:foreground "red"))
-                             ("+"
-                              (:strike-through t))))
   (use-package cnblogs
     :ensure nil
     :init
@@ -187,6 +165,7 @@ background of code to whatever theme I'm using's background"
         (url-http-debug "Request is: \n%s" request)
         request))
     )
+
   (use-package org-download
     :bind ("C-S-y" . org-download-clipboard)
     :config
@@ -198,27 +177,45 @@ background of code to whatever theme I'm using's background"
             (org-download-image link)
           (org-download-yank)))))
 
-  ;; {{ export org-mode in Chinese into PDF
-  ;; @see http://freizl.github.io/posts/tech/2012-04-06-export-orgmode-file-in-Chinese.html
-  ;; and you need install texlive-xetex on different platforms
-  ;; To install texlive-xetex:
-  ;;    `sudo USE="cjk" emerge texlive-xetex` on Gentoo Linux
-  (setq org-latex-to-pdf-process ;; org v7
-        '("xelatex -interaction nonstopmode -output-directory %o %f"
-          "xelatex -interaction nonstopmode -output-directory %o %f"
-          "xelatex -interaction nonstopmode -output-directory %o %f"))
-  (setq org-latex-pdf-process org-latex-to-pdf-process) ;; org v8
-  ;; }}
-
   ;; Various preferences
+  (defadvice org-open-at-point (around org-open-at-point-choose-browser activate)
+    (let ((browse-url-browser-function
+           (cond ((equal (ad-get-arg 0) '(4))
+                  'browse-url-generic)
+                 ((equal (ad-get-arg 0) '(16))
+                  'choose-browser)
+                 (t
+                  (lambda (url &optional new)
+                    (w3m-browse-url url t))))))
+      ad-do-it))
+
+  (defun my/org-inline-css-hook (exporter)
+    "Insert custom inline css to automatically set the
+background of code to whatever theme I'm using's background"
+    (when (eq exporter 'html)
+      (let* ((my-pre-bg (face-background 'default))
+             (my-pre-fg (face-foreground 'default)))
+        (setq
+         org-html-head-extra
+         (concat
+          org-html-head-extra
+          (format "<style type=\"text/css\">\n code {color: #FF0000}\n pre.src {background-color: %s; color: %s;}</style>\n"
+                  my-pre-bg my-pre-fg))))))
+
+  (add-hook 'org-export-before-processing-hook 'my/org-inline-css-hook)
+
+  (setq org-emphasis-alist '(("*" bold)
+                             ("/" italic)
+                             ("_" underline)
+                             ("=" org-verbatim verbatim)
+                             ("~" (:foreground "red"))
+                             ("+"
+                              (:strike-through t))))
+
   (setq org-log-done t
         org-completion-use-ido t
         org-edit-src-content-indentation 0
         org-edit-timestamp-down-means-later t
-        org-agenda-start-on-weekday nil
-        org-agenda-span 14
-        org-agenda-include-diary t
-        org-agenda-window-setup 'current-window
         org-fast-tag-selection-single-key 'expert
         org-export-kill-product-buffer-when-displayed t
         ;; org v7
@@ -231,54 +228,61 @@ background of code to whatever theme I'm using's background"
         org-src-fontify-natively t
         )
 
-  ;; Refile targets include this file and any file contributing to the agenda - up to 5 levels deep
-  (setq org-refile-targets (quote ((nil :maxlevel . 5) (org-agenda-files :maxlevel . 5))))
-  ;; Targets start with the file name - allows creating level 1 tasks
-  (setq org-refile-use-outline-path (quote file))
-  ;; Targets complete in steps so we start with filename, TAB shows the next level of targets etc
-  (setq org-outline-path-complete-in-steps t)
-  (setq org-agenda-files (list "d:/orgs/notes/todo.org"
-                               "d:/orgs/notes/work201701.org"))
-  (setq org-todo-keywords
-        (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
-                (sequence "WAITING(w@/!)" "SOMEDAY(S)" "PROJECT(P@)" "|" "CANCELLED(c@/!)"))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; Org clock
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  ;; Change task state to STARTED when clocking in
-  (setq org-clock-in-switch-to-state "STARTED")
-  ;; Save clock data and notes in the LOGBOOK drawer
-  (setq org-clock-into-drawer t)
-  ;; Removes clocked tasks with 0:00 duration
-  (setq org-clock-out-remove-zero-time-clocks t)
-
-  ;; Show the clocked-in task - if any - in the header line
-  (defun sanityinc/show-org-clock-in-header-line ()
-    (setq-default header-line-format '((" " org-mode-line-string " "))))
-
-  (defun sanityinc/hide-org-clock-from-header-line ()
-    (setq-default header-line-format nil))
+  (use-package org-agenda
+    :ensure nil
+    :config
+    (setq org-agenda-files (list "d:/orgs/notes/todo.org"
+                                 "d:/orgs/notes/work201701.org"))
+    (setq org-todo-keywords
+          (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
+                  (sequence "WAITING(w@/!)" "SOMEDAY(S)" "PROJECT(P@)" "|" "CANCELLED(c@/!)"))))
+    (setq org-agenda-start-on-weekday nil
+          org-agenda-span 14
+          org-agenda-include-diary t
+          org-agenda-window-setup 'current-window
+          ))
 
   (use-package org-clock
     :ensure nil
     :config
+    ;; Change task state to STARTED when clocking in
+    (setq org-clock-in-switch-to-state "STARTED")
+    ;; Save clock data and notes in the LOGBOOK drawer
+    (setq org-clock-into-drawer t)
+    ;; Removes clocked tasks with 0:00 duration
+    (setq org-clock-out-remove-zero-time-clocks t)
+
     (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
     (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu))
-  (use-package org-fstree
-    :disabled)
 
-  (defadvice org-open-at-point (around org-open-at-point-choose-browser activate)
-    (let ((browse-url-browser-function
-           (cond ((equal (ad-get-arg 0) '(4))
-                  'browse-url-generic)
-                 ((equal (ad-get-arg 0) '(16))
-                  'choose-browser)
-                 (t
-                  (lambda (url &optional new)
-                    (w3m-browse-url url t))))))
-      ad-do-it))
+  (use-package org-fstree :disabled)
+
+  (use-package org-capture
+    :disabled
+    :ensure nil
+    :config
+    (setq org-default-notes-file (expand-file-name "notes.org" org-directory))
+    (setq org-capture-templates
+          '(("t" "Todo" entry         (file+headline  "~/org/agenda.org" "Tasks")        "** TODO %?\n  %i\n  %a"  :prepend t)
+            ("n" "Notes" entry        (file+headline  "~/org/notes.org"  "General")      "* %T %?\n\n  %i\n"       :prepend t)
+            ))
+    (global-set-key (kbd "C-c k") 'org-capture))
+
+  (use-package org-latex
+    :ensure nil
+    :config
+    ;; {{ export org-mode in Chinese into PDF
+    ;; @see http://freizl.github.io/posts/tech/2012-04-06-export-orgmode-file-in-Chinese.html
+    ;; and you need install texlive-xetex on different platforms
+    ;; To install texlive-xetex:
+    ;;    `sudo USE="cjk" emerge texlive-xetex` on Gentoo Linux
+    (setq org-latex-to-pdf-process ;; org v7
+          '("xelatex -interaction nonstopmode -output-directory %o %f"
+            "xelatex -interaction nonstopmode -output-directory %o %f"
+            "xelatex -interaction nonstopmode -output-directory %o %f"))
+    (setq org-latex-pdf-process org-latex-to-pdf-process) ;; org v8
+    ;; }}
+    )
 
   ;; @see http://stackoverflow.com/questions/6014181/org-mode-exporting-to-pdf-for-emacs-app-on-mac-os-x
   ;; Export org docments to pdf files.
