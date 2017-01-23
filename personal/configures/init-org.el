@@ -237,7 +237,8 @@ background of code to whatever theme I'm using's background"
   (setq org-refile-use-outline-path (quote file))
   ;; Targets complete in steps so we start with filename, TAB shows the next level of targets etc
   (setq org-outline-path-complete-in-steps t)
-  (setq org-agenda-files (list "d:/orgs/notes/todo.org"))
+  (setq org-agenda-files (list "d:/orgs/notes/todo.org"
+                               "d:/orgs/notes/work201701.org"))
   (setq org-todo-keywords
         (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
                 (sequence "WAITING(w@/!)" "SOMEDAY(S)" "PROJECT(P@)" "|" "CANCELLED(c@/!)"))))
