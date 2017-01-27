@@ -253,7 +253,17 @@ background of code to whatever theme I'm using's background"
     (setq org-clock-out-remove-zero-time-clocks t)
 
     (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
-    (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu))
+    (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu)
+    ;; Show the clocked-in task - if any - in the header line
+    (defun org-clock-show-in-header-line ()
+      (setq-default header-line-format '((" " org-mode-line-string " "))))
+
+    (defun org-clock-hide-from-header-line ()
+      (setq-default header-line-format nil))
+
+    (add-hook 'org-clock-in-hook 'org-clock-show-in-header-line)
+    (add-hook 'org-clock-out-hook 'org-clock-hide-from-header-line)
+    (add-hook 'org-clock-cancel-hook 'org-clock-hide-from-header-line))
 
   (use-package org-fstree :disabled)
 
@@ -269,6 +279,7 @@ background of code to whatever theme I'm using's background"
     (global-set-key (kbd "C-c k") 'org-capture))
 
   (use-package org-latex
+    :disabled
     :ensure nil
     :config
     ;; {{ export org-mode in Chinese into PDF

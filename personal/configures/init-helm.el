@@ -16,6 +16,11 @@
         helm-scroll-amount   1
         helm-ff-newfile-prompt-p nil
         helm-ff-skip-boring-files t)
+
+  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
+  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)   ; make TAB works in terminal
+  (define-key helm-map (kbd "C-z")  'helm-select-action)              ; list actions using C-z
+
   ;; Overwrite: don't need "." and "..".
   (defun helm-ff-directory-files (directory &optional full)
     "List contents of DIRECTORY.
