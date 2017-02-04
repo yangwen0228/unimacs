@@ -230,9 +230,21 @@ background of code to whatever theme I'm using's background"
 
   (use-package org-agenda
     :ensure nil
+    :preface
+    (defun org-update-agenda-files ()
+      "Update the agenda files under a directory!"
+      (interactive)
+      (let ((my-agenda-directory "d:/orgs/notes")
+            org-files)
+        (dolist (org-file (f-files my-agenda-directory))
+          (when (string= (f-ext org-file) "org")
+            (setq org-files (append org-files (list org-file)))))
+        (setq org-agenda-files org-files)))
+
     :config
-    (setq org-agenda-files (list "d:/orgs/notes/todo.org"
-                                 "d:/orgs/notes/work201701.org"))
+    (defadvice org-agenda (before org-agenda activate)
+      (org-update-agenda-files))
+
     (setq org-todo-keywords
           (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
                   (sequence "WAITING(w@/!)" "SOMEDAY(S)" "PROJECT(P@)" "|" "CANCELLED(c@/!)"))))
