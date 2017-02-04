@@ -2,15 +2,15 @@
 ;;; Commentary:
 ;;; code:
 (use-package yasnippet
-  ;; :bind ("<tab>" . yas-expand) ; other completion, like minibuffer, use C-S-i. All tab masked, not I desired.
-  :init
+  :bind ("<tab>" . company-yasnippet) ; other completion, like minibuffer, use C-S-i. All tab masked, not I desired.
+  :config
+  (yas-global-mode 1)
   ;; fix conflict where smartparens clobbers yas' key bindings
   (defadvice yas-expand (before dotemacs activate)
     (sp-remove-active-pair-overlay))
   ;; (add-hook 'yas-before-expand-snippet-hook (lambda () (smartparens-mode -1)))
   ;; (add-hook 'yas-after-exit-snippet-hook    (lambda () (smartparens-mode 1)))
 
-  (yas-global-mode t)
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.

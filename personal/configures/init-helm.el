@@ -78,6 +78,10 @@ systems."
           (w3m-goto-url               . nil)
           ))
 
+  (defun helm-ff-retrieve-last-expanded ()
+    "Overwrite the origin function. When go up one level, just select the . directory."
+    (setq helm-ff-last-expanded nil))
+
   ;; pinyin filter
   (setq helm-pinyin-search-p t)
   (when helm-pinyin-search-p
@@ -105,108 +109,6 @@ e.g helm.el$
                                  c
                                (format "[^%s]*%s" (substring pinyin-pattern 1 -1) pinyin-pattern)))))
                    ls ""))))
-
-  (defun helm-find-files-get-candidates (&optional require-match)
-    "Create candidate list for `helm-source-find-files'."
-    (let* ((path          (helm-ff-set-pattern helm-pattern))
-           (dir-p         (file-accessible-directory-p path))
-           basedir
-           invalid-basedir
-           non-essential
-           (tramp-verbose helm-tramp-verbose)) ; No tramp message when 0.
-      ;; Tramp check if path is valid without waiting a valid
-      ;; connection and may send a file-error.
-      (setq helm--ignore-errors (file-remote-p path))
-      (set-text-properties 0 (length path) nil path)
-      ;; Issue #118 allow creation of newdir+newfile.
-      (unless (or
-               ;; A tramp file name not completed.
-               (string= path "Invalid tramp file name")
-               ;; An empty pattern
-               (string= path "")
-               (and (string-match-p ":\\'" path)
-                    (helm-ff-tramp-postfixed-p path))
-               ;; Check if base directory of PATH is valid.
-               (helm-aif (file-name-directory path)
-                   ;; If PATH is a valid directory IT=PATH,
-                   ;; else IT=basedir of PATH.
-                   (file-directory-p it)))
-        ;; BASEDIR is invalid, that's mean user is starting
-        ;; to write a non--existing path in minibuffer
-        ;; probably to create a 'new_dir' or a 'new_dir+new_file'.
-        (setq invalid-basedir t))
-      ;; Don't set now `helm-pattern' if `path' == "Invalid tramp file name"
-      ;; like that the actual value (e.g /ssh:) is passed to
-      ;; `helm-ff-tramp-hostnames'.
-      (unless (or (string= path "Invalid tramp file name")
-                  invalid-basedir)      ; Leave  helm-pattern unchanged.
-        (setq helm-ff-auto-update-flag  ; [1]
-              ;; Unless auto update is disabled at startup or
-              ;; interactively, start auto updating only at third char.
-              (unless (or (null helm-ff-auto-update-initial-value)
-                          (null helm-ff--auto-update-state)
-                          ;; But don't enable auto update when
-                          ;; deleting backward.
-                          helm-ff--deleting-char-backward
-                          (and dir-p (not (string-match-p "/\\'" path))))
-                (or (>= (length (helm-basename path)) 3) dir-p)))
-        ;; At this point the tramp connection is triggered.
-        (setq helm-pattern (helm-ff--transform-pattern-for-completion path))
-        ;; (print (concat "8 " helm-pattern))
-        ;; This have to be set after [1] to allow deleting char backward.
-        (setq basedir (expand-file-name
-                       (if (and dir-p helm-ff-auto-update-flag)
-                           ;; Add the final "/" to path
-                           ;; when `helm-ff-auto-update-flag' is enabled.
-                           (file-name-as-directory path)
-                         (if (string= path "")
-                             "/" (file-name-directory path)))))
-        (setq helm-ff-default-directory
-              (if (string= helm-pattern "")
-                  (expand-file-name "/")  ; Expand to "/" or "c:/"
-                ;; If path is an url *default-directory have to be nil.
-                (unless (or (string-match helm-ff-url-regexp path)
-                            (and ffap-url-regexp
-                                 (string-match ffap-url-regexp path)))
-                  basedir))))
-      (when (and (string-match ":\\'" path)
-                 (file-remote-p basedir nil t))
-        (setq helm-pattern basedir))
-      (cond ((string= path "Invalid tramp file name")
-             (or (helm-ff-tramp-hostnames) ; Hostnames completion.
-                 (prog2
-                     ;; `helm-pattern' have not been modified yet.
-                     ;; Set it here to the value of `path' that should be now
-                     ;; "Invalid tramp file name" and set the candidates list
-                     ;; to ("Invalid tramp file name") to make `helm-pattern'
-                     ;; match single candidate "Invalid tramp file name".
-                     (setq helm-pattern path)
-                     ;; "Invalid tramp file name" is now printed
-                     ;; in `helm-buffer'.
-                     (list path))))
-            ((or (and (file-regular-p path)
-                      (eq last-repeatable-command 'helm-execute-persistent-action))
-                 ;; `ffap-url-regexp' don't match until url is complete.
-                 (string-match helm-ff-url-regexp path)
-                 invalid-basedir
-                 (and (not (file-exists-p path)) (string-match "/$" path))
-                 (and ffap-url-regexp (string-match ffap-url-regexp path)))
-             (list path))
-            ((string= path "") (helm-ff-directory-files "/" t))
-            ;; Check here if directory is accessible (not working on Windows).
-            ((and (file-directory-p path) (not (file-readable-p path)))
-             (list (format "file-error: Opening directory permission denied `%s'" path)))
-            ;; A fast expansion of PATH is made only if `helm-ff-auto-update-flag'
-            ;; is enabled.
-            ((and dir-p helm-ff-auto-update-flag)
-             (helm-ff-directory-files path t))
-            (t (append (unless (or require-match
-                                   ;; When `helm-ff-auto-update-flag' has been
-                                   ;; disabled, whe don't want PATH to be added on top
-                                   ;; if it is a directory.
-                                   dir-p)
-                         (list path))
-                       (helm-ff-directory-files basedir t))))))
 
   (defun helm--fuzzy-match-maybe-set-pattern ()
     ;; Computing helm-pattern with helm--mapconcat-pattern
@@ -283,15 +185,7 @@ If PATTERN is a valid directory name,return PATTERN unchanged."
                       (progn
                         ;; (print (helm--mapconcat-pinyin-pattern bn))
                         (helm--mapconcat-pinyin-pattern bn))
-                    (concat ".*" (regexp-quote bn)))))
-       ;; (t (concat (regexp-quote bd)
-       ;;             (let ((eng-pattern (if (>= (length bn) 2) ; wait 2nd char before concating.
-       ;;                                    (helm--mapconcat-pinyin-pattern bn)
-       ;;                                  (concat ".*" (regexp-quote bn)))))
-       ;;               (if helm-pinyin-search-p
-       ;;                   (concat "\\(" eng-pattern "\\)" "\\|" "\\(" ".*" (pinyin-search--pinyin-to-regexp bn) ".*" "\\)")
-       ;;                 eng-pattern))))
-       )))
+                    (concat ".*" (regexp-quote bn))))))))
 
   (cl-defun helm-mm-3-match (str &optional (pattern helm-pattern))
     "Check if PATTERN match STR.
@@ -324,12 +218,12 @@ i.e (identity (string-match \"foo\" \"foo bar\")) => t."
                                        ;; using fuzzy leaving the job
                                        ;; to the fuzzy fn.
                                        (string-match regexp str)
-                                     (invalid-regexp nil))))
-          ))))
+                                     (invalid-regexp nil))))))))
 
-  (defun helm-my-test (candidate)
-    (print candidate))
-  (setq helm-find-files-actions (append helm-find-files-actions '(("my-test" . helm-my-test))))
+  ;;;;;;;;;;;;;;;;;;;;;method to add action;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; (defun helm-my-test (candidate)
+  ;;   (print candidate))
+  ;; (setq helm-find-files-actions (append helm-find-files-actions '(("my-test" . helm-my-test))))
 
   :diminish (helm-mode)
   )
