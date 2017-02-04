@@ -34,7 +34,7 @@ changes within the current region."
   (global-undo-tree-mode 1)
   (setq undo-tree-auto-save-history t)
   (setq undo-tree-history-directory-alist `((".*" . ,(expand-file-name "undo" unimacs-tempfiles-dir))))
-  )
+  :diminish (undo-tree-mode))
 
 (provide 'init-undo-tree)
 ;;; init-undo-tree.el ends here
