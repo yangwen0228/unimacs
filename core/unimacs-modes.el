@@ -53,6 +53,17 @@
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
 
+(use-package ediff
+  :ensure nil
+  :init
+  (defun my-kill-ediff-buffers ()
+    (kill-buffer ediff-buffer-A)
+    (kill-buffer ediff-buffer-B)
+    (kill-buffer ediff-buffer-C))
+
+  (add-hook 'ediff-quit-hook 'my-kill-ediff-buffers)
+  (add-hook 'ediff-after-quit-hook-internal 'winner-undo))
+
 (use-package edit-server
   ;; Chrome editor.
   :disabled t
@@ -237,6 +248,10 @@
   ;;                                     web-mode log4j-mode dired-mode))
 
   :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode))
+
+(use-package winner
+  :bind (("C-c ," . winner-undo)
+         ("C-c ." . winner-redo)))
 
 (use-package whole-line-or-region
   ;; kill or yank a whole line.
