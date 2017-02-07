@@ -29,7 +29,7 @@
   (global-company-mode t)
   (define-company-backends
     '(((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers))
-      ((tcl-hm-mode tcl-mode)      . ((company-keywords company-dabbrev-code company-dabbrev) company-files))
+      ((tcl-hm-mode tcl-mode)      . (company-gtags-tcl-rigid (company-keywords company-dabbrev-code company-dabbrev) company-files))
       ;; ((js-mode js2-mode)          . (company-tern))
       ((web-mode)                  . (company-web-html company-dabbrev-code company-css company-files))
       ))

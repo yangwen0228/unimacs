@@ -5,7 +5,8 @@
 ;;; Code:
 (use-package org
   :mode ("\\.org\\'" . org-mode)
-  :bind ("C-c a" . org-agenda)
+  :bind (("C-c a" . org-agenda)
+         ("C-c k" . org-capture))
   :config
   (add-hook 'org-mode-hook 'org-indent-mode)
   (use-package cnblogs
@@ -177,7 +178,7 @@
             (org-download-image link)
           (org-download-yank)))))
 
-  ;; Various preferences
+  ;; browse links
   (defadvice org-open-at-point (around org-open-at-point-choose-browser activate)
     (let ((browse-url-browser-function
            (cond ((equal (ad-get-arg 0) '(4))
@@ -249,7 +250,7 @@ background of code to whatever theme I'm using's background"
 
     (setq org-todo-keywords
           (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
-                  (sequence "WAITING(w@/!)" "SOMEDAY(S)" "PROJECT(P@)" "|" "CANCELLED(c@/!)"))))
+                  (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
     (setq org-agenda-start-on-weekday nil
           org-agenda-span 14
           org-agenda-include-diary t
@@ -258,9 +259,11 @@ background of code to whatever theme I'm using's background"
 
   (use-package org-clock
     :ensure nil
-    :config
+    :init
     ;; Change task state to STARTED when clocking in
     (setq org-clock-in-switch-to-state "STARTED")
+    ;; Change task state to DONE when clocking out
+    (setq org-clock-out-switch-to-state "HOLD")
     ;; Save clock data and notes in the LOGBOOK drawer
     (setq org-clock-into-drawer t)
     ;; Removes clocked tasks with 0:00 duration
@@ -282,12 +285,35 @@ background of code to whatever theme I'm using's background"
   (use-package org-capture
     :ensure nil
     :config
-    (setq org-default-notes-file (expand-file-name "notes.org" org-directory))
+    (setq org-directory "d:/orgs/notes")
+    (setq org-default-notes-file (expand-file-name "refile.org" org-directory))
+    (setq org-default-diary-file (expand-file-name "diary.org" org-directory))
+
+    ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
     (setq org-capture-templates
-          '(("t" "Todo" entry         (file+headline  "~/org/agenda.org" "Tasks")        "** TODO %?\n  %i\n  %a"  :prepend t)
-            ("n" "Notes" entry        (file+headline  "~/org/notes.org"  "General")      "* %T %?\n\n  %i\n"       :prepend t)
-            ))
-    (global-set-key (kbd "C-c k") 'org-capture))
+          (quote (("j" "Journal"      entry (file+datetree org-default-diary-file)
+                   "* %?\n%U\n" :clock-in t :clock-resume t)
+                  ("t" "todo"         entry (file org-default-notes-file)
+                   "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+                  ("r" "respond"      entry (file org-default-notes-file)
+                   "* STARTED Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+                  ("n" "note"         entry (file org-default-notes-file)
+                   "* TODO %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+                  ("m" "Meeting"      entry (file org-default-notes-file)
+                   "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                  ("p" "Phone call"   entry (file org-default-notes-file)
+                   "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+                  ("h" "Habit"        entry (file org-default-notes-file)
+                   "* STARTED %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: STARTED"))))
+    )
+
+  (use-package org-refile
+    :ensure nil
+    :init
+    ;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+    (setq org-refile-targets (quote ((nil :maxlevel . 1)
+                                     (org-agenda-files :maxlevel . 1))))
+    )
 
   (use-package org-latex
     :disabled

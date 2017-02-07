@@ -21,36 +21,40 @@
     :commands (company-gtags company-gtags-tcl-rigid)
     :preface
     (defun company-gtags--fetch-tcl-tags-rigid (prefix)
+      ;; (print prefix)
       (with-temp-buffer
         (let (tags)
+          ;; -xgq will search both "proc test ..." and "[test ...]"
+          ;; -xq will search only "proc test ...", is much faster.
           (when (= 0 (call-process company-gtags-executable nil
-                                   (list (current-buffer) nil) nil "-xgq" (concat "" prefix)))
+                                   (list (current-buffer) nil) nil "-xq"
+                                   (concat prefix "*")))
             ;; (print (buffer-string))
             (goto-char (point-min))
             (cl-loop while
                      (re-search-forward (concat
-                                         "^" prefix ; echo pattern
-                                         "[ \t]+\\([[:digit:]]+\\)" ;1 line
-                                         "[ \t]+\\([^ \t]+\\)"      ;2 file
-                                         "[ \t]*\\(proc[ \t]+\\|.*?\\[\\)\\(::\\)?\\([a-zA-Z0-9:._-]+::\\)*?" ; 3 4 5 filter
-                                         "\\(" prefix "[a-zA-Z0-9:._-]*\\)" ;6 completion text
-                                         "\\(.*\\)" ;7 definition
+                                         "^\\(::\\)?"             ;1 (::)?
+                                         "\\([a-zA-Z0-9:._-]*\\)" ;2 completion text
+                                         "[ \t]+\\([[:digit:]]+\\)" ;3 line number
+                                         "[ \t]+\\([^ \t]+\\)"      ;4 file
+                                         "[ \t]*\\(proc[ \t]+\\|.*?\\[\\)\\(::\\)?\\([a-zA-Z0-9:._-]+::\\)*?" ; 5 6 7 filter
+                                         "\\(.*\\)" ;8 definition
                                          "$"
                                          ) nil t)
                      collect
-                     (propertize (concat (match-string 4) (match-string 5) (match-string 6))
-                                 'meta (concat (match-string 3) (match-string 4) (match-string 5) (match-string 6) (match-string 7))
-                                 'location (cons (expand-file-name (match-string 2))
-                                                 (string-to-number (match-string 1)))))))))
+                     (propertize (concat (match-string 1) (match-string 2))
+                                 'meta (concat (match-string 5) (match-string 6) (match-string 7) (match-string 8) "\n=> file: " (match-string 4))
+                                 'location (cons (expand-file-name (match-string 4))
+                                                 (string-to-number (match-string 3)))))))))
 
     (defun company-grab-symbol-for-tcl-rigid ()
       "If point is at the end of a symbol, return it.
 Otherwise, if point is not inside a symbol, return an empty string."
       (if (or (looking-at "\\_>")
               (looking-at "$"))
-          (buffer-substring (point)
-                            (save-excursion (skip-syntax-backward "w_.")
-                                            (point)))
+          (buffer-substring-no-properties (point)
+                                          (save-excursion (skip-syntax-backward "w_.")
+                                                          (point)))
         (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_)))
           "")))
 
@@ -74,7 +78,8 @@ Otherwise, if point is not inside a symbol, return an empty string."
         (post-completion (let ((anno (company-gtags--annotation arg)))
                            (when (and company-gtags-insert-arguments anno)
                              (insert anno)
-                             (company-template-c-like-templatify anno)))))))
+                             (company-template-c-like-templatify anno))))))
+    )
 
   (use-package tcl-hm-eldoc
     :ensure nil
