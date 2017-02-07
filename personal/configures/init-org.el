@@ -245,6 +245,8 @@ background of code to whatever theme I'm using's background"
     (defadvice org-agenda (before org-agenda activate)
       (org-update-agenda-files))
 
+    (setq org-columns-default-format "%TODO %50ITEM(Task) %10CLOCKSUM %16TIMESTAMP_IA")
+
     (setq org-todo-keywords
           (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
                   (sequence "WAITING(w@/!)" "SOMEDAY(S)" "PROJECT(P@)" "|" "CANCELLED(c@/!)"))))
@@ -277,10 +279,7 @@ background of code to whatever theme I'm using's background"
     (add-hook 'org-clock-out-hook 'org-clock-hide-from-header-line)
     (add-hook 'org-clock-cancel-hook 'org-clock-hide-from-header-line))
 
-  (use-package org-fstree :disabled)
-
   (use-package org-capture
-    :disabled
     :ensure nil
     :config
     (setq org-default-notes-file (expand-file-name "notes.org" org-directory))
