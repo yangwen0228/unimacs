@@ -4,12 +4,39 @@
 
 ;;; Code:
 (use-package helm-flyspell
-  :bind (("C-c s t" . flyspell-mode)
-         ("C-c s b" . flyspell-buffer)
+  :bind (("C-c s t" . flyspell-dwim)
+         ("C-c s b" . flyspell-buffer-dwim)
          ("C-c s c" . helm-flyspell-correct))
-  :commands (helm-flyspell-correct flyspell-buffer)
-  :init
-  (add-hook 'flyspell-mode-hook (lambda () (when flyspell-mode (flyspell-buffer))))
+  :commands (helm-flyspell-correct flyspell-dwim flyspell-buffer-dwim)
+  :preface
+  (defun flyspell-dwim ()
+    "Use `flyspell-mode' for ordinary files, and `flyspell-prog-mode'
+
+for programming files."
+    (interactive)
+    (require 'helm-flyspell)
+    (if flyspell-mode
+        (flyspell-mode -1)
+      (if (memq major-mode
+                '(lisp-mode
+                  emacs-lisp-mode scheme-mode clojure-mode ruby-mode
+                  yaml-mode python-mode shell-mode php-mode css-mode haskell-mode
+                  caml-mode nxml-mode crontab-mode perl-mode tcl-mode js2-mode))
+          (flyspell-prog-mode)
+        (flyspell-mode 1))
+      (flyspell-buffer)))
+
+  (defun flyspell-buffer-dwim ()
+    "When `flyspell-mode' is on, check the buffer, otherwise, do nothing."
+    (interactive)
+    (require 'helm-flyspell)
+    (when flyspell-mode
+      (flyspell-buffer)))
+
+  :config
+  (setq flyspell-issue-message-flag nil)
+  (unbind-key "C-;" flyspell-mode-map)
+  ;; (unbind-key "C-." flyspell-mode-map)
   (use-package flyspell-lazy
     :init (flyspell-lazy-mode 1))
   (use-package ispell :ensure nil
@@ -45,67 +72,37 @@
         ad-do-it
         (setq ispell-extra-args old-ispell-extra-args)
         (ispell-kill-ispell t)
-        ))
-    )
+        )))
 
-  ;; (unbind-key "C-." flyspell-mode-map)
   ;; flyspell set up for web-mode
   (defun web-mode-flyspell-verify ()
-    (let ((f (get-text-property (- (point) 1) 'face))
-          rlt)
+    (let ((face (get-text-property (- (point) 1) 'face)) verified-p)
       (cond
-       ((not (memq f '(web-mode-html-attr-value-face
-                       web-mode-html-tag-face
-                       web-mode-html-attr-name-face
-                       web-mode-constant-face
-                       web-mode-doctype-face
-                       web-mode-keyword-face
-                       web-mode-comment-face ;; focus on get html label right
-                       web-mode-function-name-face
-                       web-mode-variable-name-face
-                       web-mode-css-property-name-face
-                       web-mode-css-selector-face
-                       web-mode-css-color-face
-                       web-mode-type-face
-                       web-mode-block-control-face
-                       )
-                   ))
-        (setq rlt t))
-       ((memq f '(web-mode-html-attr-value-face))
+       ((not (memq face '(web-mode-html-attr-value-face
+                          web-mode-html-tag-face
+                          web-mode-html-attr-name-face
+                          web-mode-constant-face
+                          web-mode-doctype-face
+                          web-mode-keyword-face
+                          web-mode-comment-face ;; focus on get html label right
+                          web-mode-function-name-face
+                          web-mode-variable-name-face
+                          web-mode-css-property-name-face
+                          web-mode-css-selector-face
+                          web-mode-css-color-face
+                          web-mode-type-face
+                          web-mode-block-control-face)))
+        (setq verified-p t))
+       ((memq face '(web-mode-html-attr-value-face))
         (save-excursion
           (search-backward-regexp "=['\"]" (line-beginning-position) t)
           (backward-char)
-          (setq rlt (string= (thing-at-point 'word) "value"))
-          ))
-       (t t))
-      rlt
-      ))
+          (setq verified-p (string= (thing-at-point 'word) "value"))))
+       )
+      verified-p))
 
   (put 'web-mode 'flyspell-mode-predicate 'web-mode-flyspell-verify)
 
-  (setq flyspell-issue-message-flag nil)
-
-  ;;----------------------------------------------------------------------------
-  ;; Add spell-checking in comments for all programming language modes
-  ;;----------------------------------------------------------------------------
-  (dolist (hook '(lisp-mode-hook
-                  emacs-lisp-mode-hook
-                  scheme-mode-hook
-                  clojure-mode-hook
-                  ruby-mode-hook
-                  yaml-mode
-                  python-mode-hook
-                  shell-mode-hook
-                  php-mode-hook
-                  css-mode-hook
-                  haskell-mode-hook
-                  caml-mode-hook
-                  nxml-mode-hook
-                  crontab-mode-hook
-                  perl-mode-hook
-                  tcl-mode-hook
-                  js2-mode-hook))
-    (add-hook hook 'flyspell-prog-mode))
   (add-hook 'nxml-mode-hook
             (lambda ()
               (add-to-list 'flyspell-prog-text-faces 'nxml-text-face)))
