@@ -9,8 +9,7 @@
          ("C-c k" . org-capture))
   :config
   (add-hook 'org-mode-hook 'org-indent-mode)
-  (use-package cnblogs
-    :ensure nil
+  (use-package cnblogs :ensure nil
     :init
     (require 'cnblogs)
     (cnblogs-minor-mode t)
@@ -229,9 +228,8 @@ background of code to whatever theme I'm using's background"
         org-src-fontify-natively t
         )
 
-  (use-package org-agenda
-    :ensure nil
-    :preface
+  (use-package org-agenda :ensure nil
+    :init
     (defun org-update-agenda-files ()
       "Update the agenda files under a directory!"
       (interactive)
@@ -242,7 +240,6 @@ background of code to whatever theme I'm using's background"
             (setq org-files (append org-files (list org-file)))))
         (setq org-agenda-files org-files)))
 
-    :config
     (defadvice org-agenda (before org-agenda activate)
       (org-update-agenda-files))
 
@@ -257,9 +254,9 @@ background of code to whatever theme I'm using's background"
           org-agenda-window-setup 'current-window
           ))
 
-  (use-package org-clock
-    :ensure nil
+  (use-package org-clock :ensure nil
     :init
+    (require 'org-clock)
     ;; Change task state to STARTED when clocking in
     (setq org-clock-in-switch-to-state "STARTED")
     ;; Change task state to DONE when clocking out
@@ -282,9 +279,8 @@ background of code to whatever theme I'm using's background"
     (add-hook 'org-clock-out-hook 'org-clock-hide-from-header-line)
     (add-hook 'org-clock-cancel-hook 'org-clock-hide-from-header-line))
 
-  (use-package org-capture
-    :ensure nil
-    :config
+  (use-package org-capture :ensure nil
+    :init
     (setq org-directory "d:/orgs/notes")
     (setq org-default-notes-file (expand-file-name "refile.org" org-directory))
     (setq org-default-diary-file (expand-file-name "diary.org" org-directory))
@@ -307,16 +303,17 @@ background of code to whatever theme I'm using's background"
                    "* STARTED %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: STARTED"))))
     )
 
-  (use-package org-refile
-    :ensure nil
+  (use-package org-refile :ensure nil
     :init
-    ;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+    ;; Targets include this file and any file contributing to the agenda - up to 1 levels deep
     (setq org-refile-targets (quote ((nil :maxlevel . 1)
-                                     (org-agenda-files :maxlevel . 1))))
-    )
+                                     (org-agenda-files :maxlevel . 1)))))
 
-  (use-package org-latex
-    :disabled
+  (use-package org-goto :ensure nil
+    :init
+    (setq org-goto-auto-isearch nil))
+
+  (use-package org-latex :disabled
     :ensure nil
     :config
     ;; {{ export org-mode in Chinese into PDF
