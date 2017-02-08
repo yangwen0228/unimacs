@@ -1,12 +1,11 @@
 ;;; tcl-hm-eldoc.el --- tcl-hm-mode support for eldoc-mode -*- lexical-binding: t -*-
 ;;
-;; Copyright (C) 2014 Kirill Ignatiev <github.com/ikirill>
+;; Copyright (C) 2017 Wen Yang
 ;;
-;; Author: Kirill Ignatiev <github.com/ikirill>
+;; Author: Wen Yang <github.com/yangwen0228>
 ;; Version: 0.1
-;; Package-Version: 20141226.2219
-;; Keywords: c, c++, objc, convenience, tools
-;; URL: https://github.com/ikirill/tcl-hm-eldoc
+;; Keywords: tcl-hm-mode eldoc
+;; URL: https://github.com/yangwen0228
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5") (tcl-hm "0.1"))
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -37,22 +36,9 @@
 ;; It is easiest to add `tcl-hm-eldoc' to `tcl-hm-mode-hook', if you
 ;; already have `tcl-hm-mode' set up.
 ;;
-;; Screenshot:
-;;
-;; ![Screenshot](screenshot.png "Screenshot")
-;;
 ;; Notes:
 ;;
-;; - It is based on tcl-hm-mode, which is in turn based on libclang. As a
-;;   result, it avoid reparsing files when possible and is quite
-;;   accurate.
-;;
-;; - TODO It is a little imprecise when it comes to function calls:
-;;   right now it resolves overloaded function calls by the number of
-;;   arguments, but doesn't take arguments' types into account. It
-;;   will show all matching functions in the minibuffer message, but
-;;   that will include some irrelevant ones too. There is a plan to
-;;   incorporate a precise version of this feature into `tcl-hm-mode'.
+;; - It is based on tcl-hm-mode and modified from irony-eldoc.
 ;;
 ;;; Code:
 
@@ -69,7 +55,7 @@
 eldoc is a built-in emacs mode for displaying documentation about
 a symbol or function call at point in the message buffer (see
 `eldoc-mode')."
-  :group 'tcl-hm)
+  :group 'tcl-hm-eldoc)
 
 (defcustom tcl-hm-eldoc-strip-underscores
   t
@@ -199,16 +185,19 @@ inside `condition-case'."
       ;; the escape-strings argument is not present in 24.4
       ;; (backward-up-list nil t) ; escape strings
       ;; if inside a string, move out of the string first
-      (let ((syntax (syntax-ppss)))
+      (let ((syntax (syntax-ppss))
+            (point (point))
+            (line-beg (line-beginning-position)))
         (when (nth 3 syntax) (goto-char (nth 8 syntax))))
-      (backward-up-list)
-      (when
-          (and (= (char-after) #x28)    ; open paren
+      (re-search-backward "\\[" line-beg)
+      (if (= point (point))
+          (progn
+            (beginning-of-line)
+            (back-to-indentation)
+            ))
+      (when (and (= (char-after) #x5b)    ; open \[
                (setq open-paren (point)
-                     close-paren (save-excursion (forward-list) (point)))
-               ;; possibly skip across a template bracket
-               (progn (when (= (char-before) ?>) (backward-list))
-                      (thing-at-point 'symbol)))
+                     close-paren (save-excursion (forward-list) (point))))
         (setq bounds (bounds-of-thing-at-point 'symbol)
               thing (buffer-substring-no-properties
                      (car bounds) (cdr bounds)))))
@@ -477,7 +466,7 @@ Notes:
 
 - Sometimes the information `tcl-hm-eldoc' uses can go out of
   date. In that case, try calling `tcl-hm-eldoc-reset'."
-  :group 'tcl-hm
+  :group 'tcl-hm-eldoc
   ;; FIXME This deletes documentation overlays not conservatively enough
   ;; There are more changes. that can make an overlay invalid.
   (let ((hook (lambda (o _beforep _start _end &optional _change-length)

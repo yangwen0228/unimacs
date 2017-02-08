@@ -15,6 +15,12 @@
   ;; (setq tcl-command-switches '("/clientconfig" "hwfepre.dat" "-tcl" "D:\\svn\\CRRC_2016\\source codes\\main\\weldCheck.tcl"))
   (add-to-list 'company-keywords-alist
                (append '(tcl-mode) tcl-hm-commands-list))
+
+  (unimacs-company-define-backends
+   '((tcl-hm-mode tcl-mode) .
+     ((company-keywords company-dabbrev-code)
+      company-files company-dabbrev)))
+
   (use-package company-gtags
     :ensure nil
     :bind* ("C-<tab>" . company-gtags-tcl-rigid)
@@ -28,7 +34,7 @@
           ;; -xq will search only "proc test ...", is much faster.
           (when (= 0 (call-process company-gtags-executable nil
                                    (list (current-buffer) nil) nil "-xq"
-                                   (concat prefix "*")))
+                                   (concat prefix ".*")))
             ;; (print (buffer-string))
             (goto-char (point-min))
             (cl-loop while
@@ -84,6 +90,7 @@ Otherwise, if point is not inside a symbol, return an empty string."
   (use-package tcl-hm-eldoc
     :ensure nil
     :init (add-hook 'tcl-mode-hook 'tcl-hm-eldoc))
+
   (defun tcl-hm-macro2tcl ()
     (interactive)
     (let* ((beg (if (region-active-p)
@@ -96,6 +103,7 @@ Otherwise, if point is not inside a symbol, return an empty string."
         (replace-regexp "(\\|," " " nil beg end)
         (replace-regexp ")" "" nil beg end))
       ))
+
   (defun tcl-hm-copy-path-source-this-file ()
     (interactive)
     (let ((filename (if (equal major-mode 'dired-mode)
