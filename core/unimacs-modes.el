@@ -101,6 +101,17 @@
                                            ;; try-complete-lisp-symbol
                                            )))
 
+(use-package imenu :ensure nil
+  ;; type name must be capital, like: Use-package. Cannot use use-package.
+  :init
+  (add-to-list 'lisp-imenu-generic-expression
+               (list "Use-package"
+                     (concat
+                      "^\\s-*(use-package\\s-+" ; definition
+                      "\\([-A-Za-z0-9_:+*]+\\)" ; package name
+                      )
+                     1)))
+
 (use-package mic-paren
   ;; highlight contents between braces.
   :init
@@ -129,27 +140,27 @@
          ("M-<down>" . move-text-down))
   :config
   (defun move-text-internal (arg)
-  (cond
-   ((and mark-active transient-mark-mode)
-    (if (> (point) (mark))
-        (exchange-point-and-mark))
-    (let ((column (current-column))
-          (text (delete-and-extract-region (point) (mark))))
-      (forward-line arg)
-      (move-to-column column t)
-      (set-mark (point))
-      (insert text)
-      (exchange-point-and-mark)
-      (setq deactivate-mark nil)))
-   (t
-    (let ((column (current-column)))
-      (beginning-of-line)
-      (when (or (> arg 0) (not (bobp)))
-        (forward-line)
-        (when (or (< arg 0) (not (eobp)))
-          (transpose-lines arg))
-        (forward-line -1))
-      (move-to-column column t)))))
+    (cond
+     ((and mark-active transient-mark-mode)
+      (if (> (point) (mark))
+          (exchange-point-and-mark))
+      (let ((column (current-column))
+            (text (delete-and-extract-region (point) (mark))))
+        (forward-line arg)
+        (move-to-column column t)
+        (set-mark (point))
+        (insert text)
+        (exchange-point-and-mark)
+        (setq deactivate-mark nil)))
+     (t
+      (let ((column (current-column)))
+        (beginning-of-line)
+        (when (or (> arg 0) (not (bobp)))
+          (forward-line)
+          (when (or (< arg 0) (not (eobp)))
+            (transpose-lines arg))
+          (forward-line -1))
+        (move-to-column column t)))))
   :diminish "")
 
 (use-package nlinum
@@ -173,7 +184,8 @@
   :diminish "")
 
 (use-package server :ensure nil
-  :init
+  ;; edit server, must use :config. cannot use :init.
+  :config
   (when (and (eq window-system 'w32) (file-exists-p (getenv "APPDATA")))
     (setq server-auth-dir (concat (getenv "APPDATA") "/.emacs.d/server"))
     (unless (file-exists-p server-auth-dir)
