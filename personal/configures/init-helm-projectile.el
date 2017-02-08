@@ -29,7 +29,7 @@
           )))
 
     :init
-    (projectile-global-mode 1)
+    (projectile-mode t)
     (setq projectile-project-root-files-functions
           '(projectile-root-bottom-up
             projectile-root-top-down

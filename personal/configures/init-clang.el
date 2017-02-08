@@ -7,6 +7,7 @@
 ;; Packages can share the settings: auto-complete-mode company-mode irony flycheck.
 
 ;;; Code:
+(require 'cl)                           ; for remove-if
 (setq clang-include-dir-str
     (cond
      (*win32* "

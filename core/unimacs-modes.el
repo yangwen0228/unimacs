@@ -53,8 +53,7 @@
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
 
-(use-package ediff
-  :ensure nil
+(use-package ediff :ensure nil
   :init
   (defun my-kill-ediff-buffers ()
     (kill-buffer ediff-buffer-A)
@@ -64,21 +63,19 @@
   (add-hook 'ediff-quit-hook 'my-kill-ediff-buffers)
   (add-hook 'ediff-after-quit-hook-internal 'winner-undo))
 
-(use-package edit-server
+(use-package edit-server :disabled t
   ;; Chrome editor.
-  :disabled t
   :if (and window-system)
   :init
   (defun server-ensure-safe-dir (dir) "Noop" t)
   (add-hook 'after-init-hook 'server-start t)
   (add-hook 'after-init-hook 'edit-server-start t))
 
-(use-package eldoc
+(use-package eldoc :ensure nil
   :init
-  (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
-  :config
   (setq eldoc-idle-delay 0.2)
   (setq eldoc-echo-area-use-multiline-p t)
+  (eldoc-mode t)
   :diminish (eldoc-mode))
 
 (use-package font-lock+
@@ -89,8 +86,7 @@
 (use-package help-fns+)
 (use-package help-mode+)
 
-(use-package hippie-exp
-  :disabled t
+(use-package hippie-exp :disabled t
   :bind ("M-/" . hippie-expand)
   :config
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
@@ -104,6 +100,7 @@
                                            ;; try-complete-lisp-symbol-partially
                                            ;; try-complete-lisp-symbol
                                            )))
+
 (use-package mic-paren
   ;; highlight contents between braces.
   :init
@@ -175,9 +172,8 @@
   :init (global-page-break-lines-mode)
   :diminish "")
 
-(use-package server
-  :ensure nil
-  :config
+(use-package server :ensure nil
+  :init
   (when (and (eq window-system 'w32) (file-exists-p (getenv "APPDATA")))
     (setq server-auth-dir (concat (getenv "APPDATA") "/.emacs.d/server"))
     (unless (file-exists-p server-auth-dir)
@@ -190,7 +186,7 @@
   :init (add-hook 'prog-mode-hook 'subword-mode)
   :diminish (subword-mode))
 
-(use-package tramp
+(use-package tramp :disabled
   :config
   (with-eval-after-load 'tramp-cache
     (setq tramp-persistency-file-name
@@ -216,9 +212,8 @@
   ;;   (add-to-list 'tramp-remote-path "~/bin"))
   )
 
-(use-package visual-line-mode
-  ;; break line to fit view
-  :ensure nil
+(use-package simple :ensure nil
+  ;; visual-line-mode: break line to fit view
   :init
   (global-visual-line-mode t)
   (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)))

@@ -1,5 +1,5 @@
 ;; See http://bc.tech.coop/blog/070927.html
-(add-to-list 'auto-mode-alist ("\\.cl\\'" . 'lisp-mode))
+(add-to-list 'auto-mode-alist '("\\.cl\\'" . 'lisp-mode))
 
 (add-hook 'lisp-mode-hook (lambda ()
                             (cond ((not (featurep 'slime))

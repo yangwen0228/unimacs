@@ -423,7 +423,7 @@ Doesn't mess with normal buffers."
 
 (defun unimacs-toggle-list-bookmarks ()
   (interactive)
-  (if (equalp "*Bookmark List*" (buffer-name))
+  (if (equal "*Bookmark List*" (buffer-name))
       (quit-window)
     (call-interactively 'list-bookmarks)))
 
@@ -479,7 +479,8 @@ The numth of occurences is determined by ARG."
   "Copy the whole beffer content."
   (interactive)
   (save-excursion
-    (mark-whole-buffer)
+    (goto-char (point-min))
+    (set-mark (point-max))
     (whole-line-or-region-kill-ring-save nil))
   (message "The whole buffer has been copied!"))
 

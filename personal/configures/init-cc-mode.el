@@ -116,11 +116,6 @@
     ;; make the ENTER key indent next line properly
     (local-set-key "\C-m" 'newline-and-indent)
 
-    ;; syntax-highlight aggressively
-    ;; (setq font-lock-support-mode 'lazy-lock-mode)
-    (setq lazy-lock-defer-contextually t)
-    (setq lazy-lock-defer-time 0)
-
     ;; make DEL take all previous whitespace with it
     (c-toggle-hungry-state 1)
 

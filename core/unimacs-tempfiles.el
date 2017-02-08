@@ -30,8 +30,7 @@
 (setq delete-old-versions t)
 ;; (setq backup-directory-alist         `((".*" . ,temporary-file-directory)))
 
-(use-package auto-save
-  :ensure nil
+(use-package simple :ensure nil
   :init
   (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
   ;; delete-auto-save-files
