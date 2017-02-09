@@ -68,9 +68,9 @@ systems."
           (yas-compile-directory    . helm-completing-read-default-1)
           (ffap-alternate-file      . helm-completing-read-default-1)
           (tmm-menubar                . nil)
-          (dired-do-copy              . nil)
-          (dired-do-rename            . nil)
-          (dired-create-directory     . nil)
+          (dired-do-copy              . helm-completing-read-default-1)
+          (dired-do-rename            . helm-completing-read-default-1)
+          (dired-create-directory     . helm-completing-read-default-1)
           (ido-edit-input             . nil)
           (minibuffer-completion-help . nil)
           (minibuffer-complete        . nil)
@@ -100,15 +100,24 @@ e.g helm.el$
                                 (string-match "$\\'" pattern))
                            c (regexp-quote c)))
                      (cdr ls) "")
-        ;; Fuzzy match.
-        (mapconcat (lambda (c)
-                     (if (and (string= c "$")
-                              (string-match "$\\'" pattern))
-                         c (let ((pinyin-pattern (pinyinlib-build-regexp-string c)))
+        (if (< (length ls) 8)           ; when string length is too big, too many Chinese chars, just use English then.
+            (mapconcat (lambda (c)
+                         (if (and (string= c "$")
+                                  (string-match "$\\'" pattern))
+                             c
+                           (let ((pinyin-pattern (pinyinlib-build-regexp-string c)))
                              (if (< (length pinyin-pattern) 3)
                                  c
                                (format "[^%s]*%s" (substring pinyin-pattern 1 -1) pinyin-pattern)))))
-                   ls ""))))
+                       ls "")
+          (mapconcat (lambda (c)
+                       (if (and (string= c "$")
+                                (string-match "$\\'" pattern))
+                           c
+                         (format "[^%s]*%s" c (regexp-quote c))))
+                     ls ""))
+        ;; Fuzzy match.
+        )))
 
   (defun helm--fuzzy-match-maybe-set-pattern ()
     ;; Computing helm-pattern with helm--mapconcat-pattern
