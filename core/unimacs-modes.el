@@ -113,21 +113,19 @@
                      1)))
 
 (use-package mic-paren
-  ;; highlight contents between braces.
+  ;; highlight contents between braces. Error with multiple-cursors.
   :init
   (paren-activate)
   (setq paren-match-face 'highlight)
   (setq paren-sexp-mode t)
-  (eval-and-compile
-    (require 'multiple-cursors))
-  (defadvice mic-paren-highlight (around mic-paren-dont-highlight activate)
-    (progn
-      (mic-delete-overlay (aref mic-paren-overlays 0))
-      (mic-delete-overlay (aref mic-paren-overlays 1))
-      (mic-delete-overlay (aref mic-paren-overlays 2)))
-    (unless (or mark-active multiple-cursors-mode)
-      ad-do-it
-      ))
+  (defadvice mic-paren-highlight (after mic-paren-highlight activate)
+    (if (or mark-active
+            (and (boundp 'multiple-cursors-mode)
+                 multiple-cursors-mode))
+        (progn
+          (mic-delete-overlay (aref mic-paren-overlays 0))
+          (mic-delete-overlay (aref mic-paren-overlays 1))
+          (mic-delete-overlay (aref mic-paren-overlays 2)))))
 
   :diminish "")
 
