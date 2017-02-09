@@ -1,6 +1,6 @@
 ;;; init-multiple-cursors.el --- Summary
 ;;; Commentary:
-;; comments
+;; IMPORTANT: multiple-cursors use ~/.emacs.d/.mc-lists.el to keep choose settings.
 
 ;;; Code:
 (use-package multiple-cursors
