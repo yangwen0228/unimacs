@@ -168,7 +168,7 @@
 
   (use-package org-download
     :bind ("C-S-y" . org-download-clipboard)
-    :config
+    :preface
     (defun org-download-clipboard ()
       "Save the captured image from clipboard to file, and insert into buffer. Or org-download-yank."
       (interactive)
