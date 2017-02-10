@@ -27,6 +27,7 @@
 ;;; Code:
 (require 'bind-key)
 
+(unbind-key "C-\\")                ; toggle input method, annoy.
 (bind-key "C-x p"   'proced)       ; Start proced in a similar manner to dired
 (bind-key "C-x m"   'eshell)       ; Start eshell or switch to it if it's active.
 (bind-key "C-x M"   '(lambda () (interactive) (eshell t))); Force start new eshell
