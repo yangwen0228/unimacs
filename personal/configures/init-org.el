@@ -236,7 +236,8 @@ background of code to whatever theme I'm using's background"
       (let ((my-agenda-directory "d:/orgs/notes")
             org-files)
         (dolist (org-file (f-files my-agenda-directory))
-          (when (string= (f-ext org-file) "org")
+          (when (and (string= (f-ext org-file) "org")
+                     (not (string= (substring (f-filename org-file) 0 2) ".#")))
             (setq org-files (append org-files (list org-file)))))
         (setq org-agenda-files org-files)))
 
