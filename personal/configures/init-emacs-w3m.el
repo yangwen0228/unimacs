@@ -1,6 +1,7 @@
 ;;; init-emacs-w3m.el --- Summary
 ;;; Commentary:
-;; comments
+;; Release: http://ftp.uni-kl.de/pub/cygwin/release/w3m/
+;; Or use Msys2 w3m.
 
 ;;; Code:
 (use-package w3m
