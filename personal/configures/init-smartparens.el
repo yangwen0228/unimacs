@@ -41,6 +41,7 @@
 
   ;;; tcl-mode
   (sp-with-modes 'tcl-mode
+    (sp-local-pair "\\[" "\\]")
     (sp-local-pair "hwi OpenStack" "hwi CloseStack")
     (sp-local-pair "OpenStack" "CloseStack"))
 
