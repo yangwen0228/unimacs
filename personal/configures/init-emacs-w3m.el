@@ -14,6 +14,7 @@
         w3m-output-coding-system 'utf-8
         w3m-terminal-coding-system 'utf-8)
   (setq w3m-use-cookies t)
+  (setq w3m-dirlist-cgi-program (expand-file-name "msys64/lib/w3m/cgi-bin/dirlist.cgi" unimacs-extra-bin-dir))
   (setq w3m-cookie-accept-bad-cookies t)
   (setq w3m-home-page
         (if (file-readable-p (expand-file-name "html/home.html" unimacs-tempfiles-dir))
