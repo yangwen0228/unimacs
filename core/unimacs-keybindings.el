@@ -73,7 +73,9 @@
 (bind-key "M-J"             'unimacs-join-to-previous-line)
 (bind-key "C-j"             'newline-and-indent)
 (bind-key "C-S-j"           'backward-delete-char-untabify)
-(bind-key "C-m"             'unimacs-scroll-up-line)
+;; historic reason, C-m -> RET.
+(define-key input-decode-map [?\C-m] [C-m])
+(bind-key "<C-m>"           'unimacs-scroll-up-line)
 (bind-key "M-m"             'unimacs-scroll-down-line)
 (bind-key* "M-0"            'unimacs-switch-to-previous-buffer)
 (bind-key "C-x C-x"         'unimacs-exchange-point-and-mark)
