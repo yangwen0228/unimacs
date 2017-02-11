@@ -127,6 +127,20 @@ point reaches the beginning or end of the buffer, stop there."
       (when (= orig-point (point))
         (beginning-of-line)))))
 
+(defun unimacs-scroll-up-line (&optional arg)
+  "Scroll up 1 line."
+  (interactive "^p")
+  (or arg (setq arg 1))
+  (scroll-up-line arg)
+  (next-line arg))
+
+(defun unimacs-scroll-down-line (&optional arg)
+  "Scroll down 1 line."
+  (interactive "^p")
+  (or arg (setq arg 1))
+  (scroll-down-line arg)
+  (previous-line arg))
+
 (defun unimacs-indent-current-line-or-region ()
   "Indent the currently visited buffer."
   (interactive)
