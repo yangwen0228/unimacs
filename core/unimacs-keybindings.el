@@ -73,10 +73,6 @@
 (bind-key "M-J"             'unimacs-join-to-previous-line)
 (bind-key "C-j"             'newline-and-indent)
 (bind-key "C-S-j"           'backward-delete-char-untabify)
-;; historic reason, C-m -> RET.
-(define-key input-decode-map [?\C-m] [C-m])
-(bind-key "<C-m>"           'unimacs-scroll-up-line)
-(bind-key "M-m"             'unimacs-scroll-down-line)
 (bind-key* "M-0"            'unimacs-switch-to-previous-buffer)
 (bind-key "C-x C-x"         'unimacs-exchange-point-and-mark)
 (bind-key "C-x M-S-k"       'unimacs-delete-file-and-buffer)
@@ -85,6 +81,11 @@
 (bind-key "C-x M-p"         'unimacs-copy-file-name-to-clipboard)
 (bind-key "C-S-M-h"         'unimacs-copy-func)
 (bind-key "C-x H"           'unimacs-copy-whole-buffer)
+
+;; historic reason, C-m -> RET, must unbind it first:
+(define-key input-decode-map [?\C-m] [C-m])
+(bind-key "<C-m>"           'unimacs-scroll-up-line)
+(bind-key "M-m"             'unimacs-scroll-down-line)
 
 (provide 'unimacs-keybindings)
 ;;; unimacs-keybindings.el ends here
