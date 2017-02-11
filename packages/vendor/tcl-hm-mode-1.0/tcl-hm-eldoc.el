@@ -107,7 +107,9 @@ there should be no documentation.")
                  (setq end (point)))
                (setq thing (buffer-substring-no-properties beg end))
                ;; Check thing is not a built-in type or something useless
-               (not (string-match-p (concat "\\_<\\(" tcl-hm-eldoc--ignore-symbol-regex "\\)\\_>") thing)))
+               (not (string-match-p
+                     (concat "^\\(" tcl-hm-eldoc--ignore-symbol-regex "\\)$")
+                     thing)))
       (list nil thing beg end))))
 
 (defun tcl-hm-eldoc--argindex (&optional pos param-beg param-end)
