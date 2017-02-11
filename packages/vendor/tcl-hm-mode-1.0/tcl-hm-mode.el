@@ -183,7 +183,7 @@ If nil, TAB always indents current line."
     "read" "redirect" "regexp" "regsub" "rename" "return" "scan" "seek" "set"
     "setenv" "sh" "socket" "source" "split" "string" "subst" "switch" "tell" "then" "time"
     "trace" "unset" "update" "uplevel" "upvar"
-    "variable" "vwait" "which" "while"
+    "variable" "vwait" "which" "while" "::oo::class"
     )
   "List of Tcl keywords.")
 
@@ -306,14 +306,11 @@ If nil, TAB always indents current line."
         (setq tcl-hm-commands-length-limit
               (subseq tcl-hm-all-commands-list 0 (min (length tcl-hm-all-commands-list) length-limit)))
         (setq tcl-hm-all-commands-list
-              (subseq tcl-hm-all-commands-list (max (length tcl-hm-all-commands-list) (1+ length-limit))))
+              (subseq tcl-hm-all-commands-list (length tcl-hm-commands-length-limit)))
         (setq tcl-hm-commands-regexp
-              (concat "\\<\\("
+              (concat "\\_<\\("
                       (regexp-opt
-                       (append
-                        tcl-hm-commands-length-limit
-                        (unless tcl-hm-extra-highlight
-                          tcl-hm-extra-commands))) "\\)\\>"))
+                        tcl-hm-commands-length-limit) "\\)\\_>"))
         (font-lock-add-keywords
          'tcl-mode
          (list (list tcl-hm-commands-regexp 1 'font-lock-hm-face)))))))
@@ -614,27 +611,41 @@ Prefix argument means invert sense of `tcl-use-smart-word-finder'."
   (let* ((cell (assoc command tcl-hm-help-alist))
          (file (and cell (cdr cell)))
          (syntax nil))
-    (if (file-exists-p file)
+    (if (and file (file-exists-p file))
         (with-temp-buffer
           (insert-file-contents-literally file)
           (beginning-of-buffer)
-          (search-forward ">Syntax<" nil t 1)
-          (next-line)
-          (goto-char (line-end-position))
-          (let ((begin (1+ (search-backward ">" nil t 3)))
-                (end nil))
-            (search-forward "<" nil t 1)
-            (setq end (point))
-            (setq syntax
-                  (concat command
-                          " "
-                          (replace-regexp-in-string
-                           "&quot;" "\""
-                           (substring (buffer-string) (- begin 1) (- end 2)))))
-            )
-          ))
+          (when (search-forward ">SYNTAX" nil t 1)
+            (next-line)
+            (goto-char (line-end-position))
+            (let ((begin (1+ (search-backward ">" nil t 3)))
+                  (end nil))
+              (search-forward "<" nil t 1)
+              (setq end (point))
+              (setq syntax
+                    (concat command
+                            " "
+                            (replace-regexp-in-string
+                             "&quot;" "\""
+                             (substring (buffer-string) (- begin 1) (- end 2)))))
+              ))))
     syntax
     ))
+(defun tcl-hm-get-syntax-from-html (command &optional arg)
+  "Get help on Tcl command.  Default is word at point.
+Prefix argument means invert sense of `tcl-use-smart-word-finder'."
+  (let* ((cell (assoc command tcl-hm-help-alist))
+         (file (and cell (cdr cell))))
+    (if (and file (file-exists-p file))
+        (with-temp-buffer
+          (insert-file-contents-literally file)
+          (w3m-buffer)
+          (beginning-of-buffer)
+          (when (search-forward "SYNTAX" nil t 1)
+            (next-line)
+            (substring (buffer-string)
+                       (1- (line-beginning-position))
+                       (1- (line-end-position))))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mode definition
 

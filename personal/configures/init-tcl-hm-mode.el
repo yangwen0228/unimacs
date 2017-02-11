@@ -37,31 +37,33 @@
                                    (concat prefix ".*")))
             ;; (print (buffer-string))
             (goto-char (point-min))
-            (cl-loop while
-                     (re-search-forward (concat
-                                         "^\\(::\\)?"             ;1 (::)?
-                                         "\\([a-zA-Z0-9:._-]*\\)" ;2 completion text
-                                         "[ \t]+\\([[:digit:]]+\\)" ;3 line number
-                                         "[ \t]+\\([^ \t]+\\)"      ;4 file
-                                         "[ \t]*\\(proc[ \t]+\\|.*?\\[\\)\\(::\\)?\\([a-zA-Z0-9:._-]+::\\)*?" ; 5 6 7 filter
-                                         "\\(.*\\)" ;8 definition
-                                         "$"
-                                         ) nil t)
-                     collect
-                     (propertize (concat (match-string 1) (match-string 2))
-                                 'meta (concat (match-string 5) (match-string 6) (match-string 7) (match-string 8) "\n=> file: " (match-string 4))
-                                 'location (cons (expand-file-name (match-string 4))
-                                                 (string-to-number (match-string 3)))))))))
+            (cl-loop
+             while
+             (re-search-forward (concat
+                                 "^\\(::\\)?"             ;1 (::)?
+                                 "\\([a-zA-Z0-9:._-]*\\)" ;2 completion text
+                                 "[ \t]+\\([[:digit:]]+\\)" ;3 line number
+                                 "[ \t]+\\([^ \t]+\\)"      ;4 file
+                                 "[ \t]*\\(proc[ \t]+\\|.*?\\[\\)\\(::\\)?\\([a-zA-Z0-9:._-]+::\\)*?" ; 5 6 7 filter
+                                 "\\(.*\\)" ;8 definition
+                                 "$"
+                                 ) nil t)
+             collect
+             (propertize (concat (match-string 1) (match-string 2))
+                         'meta (concat (match-string 5) (match-string 6) (match-string 7) (match-string 8) "\n=> file: " (match-string 4))
+                         'location (cons (expand-file-name (match-string 4))
+                                         (string-to-number (match-string 3)))))))))
 
     (defun company-grab-symbol-for-tcl-rigid ()
       "If point is at the end of a symbol, return it.
 Otherwise, if point is not inside a symbol, return an empty string."
       (if (or (looking-at "\\_>")
               (looking-at "$"))
-          (buffer-substring-no-properties (point)
-                                          (save-excursion (skip-syntax-backward "w_.")
-                                                          (point)))
-        (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_)))
+          (buffer-substring-no-properties
+           (point)
+           (save-excursion (skip-syntax-backward "w_.") (point)))
+        (unless (and (char-after)
+                     (memq (char-syntax (char-after)) '(?w ?_)))
           "")))
 
     (defun company-gtags-tcl-rigid (command &optional arg &rest ignored)
@@ -113,6 +115,17 @@ Otherwise, if point is not inside a symbol, return an empty string."
         (kill-new (concat "source {" filename "}"))
         (message "Copied command 'source {%s}' to the clipboard." filename))))
 
+  (defun tcl-eval-buffer (&optional and-go)
+    "Send the whole buffer to the inferior Tcl process.
+Prefix argument means switch to the Tcl buffer afterwards."
+    (interactive "P")
+    (save-excursion
+      (end-of-buffer)
+      (let ((end (point)))
+        (beginning-of-buffer)
+        (tcl-eval-region (point) end)))
+    (if and-go (switch-to-tcl t)))
+
   (define-key tcl-hm-mode-map "{"        'tcl-electric-char)
   (define-key tcl-hm-mode-map "}"        'tcl-electric-brace)
   (define-key tcl-hm-mode-map "["        'tcl-electric-char)
@@ -124,6 +137,8 @@ Otherwise, if point is not inside a symbol, return an empty string."
   (define-key tcl-hm-mode-map "\C-c\C-j" 'tcl-help-on-hm-word)
   (define-key global-map "\C-c\C-j" 'tcl-help-on-hm-word)
   (define-key tcl-hm-mode-map "\C-c\C-v" 'tcl-eval-defun)
+  (define-key tcl-hm-mode-map "\C-c\C-b" 'tcl-eval-buffer)
+  (define-key tcl-mode-map "\C-c\C-b" 'tcl-eval-buffer)
   (define-key tcl-hm-mode-map "\C-c\C-f" 'tcl-load-file)
   (define-key tcl-hm-mode-map "\C-c\C-t" 'inferior-tcl)
   (define-key tcl-hm-mode-map "\C-c\C-x" 'tcl-eval-region)
@@ -168,7 +183,7 @@ Otherwise, if point is not inside a symbol, return an empty string."
                          ) 1)
           ("Procs" ,(concat
                      (concat "^\\s-*" (regexp-opt `("proc")) "[ \t]+") ; definition
-                     "\\([-A-Za-z0-9_:+*]+\\)"                         ; proc name
+                     "\\([^ \t]+\\)"                         ; proc name
                      ) 1)
           ("DefMethods" ,(concat
                           (concat "^\\s-*" (regexp-opt `("method"
