@@ -37,6 +37,7 @@
         company-tooltip-limit         15
         company-minimum-prefix-length 2
         company-dabbrev-downcase      nil ; not downcase.
+        company-dabbrev-ignore-case   nil ; not downcase.
         company-require-match         nil
         company-show-numbers          t)
 
