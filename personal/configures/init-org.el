@@ -255,6 +255,12 @@ background of code to whatever theme I'm using's background"
           org-agenda-window-setup 'current-window
           ))
 
+  (use-package org-alert
+    :commands (org-alert-enable org-alert-disable)
+    :config
+    (setq org-alert-interval 300)
+    (setq alert-default-style 'message))
+
   (use-package org-clock :ensure nil
     :init
     (require 'org-clock)
