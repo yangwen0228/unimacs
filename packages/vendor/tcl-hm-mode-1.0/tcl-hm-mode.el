@@ -144,10 +144,6 @@ If nil, TAB always indents current line."
 
 ;; mode specific key bindings
 (define-key tcl-hm-mode-map "\C-c\C-h" 'tcl-hm-doc-mode)
-;;(define-key tcl-hm-mode-map "\C-c\C-c" 'tcl-hm-comment-uncomment-region)
-(define-key tcl-hm-mode-map "\C-c\C-c" 'comment-dwim)
-;; add electric key bindings
-(define-key tcl-hm-mode-map (kbd "<C-tab>") 'tcl-hm-electric-tab)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax table
@@ -176,16 +172,19 @@ If nil, TAB always indents current line."
     "error_info" "eval" "exec" "exit" "expr" "fblocked" "fconfigure" "fcopy"
     "file" "fileevent" "flush" "for" "foreach" "format" "getenv"
     "gets" "glob" "global" "help" "history" "if" "incr" "info"
-    "interp" "join" "lappend" "lindex" "linsert" "list"
-    "llength" "lminus" "lrange" "lreplace" "ls" "lsearch" "lset" "lsort" "man"
-    "namespace" "open" "package" "pid"
-    "printenv" "printvar" "proc" "proc_args" "proc_body" "puts" "quit"
+    "interp" "join" "lappend" "lindex" "linsert" "list" "lassign"
+    "llength" "lminus" "lrange" "lreplace" "ls" "lsearch" "lset" "lsort"
+    "namespace" "open" "package" "pid" "proc" "puts" "quit"
     "read" "redirect" "regexp" "regsub" "rename" "return" "scan" "seek" "set"
-    "setenv" "sh" "socket" "source" "split" "string" "subst" "switch" "tell" "then" "time"
+    "setenv" "socket" "source" "split" "string" "subst" "switch" "tell" "time"
     "trace" "unset" "update" "uplevel" "upvar"
-    "variable" "vwait" "which" "while" "::oo::class"
+    "variable" "vwait" "which" "while" "my" "self" "next"
     )
   "List of Tcl keywords.")
+
+(defvar tcl-hm-class-keywords
+  '("::oo::class" "::oo::define" "::oo::object" "::oo::objdefine")
+  "The symbols contains :: should take spaciel cares.")
 
 (defvar tcl-hm-keywords-file-name
   (expand-file-name
@@ -223,6 +222,17 @@ If nil, TAB always indents current line."
 (defconst tcl-hm-keywords-regexp
   (concat "\\<\\(" (regexp-opt tcl-hm-keywords) "\\)\\>")
   "Regexp for Tcl keywords.")
+
+;; "Regexp for Tcl class keywords, match prefix :: ones."
+;; (setq tcl-hm-class-keywords-regexp-1
+;;   (concat "\\(\\W\\)\\(" (regexp-opt tcl-hm-class-keywords) "\\)\\>"))
+
+;; "Regexp for Tcl class keywords, match no prefix :: ones."
+(setq tcl-hm-class-keywords-regexp-2
+      (concat "\\(\\<\\)\\(" (regexp-opt
+                              (mapcar
+                               (lambda (x) (s-chop-prefix "::" x))
+                               tcl-hm-class-keywords)) "\\)\\>"))
 
 (defconst tcl-hm-variables-regexp
   (concat "\\<\\(" (regexp-opt (append tcl-hm-variables
@@ -271,6 +281,7 @@ If nil, TAB always indents current line."
       (list
        ;; highlight function names
        '("\\<proc\\s-+\\([^\{\s-]+\\|{.*?}\\)" 1 'font-lock-function-name-face)
+       '("\\<oo::define\\s-+method\\s-+\\([^\{\s-]+\\|{.*?}\\)" 1 'font-lock-function-name-face)
        ;; highlight predefined HM variables
        (list (concat "\\(\${?\\|\\<\\(set\\|global\\|variable\\)\\s-+\\)"
                      tcl-hm-variables-regexp)
@@ -286,6 +297,8 @@ If nil, TAB always indents current line."
        '("\\s-\\(-[a-z][_0-9a-z]*\\)\\>" 1 'font-lock-warning-face)
        ;; highlight Tcl keywords
        (list tcl-hm-keywords-regexp 1 'font-lock-keyword-face)
+       ;; (list tcl-hm-class-keywords-regexp-1 2 'font-lock-keyword-face)
+       (list tcl-hm-class-keywords-regexp-2 2 'font-lock-keyword-face)
        ;; highlight extra commands
        (list tcl-hm-extra-commands-regexp 1 'font-lock-hm-face)
        ;; highlight predefined HM attributes
@@ -310,7 +323,7 @@ If nil, TAB always indents current line."
         (setq tcl-hm-commands-regexp
               (concat "\\_<\\("
                       (regexp-opt
-                        tcl-hm-commands-length-limit) "\\)\\_>"))
+                       tcl-hm-commands-length-limit) "\\)\\_>"))
         (font-lock-add-keywords
          'tcl-mode
          (list (list tcl-hm-commands-regexp 1 'font-lock-hm-face)))))))
