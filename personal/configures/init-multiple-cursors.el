@@ -13,7 +13,10 @@
          ("C-S-<mouse-1>" . mc/add-cursor-on-click)
          :map mc/keymap
          ("C-|" . mc/vertical-align-with-space))
-  :config
+  :init
+  ;; The bind commonds none require 'multiple-cursors.
+  ;; Must use :init and require to let the mc/keymap init.
+  (require 'multiple-cursors)
   (setq mc/insert-numbers-default 1))
 
 (provide 'init-multiple-cursors)
