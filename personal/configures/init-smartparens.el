@@ -26,6 +26,8 @@
   ;; @doc https://github.com/Fuco1/smartparens/wiki/Pair-management
   ;;; org-mode
   (sp-with-modes 'org-mode
+    (sp-local-pair "“" "”")
+    (sp-local-pair "《" "》")
     (sp-local-pair "*" "*" :actions '(insert wrap) :unless '(sp-point-after-word-p sp-point-at-bol-p) :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
     (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
     (sp-local-pair "/" "/" :unless '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC")))
