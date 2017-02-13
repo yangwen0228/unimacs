@@ -68,17 +68,16 @@ Because in China mainland, sometimes melpa doesn't work!"
     ;; libs: must comes first
     dash
     f s
-    ;; packages:
+    ;; use-package:
     use-package
     bind-key
     diminish
     browse-kill-ring
-    diff-hl                ; display svn git status at the left margin
+    diff-hl ; display svn git status at the left margin
     pkg-info epl ; Emacs package library based on package.el
-    gitconfig-mode gitignore-mode
-    magit
     rainbow-mode
     popup
+    xml-rpc
     solarized-theme
     )
   "A list of packages to ensure are installed at launch.")
