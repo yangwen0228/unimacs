@@ -27,6 +27,7 @@
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
+        init-pinyin-search
         init-revive ; save and restore current window and buffer status
         init-resize-window
         init-window-numbering
@@ -48,7 +49,6 @@
         init-fancy-narrow
         init-keyfreq
         init-avy
-        init-pinyin-search
         init-string-edit
         init-iedit
         init-jumplist
