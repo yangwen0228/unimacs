@@ -1,5 +1,13 @@
-(require 'cmake-mode)
-(setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode))
-                              '(("\\.cmake\\'" . cmake-mode))
-                              auto-mode-alist))
+;;; init-cmake-mode.el --- Summary
+;;; Commentary:
+;; comments
+
+;;; Code:
+(use-package cmake-mode
+  :mode (("CMakeLists\\.txt\\'" . cmake-mode)
+         ("\\.cmake\\'" . cmake-mode))
+  :config
+  )
+
 (provide 'init-cmake-mode)
+;;; init-cmake-mode.el ends here

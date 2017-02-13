@@ -21,7 +21,7 @@
           flycheck-idle-change-delay 2)
 
     ;; Use pos-tip to show the error messages
-    (require 'flycheck-pos-tip)
+    (use-package flycheck-pos-tip)
     (require 'popup)
     ;; (eval-after-load 'flycheck
     ;;   '(custom-set-variables
