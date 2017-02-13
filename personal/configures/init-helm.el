@@ -85,7 +85,7 @@ systems."
   ;; pinyin filter
   (setq helm-pinyin-search-p t)
   (when helm-pinyin-search-p
-    (use-package 'pinyin-search))
+    (use-package pinyin-search))
   (defsubst helm--mapconcat-pinyin-pattern (pattern)
     "Transform string PATTERN in regexp for further fuzzy matching.
 e.g helm.el$
