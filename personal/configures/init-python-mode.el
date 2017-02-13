@@ -8,13 +8,15 @@
          ("SConscript\\'" . python-mode)
          ("\\.py\\'"      . python-mode))
   :config
-  (use-package anaconda-mode
-    :disabled t
+  (autoload 'doctest-mode "doctest-mode" "Python doctest editing mode." t)
+  (setq python-shell-interpreter "python")
+  (add-to-list 'interpreter-mode-alist '("python" . python-mode))
+
+  (use-package anaconda-mode :disabled
     :config
     (use-package company-anaconda)
     )
-  (use-package jedi
-    :disabled
+  (use-package jedi :disabled
     :config
     (use-package jedi-core)
     (use-package company-jedi
@@ -25,7 +27,7 @@
   (setq jedi:mode-function 'jedi:get-in-function-call-when-idle)
   (setq jedi:setup-keys t)
   (setq jedi:complete-on-dot t)))
-  
+
   (use-package elpy
     :init
     (elpy-enable)
@@ -34,9 +36,6 @@
     (when (require 'flycheck nil t)
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
       (add-hook 'elpy-mode-hook 'flycheck-mode)))
-  (autoload 'doctest-mode "doctest-mode" "Python doctest editing mode." t)
-  (setq python-shell-interpreter "python")
-  (add-to-list 'interpreter-mode-alist '("python" . python-mode))
   )
 
 (provide 'init-python-mode)

@@ -12,7 +12,10 @@
          ("C-c C-<"       . mc/mark-all-like-this)
          ("C-S-<mouse-1>" . mc/add-cursor-on-click)
          :map mc/keymap
-         ("C-|" . mc/vertical-align-with-space))
+         ("C-|" . mc/vertical-align-with-space)
+         ;; ("C-_" . undo)
+         ;; ("C--" . redo)
+         )
   :init
   ;; The bind commonds none require 'multiple-cursors.
   ;; Must use :init and require to let the mc/keymap init.

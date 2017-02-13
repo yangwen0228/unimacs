@@ -3,7 +3,7 @@
 ;; Java development.
 
 ;;; Code:
-(use-package eclim
+(use-package eclim :disabled
   :mode ("\\.java$" . eclim-mode)
   :commands (start-eclimd)
   :config
@@ -33,13 +33,18 @@
     (add-to-list 'eclim--file-coding-system-mapping '("chinese-iso-8bit-dos" . "gb2312")))
   )
 
-;; (use-package jdee
-;;   :mode ("\\.java$" . jdee-mode)
-;;   :config
-;;   (setq jdee-server-dir (expand-file-name "jars" unimacs-utils-dir)
-;;         jdee-complete-function 'jdee-complete-minibuf)
-;;   ;; (bind-key "<tab>" 'helm-yas-complete jdee-mode-map)
-;;   )
+(use-package jdee :disabled
+  :mode ("\\.java$" . jdee-mode)
+  :config
+  (setq jdee-server-dir (expand-file-name "jars" unimacs-utils-dir)
+        jdee-complete-function 'jdee-complete-minibuf)
+  ;; (bind-key "<tab>" 'helm-yas-complete jdee-mode-map)
+  )
+
+(use-package meghanada
+  :mode ("\\.java$" . meghanada-mode)
+  :config
+  )
 
 (provide 'init-java)
 ;;; init-java.el ends here
