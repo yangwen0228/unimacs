@@ -29,7 +29,7 @@ Then I create a new emacs configuration package named Unimacs. I hope I can use 
     The official packages from [[http://melpa.milkbox.net/packages/][melpa]], or [[http://elpa.popkit.org/packages/][popkit]] .
   - vendor
 
-    From github or other resouces. I write or modified some packages, too.
+    From github or other resources. I write or modified some packages, too.
 - utils
 
   The snippets or executable tools under Windows system.
@@ -38,6 +38,15 @@ Then I create a new emacs configuration package named Unimacs. I hope I can use 
 
   The configuration files are placed here. Use use-package (improve the start-up speed rapidly) to load and configure the packages. And select-packages.el to choose the packages to use.
 
+* Install instructions
+First of all, we install a Emacs from [[https://www.gnu.org/software/emacs/][GNU Emacs]].
+Then, we git clone or download this package.
+Third, start Emacs, and use ~C-x C-f~ to open "~/.emacs" file. Then text
+#+BEGIN_SRC elisp
+(load-file "/path/to/unimacs/init.el")
+#+END_SRC
+
+After that, restart the Emacs, then Emacs will download all the required package from melpa or popkit for you, and that's all. However, this will take minutes to download and compile the packages, depending on the download speed.
 * Often Used packages
 ** helm
 ** helm-projectile
