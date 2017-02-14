@@ -8,10 +8,6 @@
          ("SConscript\\'" . python-mode)
          ("\\.py\\'"      . python-mode))
   :config
-  (autoload 'doctest-mode "doctest-mode" "Python doctest editing mode." t)
-  (setq python-shell-interpreter "python")
-  (add-to-list 'interpreter-mode-alist '("python" . python-mode))
-
   (use-package anaconda-mode :disabled
     :config
     (use-package company-anaconda)
@@ -32,6 +28,7 @@
     :init
     (elpy-enable)
     (elpy-use-ipython)
+    (setq python-shell-completion-native-enable nil)
     ;; use flycheck not flymake with elpy
     (when (require 'flycheck nil t)
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
