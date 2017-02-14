@@ -8,7 +8,11 @@
   :bind (("M-i"     . helm-swoop)
          ("M-I"     . helm-swoop-back-to-last-point)
          ("C-c M-i" . helm-multi-swoop)
-         ("C-x M-i" . helm-multi-swoop-all))
+         ("C-x M-i" . helm-multi-swoop-all)
+         :map helm-swoop-edit-map
+         ("C-c C-c" . helm-swoop--edit-complete)
+         ("C-c C-k" . helm-swoop--edit-cancel)
+         ("C-c C-d" . helm-swoop--edit-delete-all-lines))
   :config
   ;; When doing isearch, hand the word over to helm-swoop
   (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
