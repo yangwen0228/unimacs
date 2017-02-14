@@ -84,6 +84,8 @@
   "This directory houses all of the modules configure files.")
 (defvar unimacs-personal-preload-dir (expand-file-name "preload" unimacs-personal-dir)
   "This directory is for your personal configuration, that you want loaded before Unimacs.")
+(defvar unimacs-personal-postload-dir (expand-file-name "postload" unimacs-personal-dir)
+  "This directory is for your personal configuration, that you want loaded after Unimacs. If you have some configurations different from official ones, please place in this directory.")
 
 ;; We don't add the tempfiles folders to git, so we need to create it at the first time.
 (unless (file-exists-p unimacs-tempfiles-dir)
@@ -92,6 +94,8 @@
   (make-directory unimacs-elpa-dir t))
 (unless (file-exists-p unimacs-vendor-dir)
   (make-directory unimacs-vendor-dir t))
+(unless (file-exists-p unimacs-personal-postload-dir)
+  (make-directory unimacs-personal-postload-dir t))
 
 (defun unimacs-add-subfolders-to-load-path (parent-dir)
  "Add all level PARENT-DIR subdirs to the `load-path'."
@@ -114,24 +118,29 @@
   (require 'benchmark-init)
   (benchmark-init/activate))
 
+;; config changes made through the customize UI will be store here
+(setq custom-file (expand-file-name "custom.el" unimacs-personal-dir))
+
 ;; preload the personal settings from `unimacs-personal-preload-dir'
 (when (file-exists-p unimacs-personal-preload-dir)
   (message "Loading personal preload configuration files in %s..." unimacs-personal-preload-dir)
-  (mapc 'load (directory-files unimacs-personal-preload-dir 't "^[^#].*el$")))
+  (mapc 'load (directory-files unimacs-personal-preload-dir 't "^[^#]*\.el$")))
 
 (message "Loading Unimacs's core...")
-
 ;; the core stuff
 (require 'unimacs)
-
-;; config changes made through the customize UI will be store here
-(setq custom-file (expand-file-name "custom.el" unimacs-personal-dir))
 
 ;; load the personal settings (this includes `custom-file')
 (message "Loading personal modules...")
 (when (file-exists-p unimacs-personal-dir)
   (message "Loading personal configuration files in %s..." unimacs-personal-dir)
-  (mapc 'load (directory-files unimacs-personal-dir 't "^[^#].*el$")))
+  (load (expand-file-name "select-packages.el" unimacs-personal-dir))
+  (load (expand-file-name "custom.el" unimacs-personal-dir)))
+
+;; preload the personal settings from `unimacs-personal-postload-dir'
+(when (file-exists-p unimacs-personal-postload-dir)
+  (message "Loading personal postload configuration files in %s..." unimacs-personal-postload-dir)
+  (mapc 'load (directory-files unimacs-personal-postload-dir 't "^[^#]*\.el$")))
 
 (message "Unimacs rocks, Master %s!" current-user)
 (when my-benchmark
