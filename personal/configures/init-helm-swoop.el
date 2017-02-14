@@ -12,11 +12,9 @@
   :config
   ;; When doing isearch, hand the word over to helm-swoop
   (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-  ;; From helm-swoop to helm-multi-swoop-all
-  (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-  ;; When doing evil-search, hand the word over to helm-swoop
-  ;; (define-key evil-motion-state-map (kbd "M-i") 'helm-swoop-from-evil-search)
-
+  ;; "M-i" again in helm-multi-swoop mode will lead to an error:
+  (defun NoOp () (interactive))
+  (define-key helm-multi-swoop-map (kbd "M-i") 'NoOp)
   ;; Move up and down like isearch
   (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
   (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
@@ -41,23 +39,6 @@
   ;; optional face for line numbers
   ;; face name is `helm-swoop-line-number-face`
   (setq helm-swoop-use-line-number-face t)
-
-  (defface helm-swoop-target-line-face
-    '((t (:background "#e3e300" :foreground "#222222")))
-    "Face for helm-swoop target line"
-    :group 'helm-swoop)
-  (defface helm-swoop-target-line-block-face
-    '((t (:background "#cccc00" :foreground "#222222")))
-    "Face for target line"
-    :group 'helm-swoop)
-  (defface helm-swoop-target-word-face
-    '((t (:background "#7700ff" :foreground "#ffffff")))
-    "Face for target word"
-    :group 'helm-swoop)
-  (defface helm-swoop-line-number-face
-    '((t (:foreground "#999999")))
-    "Face for line numbers"
-    :group 'helm-swoop)
   )
 
 
