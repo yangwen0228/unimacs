@@ -82,7 +82,7 @@
     (goto-char maxp))
   (setq hs-allow-nesting t)
   (define-key hs-minor-mode-map (kbd "C-z C-n") 'hs-hide-all)
-  (define-key hs-minor-mode-map (kbd "C-z C-m") 'hs-show-all)
+  (define-key hs-minor-mode-map (kbd "C-z <C-m>") 'hs-show-all)
   (define-key hs-minor-mode-map (kbd "C-z C-c") 'my-hs-hide-block)
   (define-key hs-minor-mode-map (kbd "C-z C-o") 'my-hs-show-block)
   (define-key hs-minor-mode-map (kbd "C-z O") 'my-hs-show-block-recursively)
