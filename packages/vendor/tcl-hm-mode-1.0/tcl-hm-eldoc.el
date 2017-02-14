@@ -335,7 +335,7 @@ Once this is done, CONTINUATION will be called."
   (let ((current-thing (buffer-substring-no-properties (nth 1 thing) (nth 2 thing)))
         (matches
          (cl-remove-if-not
-          (lambda (x) (s-match (s-chop-prefix "::" (car thing)) x))
+          (lambda (x) (s-match (concat (s-chop-prefix "::" (car thing)) "$") x))
           tcl-hm-eldoc--candidates)))
     (when (> (length matches) 3)
       (setq matches (subseq matches 0 3)))
