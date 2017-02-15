@@ -50,7 +50,7 @@
         init-keyfreq
         init-avy
         init-string-edit
-        init-iedit
+        ;; init-iedit     ;buggy, sometimes doesn't work. use mc instead.
         init-jumplist
         init-multiple-cursors
         init-undo-tree
