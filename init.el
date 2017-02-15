@@ -135,7 +135,7 @@
 (when (file-exists-p unimacs-personal-dir)
   (message "Loading personal configuration files in %s..." unimacs-personal-dir)
   (load (expand-file-name "select-packages.el" unimacs-personal-dir))
-  (load (expand-file-name "custom.el" unimacs-personal-dir)))
+  (load (expand-file-name "custom.el" unimacs-personal-dir) t))
 
 ;; preload the personal settings from `unimacs-personal-postload-dir'
 (when (file-exists-p unimacs-personal-postload-dir)
