@@ -11,8 +11,8 @@
          ("C-M-<"         . mc/skip-to-previous-like-this)
          ("C-c C-<"       . mc/mark-all-like-this)
          ("C-S-<mouse-1>" . mc/add-cursor-on-click)
-         ("C-;"           . mc/mark-all-like-this-dwim)
-         ("C-:"           . mc/mark-all-like-this-in-defun)
+         ("C-;"           . mc/mark-all-symbols-like-this)
+         ("C-:"           . mc/mark-all-symbols-like-this-in-defun)
          :map mc/keymap
          ("C-|" . mc/vertical-align-with-space)
          ("C-_" . undo)                 ;undo-tree-undo point position wrong.
@@ -30,7 +30,8 @@
     (mc/keyboard-quit)
     (multiple-cursors-mode 0))
 
-  (setq mc/insert-numbers-default 1))
+  (setq mc/insert-numbers-default 1
+        mc/cycle-looping-behaviour 'stop))
 
 (provide 'init-multiple-cursors)
 ;;; init-multiple-cursors.el ends here
