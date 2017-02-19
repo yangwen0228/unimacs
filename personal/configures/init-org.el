@@ -11,6 +11,7 @@
   (add-hook 'org-mode-hook 'org-indent-mode)
   (use-package cnblogs :ensure nil
     :init
+    (use-package xml-rpc :init (require 'xml-rpc))
     (require 'cnblogs)
     (cnblogs-minor-mode t)
     ;; Run command: cnblogs-setup-blog to set up, blog-id == username.

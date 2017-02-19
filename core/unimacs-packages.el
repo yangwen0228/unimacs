@@ -65,20 +65,10 @@ Because in China mainland, sometimes melpa doesn't work!"
 ;; some packages must be loaded, and should not be maintained by selectpackages.el
 (defvar unimacs-packages
   '(
-    ;; libs: must comes first
-    dash
-    f s
     ;; use-package:
     use-package
     bind-key
     diminish
-    browse-kill-ring
-    diff-hl ; display svn git status at the left margin
-    pkg-info epl ; Emacs package library based on package.el
-    rainbow-mode
-    popup
-    xml-rpc
-    solarized-theme
     )
   "A list of packages to ensure are installed at launch.")
 

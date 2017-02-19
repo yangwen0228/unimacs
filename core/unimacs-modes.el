@@ -36,8 +36,9 @@
 (use-package s    :init (require 's))
 
 (use-package anzu
-  :init (global-anzu-mode t)
+  :defer 0
   :config
+  (global-anzu-mode t)
   (setq query-replace-skip-read-only t)
   :diminish "")
 
@@ -46,18 +47,23 @@
   :commands auto-revert-mode
   :diminish auto-revert-mode
   :init
-  (global-auto-revert-mode t)
-  (setq global-auto-revert-non-file-buffers t
-        auto-revert-verbose nil))
+  (add-hook 'find-file-hook #'(lambda () (auto-revert-mode 1)))
+  ;; :config (setq global-auto-revert-non-file-buffers t auto-revert-verbose nil)
+  )
 
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
 
 (use-package ediff :ensure nil
+  :commands (ediff-buffers
+             ediff-buffers3 compare-windows
+             ediff-files ediff-files ediff-files3
+             ediff-revision ediff-patch-file ediff-patch-buffer
+             ediff-regions-linewise ediff-regions-wordwise)
   :init
   (defun my-kill-ediff-buffers ()
     (kill-buffer ediff-buffer-A)
-    (kill-buffer ediff-buffer-B)
+    ;; (kill-buffer ediff-buffer-B)
     (kill-buffer ediff-buffer-C))
 
   (add-hook 'ediff-quit-hook 'my-kill-ediff-buffers)
