@@ -2,10 +2,8 @@
 ;;; Commentary:
 ;;; code:
 (use-package yasnippet
-  :defer 0
   :bind ("<tab>" . company-yasnippet) ; other completion, like minibuffer, use C-S-i. All tab masked, not I desired.
   :config
-  (yas-global-mode 1)
   ;; fix conflict where smartparens clobbers yas' key bindings
   (defadvice yas-expand (before dotemacs activate)
     (sp-remove-active-pair-overlay))
@@ -39,7 +37,7 @@
   :diminish (yas-minor-mode yas-global-mode)
   )
 
-;; (yas-global-mode 1)
+(yas-global-mode 1)
 
 (provide 'init-yasnippet)
 ;;; init-yasnippet.el ends here
