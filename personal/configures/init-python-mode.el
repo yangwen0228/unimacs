@@ -9,6 +9,15 @@
          ("\\.py\\'"      . python-mode))
   :interpreter ("python" . python-mode)
   :config
+  (setq py-shell-name nil)              ; Use the env path version
+  ;; bug: workaround
+  (defun py--buffer-filename-remote-maybe (&optional file-name buffer)
+    (let ((file-name (or file-name (ignore-errors (if (file-readable-p (buffer-file-name)) (buffer-file-name) "")))))
+      (if (and (featurep 'tramp) (tramp-tramp-file-p file-name))
+          (tramp-file-name-localname
+           (tramp-dissect-file-name file-name))
+        file-name)))
+
   (use-package anaconda-mode :disabled
     :config
     (use-package company-anaconda))
