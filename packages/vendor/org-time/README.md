@@ -1,0 +1,25 @@
+OrgTime
+=======
+## Overview
+This emacs extension is designed to work with emacs org-mode. It can generate a time usage summary from your org-mode file. Giving a table summary of the working time of current month, current week and today (I will not feel guilty when seeing I already have worked more than 40 hours this week ). Also will give a pie chart of the time spend on each tag.
+Here is an example:
+
+![alt tag](https://raw.github.com/Chengming/OrgTime/master/example.png)
+## Install & Setup
+1. install pychartdir (see http://www.advsofteng.com/download.html for more information)
+1. install texttable (see https://pypi.python.org/pypi/texttable for more information)
+1. Download and extract the source code
+1. Put following code in your .emacs file
+
+```lisp
+(add-hook 'org-mode-hook 'iimage-mode) ; enable iimage-mode for org-mode
+(add-to-list 'load-path  "/path/to/OrgTime")
+(require 'org-time)
+```
+
+## How to use
+When you open a org file, use this command to gnereate the working time summary
+```lisp
+org-time-summary
+```
+The summary will be put at the begnning of the org file.
