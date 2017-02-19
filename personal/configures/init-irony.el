@@ -5,7 +5,7 @@
 ;;; Code:
 
 ;; Configure for irony-mode:
-(use-package irony
+(use-package irony :disabled
   :mode (("\.c$" . irony-mode)
          ("\.cpp$" . irony-mode))
   :config
