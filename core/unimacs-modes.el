@@ -61,14 +61,6 @@
   (add-hook 'ediff-quit-hook 'my-kill-ediff-buffers)
   (add-hook 'ediff-after-quit-hook-internal 'winner-undo))
 
-(use-package edit-server :disabled t
-  ;; Chrome editor.
-  :if (and window-system)
-  :init
-  (defun server-ensure-safe-dir (dir) "Noop" t)
-  (add-hook 'after-init-hook 'server-start t)
-  (add-hook 'after-init-hook 'edit-server-start t))
-
 (use-package eldoc :ensure nil
   :init
   (setq eldoc-idle-delay 0.2)
@@ -99,23 +91,14 @@
                                            ;; try-complete-lisp-symbol
                                            )))
 
-(use-package imenu :ensure nil
-  ;; type name must be capital, like: Use-package. Cannot use use-package.
-  :init
-  (add-to-list 'lisp-imenu-generic-expression
-               (list "Use-package"
-                     (concat
-                      "^\\s-*(use-package\\s-+" ; definition
-                      "\\([-A-Za-z0-9_:+*]+\\)" ; package name
-                      )
-                     1)))
-
 (use-package mic-paren
-  ;; highlight contents between braces. Error with multiple-cursors.
-  :init
+  ;; highlight contents between braces.
+  :defer 0
+  :config
   (paren-activate)
   (setq paren-match-face 'highlight)
   (setq paren-sexp-mode t)
+  ;; Fix: Error with multiple-cursors.
   (defadvice mic-paren-highlight (after mic-paren-highlight activate)
     (if (or mark-active
             (and (boundp 'multiple-cursors-mode)
@@ -127,9 +110,13 @@
 
   :diminish "")
 
-(use-package midnight
+(use-package midnight :disabled :ensure nil
   ;; midnight mode purges buffers which haven't been displayed in 3 days
-  :init (midnight-mode t))
+  :defer 10
+  :config
+  (midnight-mode t)
+  (add-to-list 'clean-buffer-list-kill-buffer-names "*vc-dir*")
+  (add-to-list 'clean-buffer-list-kill-regexps "\\*helm"))
 
 (use-package move-text
   :bind (("M-<up>"   . move-text-up)
@@ -160,7 +147,12 @@
   :diminish "")
 
 (use-package nlinum
-  :preface
+  ;; When file is big, linum-mode is very slow.
+  ;; So just display line number when goto line.
+  :bind (("M-g g" . goto-line)
+         ("M-g l" . goto-line))
+  :init
+  (global-set-key [remap goto-line] 'goto-line-with-feedback)
   (defun goto-line-with-feedback ()
     "Show line numbers temporarily, while prompting for the line number input"
     (interactive)
@@ -170,13 +162,11 @@
           (let ((num (read-number "Goto line: ")))
             (goto-char (point-min))
             (forward-line (1- num))))
-      (nlinum-mode -1)))
-  :init
-  (bind-key "C-c g" #'goto-line)
-  (global-set-key [remap goto-line] 'goto-line-with-feedback))
+      (nlinum-mode -1))))
 
 (use-package page-break-lines
-  :init (global-page-break-lines-mode)
+  :defer 0
+  :config (global-page-break-lines-mode)
   :diminish "")
 
 (use-package server :ensure nil
@@ -222,7 +212,8 @@
 
 (use-package simple :ensure nil
   ;; visual-line-mode: break line to fit view
-  :init
+  :defer 0
+  :config
   (global-visual-line-mode t)
   (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)))
 
@@ -263,6 +254,8 @@
          ("C-y" . whole-line-or-region-yank))
   :diminish "")
 
+(use-package benchmark-init
+  :commands (benchmark-init/activate))
 
 (provide 'unimacs-modes)
 ;;; unimacs-modes.el ends here

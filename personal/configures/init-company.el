@@ -8,6 +8,7 @@
 ;; TODO: <tab> conflict with yasnippet
 ;;; Code:
 (use-package company
+  :defer 0
   :preface
   (defun define-company-backends (list)
     (dolist (cons list)
@@ -25,7 +26,7 @@
                    (set (make-local-variable 'company-backends)
                         ',backends)))
           (add-hook hook func)))))
-  :init
+  :config
   (global-company-mode t)
   (define-company-backends
     '(((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers))

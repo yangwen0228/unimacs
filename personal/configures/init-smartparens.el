@@ -4,6 +4,7 @@
 
 ;;; Code:
 (use-package smartparens
+  :defer 0
   :bind (("C-M-f" . sp-forward-sexp)
          ("C-M-b" . sp-backward-sexp)
          ("C-M-n" . sp-next-sexp)
@@ -13,7 +14,7 @@
          ("M-[" .   sp-unwrap-sexp)
          ("M-]" .   sp-backward-unwrap-sexp)
          ("C-M-{" . sp-rewrap-sexp))
-  :init
+  :config
   (use-package smartparens-config :ensure nil)
   (smartparens-global-mode 1)
   (show-smartparens-global-mode t)

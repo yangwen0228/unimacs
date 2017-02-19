@@ -4,6 +4,7 @@
 
 ;;; Code:
 (use-package hideshow
+  :defer t
   :init (add-hook 'prog-mode-hook 'hs-minor-mode)
   :config
   (use-package hideshowvis

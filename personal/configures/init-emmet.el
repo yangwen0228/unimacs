@@ -4,7 +4,8 @@
 
 ;;; Code:
 (use-package emmet-mode
-  :init
+  :defer 0
+  :config
   ;; @see https://github.com/rooney/zencoding for original tutorial
   ;; @see https://github.com/smihica/emmet for new tutorial
   ;; C-j or C-return to expand the line
