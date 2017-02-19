@@ -7,25 +7,24 @@
   :mode (("SConstruct\\'" . python-mode)
          ("SConscript\\'" . python-mode)
          ("\\.py\\'"      . python-mode))
+  :interpreter ("python" . python-mode)
   :config
   (use-package anaconda-mode :disabled
     :config
-    (use-package company-anaconda)
-    )
+    (use-package company-anaconda))
   (use-package jedi :disabled
     :config
     (use-package jedi-core)
     (use-package company-jedi
-  :commands (company-jedi)
-  :config
-  (add-hook 'python-mode-hook 'jedi:setup)
-  ;; Standard Jedi.el setting
-  (setq jedi:mode-function 'jedi:get-in-function-call-when-idle)
-  (setq jedi:setup-keys t)
-  (setq jedi:complete-on-dot t)))
+      :config
+      (add-hook 'python-mode-hook 'jedi:setup)
+      ;; Standard Jedi.el setting
+      (setq jedi:mode-function 'jedi:get-in-function-call-when-idle)
+      (setq jedi:setup-keys t)
+      (setq jedi:complete-on-dot t)))
 
   (use-package elpy
-    :init
+    :config
     (elpy-enable)
     (elpy-use-ipython)
     (setq python-shell-completion-native-enable nil)
