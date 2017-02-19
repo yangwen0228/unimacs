@@ -37,6 +37,7 @@
   :diminish (yas-minor-mode yas-global-mode)
   )
 
+;; must use function outside use-package:
 (yas-global-mode 1)
 
 (provide 'init-yasnippet)
