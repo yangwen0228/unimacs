@@ -295,13 +295,20 @@ version control automatically"
   (whitespace-cleanup))
 
 (defun unimacs-recompile-user-files (&optional force)
-  "Byte-compile all your dotfiles again.
+  "Byte-compile all your configuration files again.
 
 With a prefix ARG, force recompile all files."
   (interactive
    (list (when current-prefix-arg (setq force t))))
+  (when force (unimacs-clear-user-elcs))
   (byte-recompile-directory unimacs-core-dir 0 force)
   (byte-recompile-directory unimacs-configures-dir 0 force))
+
+(defun unimacs-clear-user-elcs ()
+  "Delete all the byte-compiled configuration files."
+  (interactive)
+  (mapc 'delete-file (directory-files unimacs-core-dir 't "\.elc$"))
+  (mapc 'delete-file (directory-files unimacs-configures-dir 't "\.elc$")))
 
 (defun unimacs-sudo-edit (&optional arg)
   "Edit currently visited file as root.

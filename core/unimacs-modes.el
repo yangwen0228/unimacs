@@ -24,16 +24,8 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(eval-and-compile
-  (require 'use-package))
+(require 'use-package)
 (setq use-package-always-ensure t)
-(require 'bind-key)
-(require 'diminish)
-
-(use-package dash :init (require 'dash))
-(use-package f    :init (require 'f))
-(use-package ht   :init (require 'ht))
-(use-package s    :init (require 's))
 
 (use-package anzu
   :defer 0

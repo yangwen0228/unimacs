@@ -26,10 +26,10 @@
 
 ;;; Code:
 ;; The order should not be changed!
-(require 'unimacs-packages)    ; must come first
-(require 'unimacs-modes) ; must come second
+(require 'unimacs-packages) ; must come first
+(require 'unimacs-funcs)    ; must come second
+(require 'unimacs-modes)    ; must come third
 (require 'unimacs-ui)
-(require 'unimacs-funcs)
 (require 'unimacs-keybindings)
 (require 'unimacs-tempfiles)
 (require 'unimacs-settings)

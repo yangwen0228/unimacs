@@ -69,6 +69,8 @@ Because in China mainland, sometimes melpa doesn't work!"
     use-package
     bind-key
     diminish
+    ;; core libs:
+    dash f ht s xml-rpc
     )
   "A list of packages to ensure are installed at launch.")
 
