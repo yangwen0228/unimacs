@@ -314,15 +314,20 @@ background of code to whatever theme I'm using's background"
                    "* STARTED %?\n%U\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: STARTED"))))
     )
 
-  (use-package org-refile :ensure nil
+  (use-package org-refile :ensure nil :no-require
     :init
     ;; Targets include this file and any file contributing to the agenda - up to 1 levels deep
     (setq org-refile-targets (quote ((nil :maxlevel . 1)
                                      (org-agenda-files :maxlevel . 1)))))
 
-  (use-package org-goto :ensure nil
+  (use-package org-goto :ensure nil :no-require
     :init
     (setq org-goto-auto-isearch nil))
+
+  (use-package org-time :ensure nil
+    :commands org-time-summary
+    :config
+    (setq org-time-python "python2"))
 
   (use-package org-latex :disabled
     :ensure nil
