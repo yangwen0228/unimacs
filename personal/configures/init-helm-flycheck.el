@@ -9,13 +9,6 @@
   (use-package flycheck
     :init
     (flycheck-mode t)
-    (eval-after-load 'flycheck
-    '(define-key flycheck-mode-map (kbd "C-c ! h") 'helm-flycheck))
-    :config
-    (when (eval-when-compile (>= emacs-major-version 24))
-      (require 'flycheck)
-      (add-hook 'after-init-hook 'global-flycheck-mode))
-
     ;; Override default flycheck triggers
     (setq flycheck-check-syntax-automatically '(save idle-change mode-enabled)
           flycheck-idle-change-delay 2)
@@ -23,9 +16,6 @@
     ;; Use pos-tip to show the error messages
     (use-package flycheck-pos-tip)
     (require 'popup)
-    ;; (eval-after-load 'flycheck
-    ;;   '(custom-set-variables
-    ;;    '(flycheck-display-errors-function #'flycheck-pos-tip-error-messages)))
 
     ;; Use my message function to show the error messages
     (defun my-format-message (message)
