@@ -169,6 +169,8 @@
   :config (global-page-break-lines-mode)
   :diminish "")
 
+(use-package scratch)
+
 (use-package server :ensure nil
   ;; edit server, must use :config. cannot use :init.
   :config

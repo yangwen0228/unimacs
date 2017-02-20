@@ -399,7 +399,7 @@ Doesn't mess with normal buffers."
              (--remove (eql (current-buffer) it)))
       #'kill-buffer)))
 
-(defun unimacs-create-scratch-buffer ()
+(defun unimacs-create-elisp-scratch ()
   "Create a new scratch buffer."
   (interactive)
   (progn
