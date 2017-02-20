@@ -514,12 +514,33 @@ The numth of occurences is determined by ARG."
   "Describe the COMMAND key."
   (let* ((keys (where-is-internal (intern command) key-map))
          (keys (mapconcat (if (fboundp 'naked-key-description)
-                                   #'naked-key-description
-                                 #'key-description)
+                              #'naked-key-description
+                            #'key-description)
                           keys "', `")))
     (print keys)
     ))
 
+(defun unimacs-update-msys64-bins (&optional dir)
+  "Update utils/extra-bins/msys64/bin exe and dll from local Msys64."
+  (interactive)
+  (setq dir (or dir "c:/msys64"))
+  (unless (file-exists-p dir)
+    (set dir (file-name-as-directory (read-directory-name "Msys64 root dir: " nil nil t))))
+  (when (file-exists-p dir)
+    (let ((cur-bin-dir (expand-file-name "msys64/bin" unimacs-extra-bin-dir))
+          (msys64-bin-dir (expand-file-name "usr/bin" dir))
+          (mingw64-bin-dir (expand-file-name "mingw64/bin" dir))
+          file1 file1-name file1-size file2 file2-size)
+      (dolist (file1 (directory-files cur-bin-dir t "[a-zA-Z]"))
+        (setq file1-name (file-name-nondirectory file1))
+        (setq file1-size (file-attribute-size (file-attributes file1)))
+        (setq file2 (expand-file-name file1-name msys64-bin-dir))
+        (unless (file-exists-p file2)
+          (setq file2 (expand-file-name file1-name mingw64-bin-dir)))
+        (when (and (file-exists-p file2)
+                   (setq file2-size (file-attribute-size (file-attributes file2)))
+                   (not (= file1-size file2-size)))
+          (copy-file file2 file1 t))))))
 
 (provide 'unimacs-funcs)
 ;;; unimacs-funcs.el ends here
