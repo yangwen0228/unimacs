@@ -47,8 +47,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Code:
-(defvar org-time-working-dir "d:/temp"
-  "`org-time' working directory. When nil, create a directory with the same name with the org file and under the org file directory.")
+(defvar org-time-working-dir nil
+  "`org-time' working directory. When nil, create a directory named \"orgtime_iamges\"
+
+ under the directory of first org file defined in `org-agenda-files'.")
 
 (defvar org-time-python "python"
   "The python executable path. Prefer to use python3.")
@@ -62,7 +64,8 @@
 directory and insert a link to this file."
   (interactive)
   (save-buffer)
-  (let ((begin-str "#+BEGIN: clocktable")
+  (let ((workdir (or org-time-working-dir (file-name-directory )))
+        (begin-str "#+BEGIN: clocktable")
         (end-str   "#+END:")
         begin end
         (msg       (shell-command-to-string

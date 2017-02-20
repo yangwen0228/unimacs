@@ -4,9 +4,9 @@
 
 ;;; Code:
 (use-package diff-hl
-  :defer 0
-  :config
-  (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode))
+  :init
+  (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+  (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
 
 (provide 'init-vc)
 ;;; init-vc.el ends here

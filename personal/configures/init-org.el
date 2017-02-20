@@ -327,7 +327,9 @@ background of code to whatever theme I'm using's background"
   (use-package org-time :ensure nil
     :commands org-time-summary
     :config
-    (setq org-time-python "python2"))
+    (setq org-time-python "python2")
+    (defadvice org-time-summary (before org-time-summary activate)
+      (org-update-agenda-files)))
 
   (use-package org-latex :disabled
     :ensure nil
