@@ -16,7 +16,7 @@
         helm-gtags-cache-select-result    t
         helm-gtags-cache-max-result-size  (* 10 1024 1024))
 
-  (bind-keys* ("M-t"     . helm-gtags-find-tag)
+  (bind-keys* ("M-t"     . helm-gtags-find-tag-adapter)
               ("M-r"     . helm-gtags-find-rtag-adapter)
               ("C-c M-s" . helm-gtags-find-symbol)
               ("C-c M-f" . helm-gtags-find-files)
@@ -28,10 +28,16 @@
 
   ;; filename encoding is 'GBK, content is utf-8
   (defun helm-gtags--exec-global-command (type input &optional detail)
-    (let ((args (helm-gtags--construct-command type input)))
+    (let* ((args (helm-gtags--construct-command type input))
+           (reg (car (last args))))
+      (when (eq type 'pattern)
+        (when (string-match "\\`(^.*?)\\(.*\\)" (substring-no-properties reg))
+          (setf (car (last args)) (match-string 1 reg))))
       (helm-gtags--find-tag-directory)
       (helm-gtags--save-current-context)
-      (let ((buf-coding buffer-file-coding-system))
+      (let (
+            ;; (buf-coding buffer-file-coding-system)
+            (buf-coding 'utf-8))
         (with-current-buffer (helm-candidate-buffer 'global)
           (let ((default-directory (helm-gtags--base-directory))
                 (input (car (last args)))
@@ -42,26 +48,58 @@
             ;; --path options does not support searching under GTAGSLIBPATH
             (when (eq type 'find-file)
               (helm-gtags--print-path-in-gtagslibpath args))
+            (when (eq type 'pattern)
+              (when (string-match "\\`(^\\(.*?\\))" (substring-no-properties reg))
+                (helm-gtags--filter-candidates (match-string-no-properties 1 reg))))
             (helm-gtags--remove-carrige-returns)
             (helm-gtags--recode-windows-file-names)
             (when detail
               (helm-gtags--show-detail)))))))
 
+  (defun helm-gtags--filter-candidates (pattern)
+    (when (helm-gtags--windows-p)
+      (save-excursion
+        (setq pattern (concat "\\(" (replace-regexp-in-string "|" "\\\\)\\\\|\\\\(" pattern) "\\)"))
+        (goto-char (point-min))
+        (while (re-search-forward (concat ".*?:[0-9]+:[ \t]*" pattern) nil t)
+          (delete-region (line-beginning-position) (line-end-position))))))
+
   (defun helm-gtags--recode-windows-file-names ()
     (when (helm-gtags--windows-p)
       (save-excursion
         (goto-char (point-min))
-        (let ((buf-coding buffer-file-coding-system)
+        (let (
+              ;; (buf-coding buffer-file-coding-system)
+              (buf-coding 'utf-8)
               (name-coding file-name-coding-system)
               (beg (point)))
-          (while (re-search-forward ".*?:" nil t)
+          (while (re-search-forward ".*?:[0-9]+:" nil t)
             (recode-region beg (1- (point)) name-coding buf-coding)
             (end-of-line)
-            (setq beg (point)))))))
+            (setq beg (point)))
+          (if (= beg 1)           ; gtags-file -> no ":" output.
+              (recode-region (point-min) (point-max) name-coding buf-coding))
+          ))))
 
-  (defun helm-gtags-find-rtag-for-ctags (tag)
+  (defun helm-gtags--token-at-point (type)
+    (if (not (eq type 'find-file))
+        (thing-at-point 'symbol)
+      (let ((line (helm-current-line-contents)))
+        (when (string-match helm-gtags--include-regexp line)
+          (match-string-no-properties 1 line)))))
+
+  (defun helm-gtags-find-tag-adapter (tag)
+    "Workaround for tcl rtags: TAG: choose function according to major mode."
+    (interactive
+     (list (helm-gtags--read-tagname 'tag)))
+    (cond
+     ((equal major-mode 'tcl-mode)
+      (helm-gtags-find-tag-for-tcl-by-ctags tag))
+     (t (helm-gtags-find-tag tag))))
+
+  (defun helm-gtags-find-tag-for-tcl-by-ctags (tag)
     "TODO: Workaround for ctags rtags: Use TAG to find all matches, then filter procs."
-    (helm-gtags--common '(helm-source-gtags-pattern) (format "\\<%s\\>" tag )))
+    (helm-gtags--common '(helm-source-gtags-pattern) (format "(proc.*%s)|(((\\<variable\\>)|(\\<def.*Var\\>))[ \t]+%s )" tag tag)))
 
   (defun helm-gtags-find-rtag-adapter (tag)
     "Workaround for tcl rtags: TAG: choose function according to major mode."
@@ -70,6 +108,10 @@
     (if (member major-mode '(c-mode c++-mode objc-mode java-mode))
         (helm-gtags-find-rtag tag)
       (helm-gtags-find-rtag-for-ctags tag)))
+
+  (defun helm-gtags-find-rtag-for-ctags (tag)
+    "TODO: Workaround for ctags rtags: Use TAG to find all matches, then filter procs."
+    (helm-gtags--common '(helm-source-gtags-pattern) (format "(^proc|variable|def.*Var|declareVars)\\<%s\\>" tag )))
 
   (defadvice helm-gtags-find-pattern (before helm-gtags-find-pattern activate)
     "Ignore case when use pattern to search."
@@ -91,9 +133,9 @@
     "Override the original function."
     (let ((gtagslabel (concat "--gtagslabel=" helm-gtags-default-label)))
       (cl-case how-to
-      (entire-update (list "global" gtagslabel "-u"))
-      (generate-other-directory (list "global" gtagslabel (helm-gtags--read-tag-directory)))
-      (single-update (list "global" gtagslabel "--single-update" (helm-gtags--real-file-name))))))
+        (entire-update (list "global" gtagslabel "-u"))
+        (generate-other-directory (list "global" gtagslabel (helm-gtags--read-tag-directory)))
+        (single-update (list "global" gtagslabel "--single-update" (helm-gtags--real-file-name))))))
 
   (defun helm-gtags-edit ()
     (interactive)
