@@ -111,12 +111,16 @@
   :diminish "")
 
 (use-package midnight :disabled :ensure nil
-  ;; midnight mode purges buffers which haven't been displayed in 3 days
-  :defer 10
+  ;; midnight mode purges buffers every midnight-period time.
   :config
   (midnight-mode t)
+  (midnight-delay-set 'midnight-delay "12:00am")  ; delay to midnight 24:00.
+  (setq clean-buffer-list-delay-general 0)       ; today's buffers.
+  (setq midnight-period 3600)                    ; run / 1 hour
+
   (add-to-list 'clean-buffer-list-kill-buffer-names "*vc-dir*")
-  (add-to-list 'clean-buffer-list-kill-regexps "\\*helm"))
+  (add-to-list 'clean-buffer-list-kill-regexps "\\*helm")
+  (add-to-list 'clean-buffer-list-kill-never-buffer-names "*helm ag* *helm gtags* *helm swoop*"))
 
 (use-package move-text
   :bind (("M-<up>"   . move-text-up)

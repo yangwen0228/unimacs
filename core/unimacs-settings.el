@@ -77,20 +77,21 @@
 
 ;; Chinese filenames in shell commands.
 (when (eq system-type 'windows-nt)
-  (setq file-name-coding-system 'gbk-dos)
   (set-selection-coding-system 'gbk-dos)
   (set-clipboard-coding-system 'gbk-dos)
-  (setq default-process-coding-system '(gbk-dos . gbk-dos))
   (set-file-name-coding-system 'gbk-dos)
+  (setq default-process-coding-system '(gbk-dos . gbk-dos))
   (set-default 'process-coding-system-alist
-               '(("find"   gbk-dos . gbk-dos)
-                 ("global" gbk-dos . gbk-dos)
-                 ("gtags"  gbk-dos . gbk-dos)
-                 ("ctags"  gbk-dos . gbk-dos)
-                 ("ag"     gbk-dos . gbk-dos)
+               '(
+                 ("find"   utf-8 . utf-8)
+                 ("global" utf-8 . utf-8)
+                 ("gtags"  utf-8 . utf-8)
+                 ("ctags"  utf-8 . utf-8)
+                 ("ag"     utf-8 . utf-8)
                  ("java"   gbk-dos . gbk-dos)
                  ("javac"  gbk-dos . gbk-dos)
-                 )))
+                 ))
+  )
 
 ;; automatically save buffers associated with files on buffer switch
 ;; and on windows switch
