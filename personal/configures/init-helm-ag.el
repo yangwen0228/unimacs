@@ -60,8 +60,22 @@
                   (error "'ag' is not installed."))
                 (error "Failed: '%s'" helm-ag--last-query))))
           (helm-ag--remove-carrige-returns)
+          (helm-ag--recode-windows-file-names)
           (helm-ag--save-current-context)))))
 
+  (defun helm-ag--recode-windows-file-names ()
+    (when (helm-gtags--windows-p)
+      (save-excursion
+        (goto-char (point-min))
+        (let (
+              ;; (buf-coding buffer-file-coding-system)
+              (buf-coding 'utf-8)
+              (name-coding file-name-coding-system)
+              (beg (point)))
+          (while (re-search-forward ".*?:[0-9]+:" nil t)
+            (recode-region beg (1- (point)) name-coding buf-coding)
+            (end-of-line)
+            (setq beg (point)))))))
   )
 
 (provide 'init-helm-ag)
