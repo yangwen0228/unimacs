@@ -83,7 +83,7 @@
   (setq default-process-coding-system '(gbk-dos . gbk-dos))
   (set-default 'process-coding-system-alist
                '(
-                 ("find"   utf-8 . utf-8)
+                 ("find"   gbk-dos . gbk-dos)
                  ("global" utf-8 . utf-8)
                  ("gtags"  utf-8 . utf-8)
                  ("ctags"  utf-8 . utf-8)

@@ -13,8 +13,8 @@
       (let ((file (expand-file-name ".projectile" dir)))
         (with-temp-file file
           (erase-buffer)
-          (insert "
-;; - means ignore this pattern, must has a lead \"/\", using the regexp rule.
+          (insert ";; projectile configure file
+;; - means ignore this pattern, must has a leading \"/\", using the regexp rule.
 ;; + means add this subdir, it will block the root dir.
 -/GTAGS
 -/GPATH
@@ -35,6 +35,30 @@
             projectile-root-top-down
             ;; projectile-root-top-down-recurring ; don't use svn to define root.
             ))
+    (defun projectile-remove-ignored (files &optional subdirectories)
+      "Remove ignored files and folders from FILES.
+
+Operates on filenames relative to the project root.  Optionally,
+you can filter ignored files in subdirectories by setting
+SUBDIRECTORIES to a non-nil value."
+      (let ((ignored (append (projectile-ignored-files-rel)
+                             (projectile-ignored-directories-rel))))
+        (cl-remove-if
+         (lambda (file)
+           (or (cl-some
+                (lambda (dir)
+                  ;; string-prefix-p -> string-match-p: like *.elc can work!
+                  (string-match-p
+                   (concat "^" dir )
+                   (if subdirectories
+                       (file-name-nondirectory file)
+                     file)))
+                ignored)
+               (cl-some
+                (lambda (suf)
+                  (string-suffix-p suf file))
+                projectile-globally-ignored-file-suffixes)))
+         files)))
     ;; Bugfix: support Chinese file path.
     (defun projectile-files-via-ext-command (command)
       "Get a list of relative file names in the project root by executing COMMAND."
@@ -58,23 +82,6 @@
          ((eq vcs 'darcs) projectile-darcs-command)
          ;; ((eq vcs 'svn) projectile-svn-command) ; don't use svn to search files.
          (t projectile-generic-command))))
-
-    (defun projectile-remove-ignored (files &optional subdirectories)
-      "Remove ignored files and folders from FILES.
-
-Operates on filenames relative to the project root.  Optionally,
-you can filter ignored files in subdirectories by setting
-SUBDIRECTORIES to a non-nil value."
-      (let ((ignored (append (projectile-ignored-files-rel)
-                             (projectile-ignored-directories-rel))))
-        (-remove (lambda (file)
-                   ;; string-prefix-p -> string-match-p
-                   (or (--any-p (string-match-p it (if subdirectories
-                                                       (file-name-nondirectory file)
-                                                     file))
-                                ignored)
-                       (--any-p (string-suffix-p it file) projectile-globally-ignored-file-suffixes)))
-                 files)))
 
     (defun projectile-parse-dirconfig-file ()
       "Parse project ignore file and return directories to ignore and keep.
@@ -101,12 +108,12 @@ prefix the string will be assumed to be an ignore string."
                 ;; (_  (push (buffer-substring     (point)  (line-end-position)) ignore))
                 )
               (forward-line)))
-          (list (--map (file-name-as-directory (projectile-trim-string it))
-                       (delete "" (reverse keep)))
-                (-map  #'projectile-trim-string
-                       (delete "" (reverse ignore)))
-                (-map  #'projectile-trim-string
-                       (delete "" (reverse ensure)))))))
+          (list (mapcar (lambda (f) (file-name-as-directory (projectile-trim-string f)))
+                        (delete "" (reverse keep)))
+                (mapcar #'projectile-trim-string
+                        (delete "" (reverse ignore)))
+                (mapcar #'projectile-trim-string
+                        (delete "" (reverse ensure)))))))
 
     (setq projectile-svn-command "svn list -R . | grep -v '$/")
     (setq projectile-git-submodule-command
