@@ -16,15 +16,17 @@
           (insert ";; projectile configure file
 ;; - means ignore this pattern, must has a leading \"/\", using the regexp rule.
 ;; + means add this subdir, it will block the root dir.
--/GTAGS
--/GPATH
--/GRTAGS
--/\\.svn
--/\\.git
+-/GTAGS$
+-/GPATH$
+-/GRTAGS$
+-/.*.svn
+-/.*.git
 -/icons
--/images
+-/.*images/
+-/.*imgs/
+-/.*image/
 -/libs/encoding
--/**.dll
+-/.*.dll$
 ")
           )))
 
