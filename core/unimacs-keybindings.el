@@ -82,6 +82,13 @@
 (bind-key "C-S-M-h"         'unimacs-copy-func)
 (bind-key "C-x H"           'unimacs-copy-whole-buffer)
 
+(bind-key "<wheel-down>"        'unimacs-scroll-up-line)
+(bind-key "<wheel-up>"          'unimacs-scroll-down-line)
+(bind-key "<double-wheel-down>" '(lambda () (interactive) (unimacs-scroll-up-line 2)))
+(bind-key "<double-wheel-up>"   '(lambda () (interactive) (unimacs-scroll-down-line 2)))
+(bind-key "<triple-wheel-down>" '(lambda () (interactive) (unimacs-scroll-up-line 3)))
+(bind-key "<triple-wheel-up>"   '(lambda () (interactive) (unimacs-scroll-down-line 3)))
+
 ;; historic reason, C-m -> RET, must unbind it first:
 (define-key input-decode-map [?\C-m] [C-m])
 (bind-key "<C-m>"           'unimacs-scroll-up-line)
