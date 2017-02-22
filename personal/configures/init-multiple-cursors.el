@@ -11,7 +11,7 @@
          ("C-M-<"         . mc/skip-to-previous-like-this)
          ("C-c C-<"       . mc/mark-all-like-this)
          ("C-S-<mouse-1>" . mc/add-cursor-on-click)
-         ("C-;"           . mc/mark-all-symbols-like-this)
+         ("C-;"           . mc/mark-all-symbols-like-this-toggle)
          ("C-:"           . mc/mark-all-symbols-like-this-in-defun)
          :map mc/keymap
          ("C-|" . mc/vertical-align-with-space)
@@ -29,6 +29,13 @@
     (interactive)
     (mc/keyboard-quit)
     (multiple-cursors-mode 0))
+
+  (defun mc/mark-all-symbols-like-this-toggle ()
+    "Toogle when only one matches!"
+    (interactive)
+    (if (region-active-p)
+        (mc/my-quit)
+      (mc/mark-all-symbols-like-this)))
 
   (setq mc/insert-numbers-default 1
         mc/cycle-looping-behaviour 'stop))
