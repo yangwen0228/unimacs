@@ -104,14 +104,14 @@
   (defun helm-gtags-find-rtag-adapter (tag)
     "Workaround for tcl rtags: TAG: choose function according to major mode."
     (interactive
-     (list (helm-gtags--read-tagname 'tag)))
+     (list (helm-gtags--read-tagname 'rtag)))
     (if (member major-mode '(c-mode c++-mode objc-mode java-mode))
         (helm-gtags-find-rtag tag)
       (helm-gtags-find-rtag-for-ctags tag)))
 
   (defun helm-gtags-find-rtag-for-ctags (tag)
     "TODO: Workaround for ctags rtags: Use TAG to find all matches, then filter procs."
-    (helm-gtags--common '(helm-source-gtags-pattern) (format "(^proc|variable|def.*Var|declareVars)\\<%s\\>" tag )))
+    (helm-gtags--common '(helm-source-gtags-pattern) (format "(^proc|variable|def.*Var|declareVars)\\<%s\\>" tag)))
 
   (defadvice helm-gtags-find-pattern (before helm-gtags-find-pattern activate)
     "Ignore case when use pattern to search."
