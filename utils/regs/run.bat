@@ -13,6 +13,7 @@ echo. 6.将"交换CapsLock与右ctrl键"从注册表中移除，需重启电脑生效
 echo. q.退出
 echo.
 
+set type=q
 set /p type= 请选择相应数字，或者按q退出：
 
 if "%type%" == "1" cls & goto addEdit
@@ -24,30 +25,40 @@ if "%type%" == "6" cls & goto delSwap
 if "%type%" == "q" cls & exit
 
 :addEdit
-set emacsDir=c:\\emacs
+cls
+set emacsDir=c:\emacs\bin
+
 :inputPath
 if not exist %emacsDir% (
-set /p emacsDir=请输入emacs的安装根路径：
+set /p emacsDir=请输入emacs.exe所在的路径（如：C:\Emacs\bin），或按q返回菜单：
+) else (
+if not exist %emacsDir%\runemacs.exe (
+set /p emacsDir=请输入emacs.exe所在的路径（如：C:\Emacs\bin），或按q返回菜单：
+)
+)
+if "%emacsDir%" == "q" (
+goto begin
 )
 if not exist %emacsDir% (
 echo %emacsDir% 不存在，请重新输入！
 goto inputPath
 )
-if not exist %emacsDir%\bin\runemacs.exe (
-echo 设置的路径%emacsDir%不正确，程序将退出。。。
+if not exist %emacsDir%\runemacs.exe (
+echo 设置的路径%emacsDir%不正确，请重新输入。。。
 goto inputPath
 )
+set emacsDir=%emacsDir:\=\\%
 
 echo Windows Registry Editor Version 5.00> edit_with_emacs.reg
 echo [HKEY_CLASSES_ROOT\*\shell\Edit In Emacs]>> edit_with_emacs.reg
 echo @="">> edit_with_emacs.reg
 echo [HKEY_CLASSES_ROOT\*\shell\Edit In Emacs\command]>> edit_with_emacs.reg
-echo @="\"%emacsDir%\\bin\\emacsclientw.exe\" -a \"%emacsDir%\\bin\\runemacs.exe\" -n \"%%1\"">> edit_with_emacs.reg
+echo @="\"%emacsDir%\\emacsclientw.exe\" -a \"%emacsDir%\\runemacs.exe\" -n \"%%1\"">> edit_with_emacs.reg
 
 echo [HKEY_CLASSES_ROOT\*\shell\Edit With New Emacs]>> edit_with_emacs.reg
 echo @="">> edit_with_emacs.reg
 echo [HKEY_CLASSES_ROOT\*\shell\Edit With New Emacs\command]>> edit_with_emacs.reg
-echo @="\"%emacsDir%\\bin\\emacsclientw.exe\" -a \"%emacsDir%\\bin\\runemacs.exe\" -nc \"%%1\"">> edit_with_emacs.reg
+echo @="\"%emacsDir%\\emacsclientw.exe\" -a \"%emacsDir%\\runemacs.exe\" -nc \"%%1\"">> edit_with_emacs.reg
 
 regedit /S edit_with_emacs.reg
 del edit_with_emacs.reg
