@@ -7,7 +7,7 @@
   :bind (("C-x u" . undo-tree-visualize)
          ("C-_"   . undo-tree-undo)
          ("C--"   . undo-tree-redo))
-  :config
+  :init
   ;; Bugfix: the cursor jump twice
   (defun undo-tree-undo (&optional arg)
     "Undo changes.

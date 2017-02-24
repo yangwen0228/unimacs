@@ -9,6 +9,7 @@
          ("C-c k" . org-capture))
   :config
   (add-hook 'org-mode-hook 'org-indent-mode)
+  (use-package htmlize)
   (use-package cnblogs :ensure nil
     :init
     (use-package xml-rpc :init (require 'xml-rpc))
@@ -199,10 +200,8 @@ background of code to whatever theme I'm using's background"
              (my-pre-fg (face-foreground 'default)))
         (setq
          org-html-head-extra
-         (concat
-          org-html-head-extra
-          (format "<style type=\"text/css\">\n code {color: #FF0000}\n pre.src {background-color: %s; color: %s;}</style>\n"
-                  my-pre-bg my-pre-fg))))))
+         (format "<style type=\"text/css\">\n code {color: #FF0000}\n pre.src {background-color: %s; color: %s;}</style>\n"
+                 my-pre-bg my-pre-fg)))))
 
   (add-hook 'org-export-before-processing-hook 'my/org-inline-css-hook)
 
@@ -219,15 +218,17 @@ background of code to whatever theme I'm using's background"
         org-edit-src-content-indentation 0
         org-edit-timestamp-down-means-later t
         org-fast-tag-selection-single-key 'expert
-        org-export-kill-product-buffer-when-displayed t
-        ;; org v7
-        org-export-odt-preferred-output-format "doc"
-        ;; org v8
         org-odt-preferred-output-format "doc"
         org-tags-column 80
-        ;;org-startup-indented t
-        org-export-with-creator t
+        org-startup-indented t
         org-src-fontify-natively t
+        )
+
+  ;; org-export settings:
+  (setq org-export-with-creator t
+        org-export-preserve-breaks t
+        org-export-with-sub-superscripts nil
+        org-export-kill-product-buffer-when-displayed t
         )
 
   (use-package org-agenda :ensure nil
@@ -312,17 +313,13 @@ background of code to whatever theme I'm using's background"
                    "* PHONE with %? :PHONE:\n%U" :clock-in t :clock-resume t)
                   ("h" "Habit"        entry (file org-default-notes-file)
                    "* STARTED %?\n%U\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: STARTED"))))
-    )
-
-  (use-package org-refile :ensure nil :no-require
-    :init
     ;; Targets include this file and any file contributing to the agenda - up to 1 levels deep
     (setq org-refile-targets (quote ((nil :maxlevel . 1)
-                                     (org-agenda-files :maxlevel . 1)))))
+                                     (org-agenda-files :maxlevel . 1))))
+    )
 
-  (use-package org-goto :ensure nil :no-require
-    :init
-    (setq org-goto-auto-isearch nil))
+  ;; org-goto:
+  (setq org-goto-auto-isearch nil)
 
   (use-package org-time :ensure nil
     :commands org-time-summary

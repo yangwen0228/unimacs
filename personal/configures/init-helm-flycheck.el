@@ -99,15 +99,15 @@ string is a package name with an optional version number attached such as `Tcl' 
 
     ;; (add-hook 'c-mode-common-hook 'my-flycheck-clang-init)
 
-    (defun my-flycheck-irony-init ()
-      (require 'flycheck-irony)
-      (set (make-local-variable 'flycheck-checkers) nil)
-      (flycheck-irony-setup)
-      )
+    ;; (defun my-flycheck-irony-init ()
+    ;;   (require 'flycheck-irony)
+    ;;   (set (make-local-variable 'flycheck-checkers) nil)
+    ;;   (flycheck-irony-setup)
+    ;;   )
 
-    (add-hook 'c-mode-hook    'my-flycheck-irony-init)
-    (add-hook 'c++-mode-hook  'my-flycheck-irony-init)
-    (add-hook 'objc-mode-hook 'my-flycheck-irony-init)
+    ;; (add-hook 'c-mode-hook    'my-flycheck-irony-init)
+    ;; (add-hook 'c++-mode-hook  'my-flycheck-irony-init)
+    ;; (add-hook 'objc-mode-hook 'my-flycheck-irony-init)
 
     ;; (eval-after-load 'flycheck
     ;;   '(progn

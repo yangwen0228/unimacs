@@ -26,20 +26,6 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-
-;; set the default theme
-(use-package solarized-theme
-  :init
-  (load-theme 'solarized-dark t))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(cursor ((t (:background "RoyalBlue2" :foreground "#002b36" :inverse-video t))))
- '(mc/cursor-face ((t (:background "black" :foreground "light blue" :inverse-video t)))))
-
 (when (functionp 'menu-bar-mode)       (menu-bar-mode -1))
 (when (functionp 'set-scroll-bar-mode) (set-scroll-bar-mode 'nil))
 ;; (when (functionp 'mouse-wheel-mode)    (mouse-wheel-mode -1))
@@ -146,6 +132,24 @@ DELTA should be a multiple of 10, in the units used by the
 (bind-key "C-M--" 'decrease-default-font-height)
 (bind-key "M-+"   'text-scale-increase)   ; Font size +
 (bind-key "M-_"   'text-scale-decrease)   ; Font size -
+
+(use-package maxframe
+  ;; NOTICE: Must put after font-size setup!
+  :init
+  (maximize-frame))
+
+;; set the default theme
+(use-package solarized-theme
+  :init
+  (load-theme 'solarized-dark t))
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(cursor ((t (:background "RoyalBlue2" :foreground "#002b36" :inverse-video t))))
+ '(mc/cursor-face ((t (:background "black" :foreground "light blue" :inverse-video t)))))
 
 (provide 'unimacs-ui)
 ;;; unimacs-ui.el ends here

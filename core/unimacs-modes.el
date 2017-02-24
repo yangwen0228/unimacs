@@ -58,6 +58,9 @@
     ;; (kill-buffer ediff-buffer-B)
     (kill-buffer ediff-buffer-C))
 
+  (setq-default
+   ediff-split-window-function 'split-window-horizontally
+   ediff-window-setup-function 'ediff-setup-windows-plain)
   (add-hook 'ediff-quit-hook 'my-kill-ediff-buffers)
   (add-hook 'ediff-after-quit-hook-internal 'winner-undo))
 
@@ -67,6 +70,12 @@
   (setq eldoc-echo-area-use-multiline-p t)
   (eldoc-mode t)
   :diminish (eldoc-mode))
+
+(use-package fancy-narrow
+  :bind (("C-x n n" . fancy-narrow-to-region)
+         ("C-x n w" . fancy-widen)
+         ("C-x n d" . fancy-narrow-to-defun)
+         ("C-x n p" . fancy-narrow-to-page)))
 
 (use-package font-lock+
   :init
@@ -172,6 +181,9 @@
   :defer 0
   :config (global-page-break-lines-mode)
   :diminish "")
+
+(use-package rainbow-mode
+  :commands rainbow-mode)
 
 (use-package scratch)
 

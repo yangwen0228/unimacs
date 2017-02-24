@@ -33,7 +33,7 @@
     (add-to-list 'eclim--file-coding-system-mapping '("chinese-iso-8bit-dos" . "gb2312")))
   )
 
-(use-package jdee :disabled
+(use-package jdee
   :mode ("\\.java$" . jdee-mode)
   :config
   (setq jdee-server-dir (expand-file-name "jars" unimacs-utils-dir)
@@ -41,7 +41,8 @@
   ;; (bind-key "<tab>" 'helm-yas-complete jdee-mode-map)
   )
 
-(use-package meghanada
+(use-package meghanada :disabled
+  ;; Can't work on Windows yet!
   :mode ("\\.java$" . meghanada-mode)
   :config
   )

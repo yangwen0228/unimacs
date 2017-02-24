@@ -77,6 +77,7 @@ systems."
           (read-file-name           . helm-completing-read-default-1)
           (read-directory-name      . helm-completing-read-default-1)
           (yas-compile-directory    . helm-completing-read-default-1)
+          (yas-visit-snippet-file   . helm-completing-read-default-1)
           (ffap-alternate-file      . helm-completing-read-default-1)
           (tmm-menubar                . nil)
           (dired-do-copy              . helm-completing-read-default-1)

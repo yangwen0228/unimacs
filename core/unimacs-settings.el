@@ -26,8 +26,9 @@
 
 ;;; Code:
 (setq-default
- ediff-split-window-function 'split-window-horizontally
- ediff-window-setup-function 'ediff-setup-windows-plain
+ undo-limit        1000000
+ undo-strong-limit 1500000
+ undo-outer-limit  12000000
  case-fold-search               t
  compilation-scroll-output      t
  fill-column                    80

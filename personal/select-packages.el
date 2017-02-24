@@ -23,7 +23,6 @@
         init-emacs
         init-exec-path
         init-dired
-        init-maxframe
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
@@ -46,7 +45,6 @@
         ;; editing
         ;;-------------------------------------------------------------------
         init-guide-key
-        init-fancy-narrow
         init-keyfreq
         init-avy
         init-string-edit
