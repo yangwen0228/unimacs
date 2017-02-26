@@ -286,16 +286,8 @@ background of code to whatever theme I'm using's background"
           org-clock-out-remove-zero-time-clocks t
           ;; Clock out when moving task to a done state
           org-clock-out-when-done t
-          ;; Save the running clock and all clock history when exiting Emacs, load it on startup
-          org-clock-persist t
-          ;; Prompt to resume an active clock
-          org-clock-persist-query-resume t
           ;; Enable auto clock resolution for finding open clocks
           org-clock-auto-clock-resolution #'when-no-clock-is-running
-          ;; Include current clocking task in clock reports
-          org-clock-report-include-clocking-task t
-          ;; don't use pretty things for the clocktable
-          org-pretty-entities nil
           ;; some default parameters for the clock report
           org-agenda-clockreport-parameter-plist
           '(:maxlevel 10 :fileskip0 t :score agenda :block thismonth :compact t :narrow 60))

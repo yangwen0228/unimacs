@@ -38,89 +38,36 @@
   :config
   (bind-key "C-<tab>" 'jdee-complete-minibuf jdee-mode-map)
   (setq jdee-server-dir (expand-file-name "jars" unimacs-utils-dir)
-        jdee-complete-function 'jdee-complete-minibuf)
-  )
-
-
-(defun scala-mode-newline-comments ()
-  "Custom newline appropriate for `scala-mode'."
-  ;; shouldn't this be in a post-insert hook?
-  (interactive)
-  (newline-and-indent)
-  (scala-indent:insert-asterisk-on-multiline-comment))
-
-(defun c-mode-newline-comments ()
-  "Newline with indent and preserve multiline comments."
-  (interactive)
-  (c-indent-new-comment-line)
-  (indent-according-to-mode))
-
-(use-package cc-mode
-  :ensure nil
-  :config
-  (bind-key "C-c c" 'sbt-command java-mode-map)
-  (bind-key "C-c e" 'next-error java-mode-map)
-  (bind-key "RET" 'c-mode-newline-comments java-mode-map))
-
-(use-package scala-mode
-  :defer t
-  :pin melpa
-  :init
-  (setq
-   scala-indent:use-javadoc-style t
-   scala-indent:align-parameters t)
-  :config
-
-  ;; prefer smartparens for parens handling
-  (remove-hook 'post-self-insert-hook
-               'scala-indent:indent-on-parentheses)
-
-  (sp-local-pair 'scala-mode "(" nil :post-handlers '(("||\n[i]" "RET")))
-  (sp-local-pair 'scala-mode "{" nil
-               :post-handlers '(("||\n[i]" "RET")
-                                ("| " "SPC")
-                                fommil-sp-wrap-with-brackets))
-
-  (bind-key "RET" 'scala-mode-newline-comments scala-mode-map)
-  (bind-key "s-<delete>" (sp-restrict-c 'sp-kill-sexp) scala-mode-map)
-  (bind-key "s-<backspace>" (sp-restrict-c 'sp-backward-kill-sexp) scala-mode-map)
-  (bind-key "s-<home>" (sp-restrict-c 'sp-beginning-of-sexp) scala-mode-map)
-  (bind-key "s-<end>" (sp-restrict-c 'sp-end-of-sexp) scala-mode-map)
-  ;; BUG https://github.com/Fuco1/smartparens/issues/468
-  ;; backwards/next not working particularly well
-
-  ;; i.e. bypass company-mode
-  (bind-key "C-<tab>" 'dabbrev-expand scala-mode-map)
-
-  (bind-key "C-c c" 'sbt-command scala-mode-map)
-  (bind-key "C-c e" 'next-error scala-mode-map))
-
-(defun ensime-edit-definition-with-fallback (arg)
-  "Variant of `ensime-edit-definition' with ctags if ENSIME is not available."
-  (interactive "P")
-  (unless (and (ensime-connection-or-nil)
-               (ensime-edit-definition arg))
-    (projectile-find-tag)))
+        jdee-complete-function 'jdee-complete-minibuf))
 
 (use-package ensime
   :defer t
-  :pin melpa
   :init
   (put 'ensime-auto-generate-config 'safe-local-variable #'booleanp)
   (setq
+   ensime-use-helm t
    ensime-startup-notification nil
    ensime-startup-snapshot-notification nil)
   :config
+  (unimacs-company-define-backends
+   '((ensime-mode) . (company-ensime company-yasnippet company-dabbrev-code)))
+  (use-package gradle-mode)
   (require 'ensime-expand-region)
   (add-hook 'git-timemachine-mode-hook (lambda () (ensime-mode 0)))
 
   (bind-key "s-n" 'ensime-search ensime-mode-map)
   (bind-key "s-t" 'ensime-print-type-at-point ensime-mode-map)
+
+  (defun ensime-edit-definition-with-fallback (arg)
+    "Variant of `ensime-edit-definition' with ctags if ENSIME is not available."
+    (interactive "P")
+    (unless (and (ensime-connection-or-nil)
+                 (ensime-edit-definition arg))
+      (projectile-find-tag)))
   (bind-key "M-." 'ensime-edit-definition-with-fallback ensime-mode-map))
 
 (use-package sbt-mode
   :commands sbt-start sbt-command
-  :pin melpa
   :init
   (setq
    sbt:prefer-nested-projects t
@@ -137,51 +84,58 @@
   (bind-key "C-c c" 'sbt-command sbt:mode-map)
   (bind-key "C-c e" 'next-error sbt:mode-map))
 
-(defcustom
-  scala-mode-prettify-symbols
-  '(("->" . ?→)
-    ("<-" . ?←)
-    ("=>" . ??)
-    ("<=" . ?≤)
-    (">=" . ?≥)
-    ("!=" . ?≠)
-    ;; implicit https://github.com/chrissimpkins/Hack/issues/214
-    ("+-" . ?±))
-  "Prettify symbols for scala-mode.")
-
-(add-hook 'scala-mode-hook
-          (lambda ()
-            (whitespace-mode-with-local-variables)
-            (show-paren-mode t)
-            (smartparens-mode t)
-            (yas-minor-mode t)
-            (git-gutter-mode t)
-            (company-mode t)
-            (setq prettify-symbols-alist scala-mode-prettify-symbols)
-            (prettify-symbols-mode t)
-            (scala-mode:goto-start-of-code)))
-
-(add-hook 'ensime-mode-hook
-          (lambda ()
-            (let ((backends (company-backends-for-buffer)))
-              (setq company-backends (push '(ensime-company company-yasnippet) backends)))))
-
-(add-hook 'java-mode-hook
-          (lambda ()
-            (whitespace-mode-with-local-variables)
-            (show-paren-mode t)
-            (smartparens-mode t)
-            (yas-minor-mode t)
-            (git-gutter-mode t)
-            (company-mode t)
-            (ensime-mode t)))
-
-(use-package ensime
-  :mode ("\\.java$" . ensime)
+(use-package java-mode
+  :ensure nil
+  :mode ("\\.java$" . java-mode)
+  :init
+  (add-hook 'java-mode-hook (lambda () (ensime-mode t)))
   :config
-  (use-package gradle-mode)
-  (setq ensime-use-helm t)
-  )
+  (when (require 'cc-mode nil t)
+    (defun c-mode-newline-comments ()
+      "Newline with indent and preserve multiline comments."
+      (interactive)
+      (c-indent-new-comment-line)
+      (indent-according-to-mode))
+    (bind-key "RET" 'c-mode-newline-comments java-mode-map))
+
+  (bind-key "C-c c" 'sbt-command java-mode-map)
+  (bind-key "C-c e" 'next-error java-mode-map))
+
+(use-package scala-mode
+  :defer t
+  :mode ("\\.scala$" . scala-mode)
+  :init
+  (setq
+   scala-indent:use-javadoc-style t
+   scala-indent:align-parameters t)
+  (add-hook 'scala-mode-hook (lambda ()
+                               (ensime-mode t)
+                               (scala-mode:goto-start-of-code)))
+  :config
+  ;; prefer smartparens for parens handling
+  (remove-hook 'post-self-insert-hook
+               'scala-indent:indent-on-parentheses)
+
+  (sp-local-pair 'scala-mode "(" nil :post-handlers '(("||\n[i]" "RET")))
+  (sp-local-pair 'scala-mode "{" nil
+                 :post-handlers '(("||\n[i]" "RET")
+                                  ("| " "SPC")
+                                  fommil-sp-wrap-with-brackets))
+
+  (defun scala-mode-newline-comments ()
+    "Custom newline appropriate for `scala-mode'."
+    ;; shouldn't this be in a post-insert hook?
+    (interactive)
+    (newline-and-indent)
+    (scala-indent:insert-asterisk-on-multiline-comment))
+
+  (bind-key "RET" 'scala-mode-newline-comments scala-mode-map)
+
+  ;; i.e. bypass company-mode
+  (bind-key "C-<tab>" 'dabbrev-expand scala-mode-map)
+
+  (bind-key "C-c c" 'sbt-command scala-mode-map)
+  (bind-key "C-c e" 'next-error scala-mode-map))
 
 (provide 'init-java)
 ;;; init-java.el ends here
