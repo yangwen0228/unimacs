@@ -91,7 +91,7 @@
   (setq default-process-coding-system '(gbk-dos . gbk-dos))
   (set-default 'process-coding-system-alist
                '(
-                 ("find"   gbk-dos . gbk-dos)
+                 ("find"   utf-8 . utf-8) ; use msys64/usr/bin/find.exe
                  ("global" utf-8 . utf-8)
                  ("gtags"  utf-8 . utf-8)
                  ("ctags"  utf-8 . utf-8)
