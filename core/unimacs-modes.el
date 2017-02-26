@@ -28,11 +28,10 @@
 (setq use-package-always-ensure t)
 
 (use-package anzu
+  :diminish anzu-mode
   :defer 0
-  :config
-  (global-anzu-mode t)
-  (setq query-replace-skip-read-only t)
-  :diminish "")
+  :config (global-anzu-mode t)
+  (setq query-replace-skip-read-only t))
 
 (use-package autorevert
   ;; revert buffers automatically when underlying files are changed externally
@@ -45,6 +44,11 @@
 
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
+
+(use-package diff-hl
+  :init
+  (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+  (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
 
 (use-package ediff :ensure nil
   :commands (ediff-buffers
@@ -71,6 +75,9 @@
   (eldoc-mode t)
   :diminish (eldoc-mode))
 
+(use-package expand-region
+  :bind ("C-=" . er/expand-region))
+
 (use-package fancy-narrow
   :bind (("C-x n n" . fancy-narrow-to-region)
          ("C-x n w" . fancy-widen)
@@ -79,8 +86,9 @@
 
 (use-package font-lock+
   :init
-  (global-font-lock-mode t) ; turn on syntax highlighting for all buffers
-  )
+  ;; turn on syntax highlighting for all buffers
+  (global-font-lock-mode t))
+
 (use-package help+)
 (use-package help-fns+)
 (use-package help-mode+)
@@ -105,19 +113,15 @@
   :defer 0
   :config
   (paren-activate)
-  (setq paren-match-face 'highlight)
-  (setq paren-sexp-mode t)
-  ;; Fix: Error with multiple-cursors.
+  (setq paren-sexp-mode  t
+        paren-match-face 'highlight)
+  ;; Fix: Error with multiple-cursors and active mark:
   (defadvice mic-paren-highlight (after mic-paren-highlight activate)
-    (if (or mark-active
-            (and (boundp 'multiple-cursors-mode)
-                 multiple-cursors-mode))
-        (progn
-          (mic-delete-overlay (aref mic-paren-overlays 0))
-          (mic-delete-overlay (aref mic-paren-overlays 1))
-          (mic-delete-overlay (aref mic-paren-overlays 2)))))
-
-  :diminish "")
+    (if (or mark-active (and (boundp 'multiple-cursors-mode)
+                             multiple-cursors-mode))
+        (progn (mic-delete-overlay (aref mic-paren-overlays 0))
+               (mic-delete-overlay (aref mic-paren-overlays 1))
+               (mic-delete-overlay (aref mic-paren-overlays 2))))))
 
 (use-package midnight :disabled :ensure nil
   ;; midnight mode purges buffers every midnight-period time.
@@ -156,8 +160,7 @@
           (when (or (< arg 0) (not (eobp)))
             (transpose-lines arg))
           (forward-line -1))
-        (move-to-column column t)))))
-  :diminish "")
+        (move-to-column column t))))))
 
 (use-package nlinum
   ;; When file is big, linum-mode is very slow.
@@ -178,9 +181,12 @@
       (nlinum-mode -1))))
 
 (use-package page-break-lines
+  :diminish page-break-lines-mode
   :defer 0
-  :config (global-page-break-lines-mode)
-  :diminish "")
+  :config (global-page-break-lines-mode))
+
+(use-package paradox
+  :commands paradox-list-packages)
 
 (use-package rainbow-mode
   :commands rainbow-mode)
@@ -190,17 +196,32 @@
 (use-package server :ensure nil
   ;; edit server, must use :config. cannot use :init.
   :config
-  (when (and (eq window-system 'w32) (file-exists-p (getenv "APPDATA")))
-    (setq server-auth-dir (concat (getenv "APPDATA") "/.emacs.d/server"))
-    (unless (file-exists-p server-auth-dir)
-      (make-directory server-auth-dir)))
+  (unless (file-exists-p server-auth-dir)
+    (make-directory server-auth-dir))
   (defun server-ensure-safe-dir (dir) "Noop" t)
   (server-start))
 
+(use-package smart-tab
+  :diminish smart-tab-mode
+  :init
+  ;; NOTICE: Don't manually bind to 'smart-tab, otherwise, dead loop.
+  (unbind-key "<tab>")
+  (global-smart-tab-mode 1)
+  ;; Never use auto-complete and hippie-expand, use yas-expand, so override:
+  (defun smart-tab-call-completion-function ()
+    "Get a completion function according to current major mode."
+    (let ((completion-function
+           (cdr (assq major-mode smart-tab-completion-functions-alist))))
+      (if completion-function
+          (funcall completion-function)
+        (if (not (minibufferp))
+            (unless (yas-expand)
+              (call-interactively 'company-yasnippet)))))))
+
 (use-package subword
+  :diminish subword-mode
   ;; M-f better jump between camel words. C-M-f whole word.
-  :init (add-hook 'prog-mode-hook 'subword-mode)
-  :diminish (subword-mode))
+  :init (add-hook 'prog-mode-hook 'subword-mode))
 
 (use-package tramp :disabled
   :config
@@ -229,18 +250,20 @@
   )
 
 (use-package simple :ensure nil
-  ;; visual-line-mode: break line to fit view
+  :diminish visual-line-mode
+  ;; visual-line-mode: manipulate lines by visual mode.
   :defer 0
-  :config
-  (global-visual-line-mode t)
+  :config (global-visual-line-mode t)
   (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)))
 
+(use-package highlight-symbol
+  :bind (("M-*" . highlight-symbol))
+  :init (add-hook 'prog-mode-hook 'highlight-symbol-nav-mode))
+
 (use-package volatile-highlights
+  :diminish volatile-highlights-mode
   ;; highlight when undo or yank
-  :init
-  (require 'volatile-highlights) ;Don't know why? Not work without this.
-  (volatile-highlights-mode t)
-  :diminish "")
+  :init (volatile-highlights-mode 1))
 
 (use-package whitespace
   ;; display special chars, like tabs and trailing whitespace.
@@ -250,27 +273,23 @@
   (setq whitespace-line-column 120
         whitespace-style '(face trailing tabs))
   (setq whitespace-display-mappings
-        '(
-          ;; (space-mark nil); 32 SPACE, 183 MIDDLE DOT
-          ;; (newline-mark nil);(newline-mark 10 [172 10]) ; 10 LINE FEED
+        '(;; (newline-mark 10 [172 10]) ; 10 LINE FEED
           ;; (tab-mark 9 [8680 9] [92 9]); 9 TAB
           ))
-  ;; (setq whitespace-global-modes '(not org-mode eshell-mode shell-mode
-  ;;                                     ;; emacs-lisp-mode clojure-mode lisp-mode
-  ;;                                     web-mode log4j-mode dired-mode))
-
   :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode))
 
 (use-package winner
+  ;; window layout undo/redo
   :bind (("C-c ," . winner-undo)
-         ("C-c ." . winner-redo)))
+         ("C-c ." . winner-redo))
+  :init (winner-mode 1))
 
 (use-package whole-line-or-region
+  :diminish whole-line-or-region-mode
   ;; kill or yank a whole line.
   :bind (("C-w" . whole-line-or-region-kill-region)
          ("M-w" . whole-line-or-region-kill-ring-save)
-         ("C-y" . whole-line-or-region-yank))
-  :diminish "")
+         ("C-y" . whole-line-or-region-yank)))
 
 (use-package benchmark-init
   :commands (benchmark-init/activate))

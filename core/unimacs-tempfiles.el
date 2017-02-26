@@ -36,10 +36,6 @@
   ;; delete-auto-save-files
   (setq delete-auto-save-files t))
 
-;; autosave the undo-tree history
-(setq undo-tree-history-directory-alist `((".*" . ,temporary-file-directory)))
-(setq undo-tree-auto-save-history t)
-
 (use-package saveplace
   ;; saveplace remembers your location in a file when saving files
   :init

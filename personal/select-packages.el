@@ -112,7 +112,6 @@
         ;; modules not offen used
         ;;-------------------------------------------------------------------
         ;; init-doxygen
-        init-vc
         ;; init-gist
         ;; init-git
         ;; init-gnus

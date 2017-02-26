@@ -43,13 +43,16 @@
 
   (custom-set-variables
    '(jumplist-hook-commands
-     '(helm-swoop
-       helm-imenu helm-for-files
-       mark-defun mark-whole-buffer
+     '(unimacs-move-beginning-of-line
+       end-of-visual-line
+       beginning-of-defun end-of-defun
+       sp-forward-sexp sp-backward-sexp
+       helm-swoop helm-imenu helm-find-files helm-multi-files
        helm-projectile-switch-project helm-projectile-find-file
-       ido-find-file find-file find-function find-variable
+       find-function find-variable
+       mark-defun mark-whole-buffer
        avy-goto-char avy-goto-char-2
-       helm-gtags-find-pattern helm-gtags-find-tag helm-gtags-find-rtag-adapter
+       helm-gtags-find-pattern helm-gtags-find-tag-adapter helm-gtags-find-rtag-adapter
        helm-ag-select-directory
        isearch-forward
        end-of-buffer beginning-of-buffer))

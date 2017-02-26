@@ -267,15 +267,38 @@ background of code to whatever theme I'm using's background"
   (use-package org-clock :ensure nil
     :init
     (require 'org-clock)
-    ;; Change task state to STARTED when clocking in
-    (setq org-clock-in-switch-to-state "STARTED")
-    ;; Change task state to DONE when clocking out
-    (setq org-clock-out-switch-to-state "HOLD")
-    ;; Save clock data and notes in the LOGBOOK drawer
-    (setq org-clock-into-drawer t)
-    ;; Removes clocked tasks with 0:00 duration
-    (setq org-clock-out-remove-zero-time-clocks t)
-
+    ;; Insinuate it everywhere
+    (org-clock-persistence-insinuate)
+    ;; Show lot of clocking history so it's easy to pick items off the C-F11 list
+    (setq org-clock-history-length 23
+          ;; Change task state to STARTED when clocking in
+          org-clock-in-switch-to-state "STARTED"
+          ;; Change task state to DONE when clocking out
+          org-clock-out-switch-to-state "HOLD"
+          ;; Resume clocking task on clock-in if the clock is open
+          org-clock-in-resume t
+          ;; Separate drawers for clocking and logs
+          org-drawers '("PROPERTIES" "CLOCK" "LOGBOOK" "RESULTS" "HIDDEN")
+          ;; Save clock data and state changes and notes in the LOGBOOK drawer
+          org-clock-into-drawer t
+          ;; Sometimes I change tasks I'm clocking quickly -
+          ;; this removes clocked tasks with 0:00 duration
+          org-clock-out-remove-zero-time-clocks t
+          ;; Clock out when moving task to a done state
+          org-clock-out-when-done t
+          ;; Save the running clock and all clock history when exiting Emacs, load it on startup
+          org-clock-persist t
+          ;; Prompt to resume an active clock
+          org-clock-persist-query-resume t
+          ;; Enable auto clock resolution for finding open clocks
+          org-clock-auto-clock-resolution #'when-no-clock-is-running
+          ;; Include current clocking task in clock reports
+          org-clock-report-include-clocking-task t
+          ;; don't use pretty things for the clocktable
+          org-pretty-entities nil
+          ;; some default parameters for the clock report
+          org-agenda-clockreport-parameter-plist
+          '(:maxlevel 10 :fileskip0 t :score agenda :block thismonth :compact t :narrow 60))
     (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
     (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu)
     ;; Show the clocked-in task - if any - in the header line

@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; code:
 (use-package yasnippet
-  :bind ("<tab>" . company-yasnippet) ; other completion, like minibuffer, use C-S-i. All tab masked, not I desired.
+  ;; :bind ("<tab>" . company-yasnippet) ; use smart-tab.
   :config
   ;; fix conflict where smartparens clobbers yas' key bindings
   (defadvice yas-expand (before dotemacs activate)

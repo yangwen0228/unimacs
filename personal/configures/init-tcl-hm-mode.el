@@ -126,10 +126,10 @@ Prefix argument means switch to the Tcl buffer afterwards."
         (tcl-eval-region (point) end)))
     (if and-go (switch-to-tcl t)))
 
-  (define-key tcl-hm-mode-map "{"        'tcl-electric-char)
-  (define-key tcl-hm-mode-map "}"        'tcl-electric-brace)
-  (define-key tcl-hm-mode-map "["        'tcl-electric-char)
-  (define-key tcl-hm-mode-map "]"        'tcl-electric-char)
+  (define-key tcl-hm-mode-map "{"        nil)
+  (define-key tcl-hm-mode-map "}"        nil)
+  (define-key tcl-hm-mode-map "["        nil)
+  (define-key tcl-hm-mode-map "]"        nil)
   (define-key tcl-hm-mode-map ";"        'tcl-electric-char)
   (define-key tcl-hm-mode-map "#"        'tcl-electric-hash) ;Remove?  -stef
   (define-key tcl-hm-mode-map "\t"       'tcl-indent-command)

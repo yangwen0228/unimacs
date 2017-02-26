@@ -25,26 +25,33 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(setq-default
+;; Global settings for built-in emacs parameters:
+(setq
  undo-limit        1000000
  undo-strong-limit 1500000
  undo-outer-limit  12000000
- case-fold-search               t
- compilation-scroll-output      t
+ create-lockfiles          nil
+ tooltip-delay             0.5
+ case-fold-search          t
+ compilation-scroll-output t
+ ad-redefinition-action    'accept
+ ;; no annoying beep on errors
+ visible-bell t
+ )
+
+;; buffer local variables:
+(setq-default
  fill-column                    80
  grep-highlight-matches         t
  grep-scroll-output             t
- indent-tabs-mode               nil
  mouse-yank-at-point            t
  set-mark-command-repeat-pop    t
- tab-width                      8
- tooltip-delay                  0.5
+ indent-tabs-mode               nil
+ tab-width                      4
  truncate-lines                 nil
  truncate-partial-width-windows nil
- ;; no annoying beep on errors
- visible-bell t)
+ )
 
-(winner-mode t)                               ; window layout undo/redo
 (transient-mark-mode t)                       ; If you change buffer, or focus, disable the current buffer's mark
 (setq ring-bell-function (lambda ()))         ; no annoying ring bell
 (setq line-move-visual t)                     ; move around lines based on how they are displayed, rather than the actual line.

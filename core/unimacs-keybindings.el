@@ -89,7 +89,7 @@
 (bind-key "<triple-wheel-down>" '(lambda () (interactive) (unimacs-scroll-up-line 3)))
 (bind-key "<triple-wheel-up>"   '(lambda () (interactive) (unimacs-scroll-down-line 3)))
 
-;; historic reason, C-m -> RET, must unbind it first:
+;; NOTICE: historic reason, in terminal: C-m -> RET, must unbind it first:
 (define-key input-decode-map [?\C-m] [C-m])
 (bind-key "<C-m>"           'unimacs-scroll-up-line)
 (bind-key "M-m"             'unimacs-scroll-down-line)
