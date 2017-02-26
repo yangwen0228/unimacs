@@ -42,6 +42,7 @@
         init-helm-flyspell
         init-helm-ag
         init-helm-gtags
+        init-helm-yasnippet
         ;;-------------------------------------------------------------------
         ;; editing
         ;;-------------------------------------------------------------------
@@ -63,7 +64,6 @@
         ;; auto company && auto check
         ;;-------------------------------------------------------------------
         init-company
-        init-yasnippet
         init-auto-yasnippet
         init-mvc
         init-dict
