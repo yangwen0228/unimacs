@@ -2,7 +2,8 @@
 ;;; Commentary:
 ;;; code:
 (use-package yasnippet
-  ;; :bind ("<tab>" . company-yasnippet) ; use smart-tab.
+  :commands yas-global-mode
+  :init (add-hook 'prog-mode-hook (lambda () (yas-global-mode 1)))
   :config
   ;; fix conflict where smartparens clobbers yas' key bindings
   (defadvice yas-expand (before dotemacs activate)
@@ -36,9 +37,6 @@
   (setq-default mode-require-final-newline nil)
   :diminish (yas-minor-mode yas-global-mode)
   )
-
-;; must use function outside use-package:
-(yas-global-mode 1)
 
 (provide 'init-yasnippet)
 ;;; init-yasnippet.el ends here
