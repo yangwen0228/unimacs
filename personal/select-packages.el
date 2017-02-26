@@ -34,6 +34,7 @@
         init-rainbow-delimiters
         init-ido
         init-helm
+        init-helm-imenu
         init-helm-projectile
         init-helm-swoop
         init-helm-descbinds

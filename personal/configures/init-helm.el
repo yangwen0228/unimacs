@@ -6,22 +6,10 @@
 (use-package helm
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
-         ("C-x b"   . helm-multi-files)
-         ("C-c i"   . helm-imenu))
+         ("C-x b"   . helm-multi-files))
   :config
   (require 'helm-config)
   (helm-mode 1) ;turn helm-mode on, don't turn ido-mode on
-
-  (use-package imenu :ensure nil
-    ;; type name must be capital, like: Use-package. Cannot use use-package.
-    :init
-    (add-to-list 'lisp-imenu-generic-expression
-                 (list "Use-package"
-                       (concat
-                        "^\\s-*(use-package\\s-+" ; definition
-                        "\\([-A-Za-z0-9_:+*]+\\)" ; package name
-                        )
-                       1)))
 
   (setq helm-autoresize-mode t
         helm-scroll-amount   1
