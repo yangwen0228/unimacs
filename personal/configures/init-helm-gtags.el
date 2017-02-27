@@ -4,8 +4,9 @@
 
 ;;; Code:
 (use-package helm-gtags
+  :diminish helm-gtags-mode
   :init
-  (helm-gtags-mode t)
+  (add-hook 'prog-mode-hook (lambda () (helm-gtags-mode t)))
   :config
   (setq helm-gtags-path-style             'root
         helm-gtags-update-interval-second nil

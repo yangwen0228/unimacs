@@ -207,6 +207,9 @@
   ;; NOTICE: Don't manually bind to 'smart-tab, otherwise, dead loop.
   (unbind-key "<tab>")
   (global-smart-tab-mode 1)
+  (setq
+   smart-tab-disabled-major-modes
+   (remove 'org-mode smart-tab-disabled-major-modes)) ; org-mode: yasnippet
   ;; Never use auto-complete and hippie-expand, use yas-expand, so override:
   (defun smart-tab-call-completion-function ()
     "Get a completion function according to current major mode."

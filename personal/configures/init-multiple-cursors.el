@@ -21,9 +21,9 @@
          ("M-p" . mc/cycle-backward)
          )
   :init
-  ;; The bind commonds none require 'multiple-cursors.
-  ;; Must use :init and require to let the mc/keymap init.
-  (require 'multiple-cursors)
+  (setq mc/insert-numbers-default 1
+        mc/cycle-looping-behaviour 'stop)
+
   (defun mc/my-quit ()
     "Quit from mark mode."
     (interactive)
@@ -36,9 +36,7 @@
     (if (region-active-p)
         (mc/my-quit)
       (mc/mark-all-symbols-like-this)))
-
-  (setq mc/insert-numbers-default 1
-        mc/cycle-looping-behaviour 'stop))
+  :config (require 'multiple-cursors))
 
 (provide 'init-multiple-cursors)
 ;;; init-multiple-cursors.el ends here
