@@ -16,11 +16,10 @@
          :map mc/keymap
          ("C-|" . mc/vertical-align-with-space)
          ("C-_" . undo)                 ;undo-tree-undo point position wrong.
-         ("C-;" . mc/my-quit)
          ("M-n" . mc/cycle-forward)
-         ("M-p" . mc/cycle-backward)
-         )
+         ("M-p" . mc/cycle-backward))
   :init
+  (require 'multiple-cursors)
   (setq mc/insert-numbers-default 1
         mc/cycle-looping-behaviour 'stop)
 
@@ -43,9 +42,7 @@
                          (highlight-symbol-nav-mode -1))))
   (add-hook 'multiple-cursors-mode-disabled-hook
             (lambda () (when (boundp highlight-symbol-nav-mode)
-                         (highlight-symbol-nav-mode +1))))
-
-  :config (require 'multiple-cursors))
+                         (highlight-symbol-nav-mode +1)))))
 
 (provide 'init-multiple-cursors)
 ;;; init-multiple-cursors.el ends here
