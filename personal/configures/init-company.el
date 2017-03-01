@@ -9,10 +9,15 @@
 ;;; Code:
 (use-package company
   :defer 0
-  :preface
-  (defun define-company-backends (list)
-    (dolist (cons list)
-      (unimacs-company-define-backends cons)))
+  :init
+  (setq company-idle-delay            0.1
+        company-tooltip-limit         15
+        company-minimum-prefix-length 2
+        company-dabbrev-downcase      nil ; not downcase.
+        company-dabbrev-ignore-case   nil ; not downcase.
+        company-require-match         nil
+        company-show-numbers          t)
+
   (defun unimacs-company-define-backends (modes-backends-cons)
     (let ((modes    (car modes-backends-cons))
           (backends (cdr modes-backends-cons)))
@@ -28,24 +33,12 @@
           (add-hook hook func)))))
   :config
   (global-company-mode t)
-  (define-company-backends
-    '(((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers))
-      ;; ((js-mode js2-mode)          . (company-tern))
-      ((web-mode)                  . (company-web-html company-dabbrev-code company-css company-files))
-      ))
-
-  (setq company-idle-delay            0.1
-        company-tooltip-limit         15
-        company-minimum-prefix-length 2
-        company-dabbrev-downcase      nil ; not downcase.
-        company-dabbrev-ignore-case   nil ; not downcase.
-        company-require-match         nil
-        company-show-numbers          t)
+  (unimacs-company-define-backends '((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers)))
+  (unimacs-company-define-backends '((web-mode) . (company-web-html company-dabbrev-code company-css company-files)))
 
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "C-j") 'company-show-location)
-  (define-key company-search-map (kbd "C-j") 'company-show-location)
-  )
+  (define-key company-search-map (kbd "C-j") 'company-show-location))
 
 ;; (use-package company-tern
 ;;   :commands (company-tern company-tern-create-project)

@@ -440,7 +440,7 @@ Doesn't mess with normal buffers."
 (defun unimacs-open-configure-dir ()
   "Open the configuration dir to edit configuration files!"
   (interactive)
-  (ido-find-file-in-dir unimacs-configures-dir))
+  (find-file unimacs-configures-dir))
 
 (defun unimacs-toggle-list-bookmarks ()
   (interactive)

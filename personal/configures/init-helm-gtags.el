@@ -7,25 +7,38 @@
   :diminish helm-gtags-mode
   :init
   (add-hook 'prog-mode-hook (lambda () (helm-gtags-mode t)))
+  :commands helm-gtags-create-tags helm-gtags-update-entire-tags helm-gtags-delete-tags
+  :bind-keymap ("C-c g" . helm-gtags-mode-map)
+  :bind (("M-t"     . helm-gtags-find-tag-adapter)
+         ("M-r"     . helm-gtags-find-rtag-adapter)
+         ("C-c M-g" . helm-gtags-find-pattern)
+         :map helm-gtags-mode-map
+         ("C-c g c" . helm-gtags-create-tags)
+         ("C-c g d" . helm-gtags-delete-tags)
+         ("C-c g u" . helm-gtags-update-entire-tags))
+  :preface
+  (defun helm-gtags-update-entire-tags ()
+    "Update entire project tags."
+    (interactive)
+    (let* ((how-to 'entire-update)
+           (current-time (float-time (current-time)))
+           (cmds (helm-gtags--update-tags-command how-to))
+           (proc (apply #'start-file-process "helm-gtags-update-tag" nil cmds)))
+      (if (not proc)
+          (message "Failed: %s" (string-join cmds " "))
+        (set-process-sentinel proc (helm-gtags--make-gtags-sentinel 'update))
+        (setq helm-gtags--last-update-time current-time))))
+
   :config
   (setq helm-gtags-path-style             'root
         helm-gtags-update-interval-second nil
         helm-gtags-ignore-case            nil
         helm-gtags-read-only              nil
+        helm-gtags-preselect              t
         helm-gtags-auto-update            t
         helm-gtags-pulse-at-cursor        t
         helm-gtags-cache-select-result    t
         helm-gtags-cache-max-result-size  (* 10 1024 1024))
-
-  (bind-keys* ("M-t"     . helm-gtags-find-tag-adapter)
-              ("M-r"     . helm-gtags-find-rtag-adapter)
-              ("C-c M-s" . helm-gtags-find-symbol)
-              ("C-c M-f" . helm-gtags-find-files)
-              ("C-c M-g" . helm-gtags-find-pattern)
-              ("C-t"     . helm-gtags-pop-stack)
-              ("C-c <"   . helm-gtags-previous-history)
-              ("C-c >"   . helm-gtags-next-history)
-              ("C-c s s" . helm-gtags-show-stack))
 
   ;; filename encoding is 'GBK, content is utf-8
   (defun helm-gtags--exec-global-command (type input &optional detail)
@@ -258,8 +271,6 @@
           (define-key map (kbd "C-c C-d") 'helm-gtags--mark-line-deleted)
           (define-key map (kbd "C-c C-u") 'helm-gtags--unmark)
           map))
-
-  :commands (helm-gtags-create-tags helm-gtags-update-tags helm-gtags-delete-tags)
   )
 
 (provide 'init-helm-gtags)

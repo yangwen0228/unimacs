@@ -210,6 +210,7 @@
   (setq
    smart-tab-disabled-major-modes
    (remove 'org-mode smart-tab-disabled-major-modes)) ; org-mode: yasnippet
+  :config
   ;; Never use auto-complete and hippie-expand, use yas-expand, so override:
   (defun smart-tab-call-completion-function ()
     "Get a completion function according to current major mode."

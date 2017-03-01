@@ -24,8 +24,30 @@
   (use-package company-gtags
     :ensure nil
     :bind* ("C-<tab>" . company-gtags-tcl-rigid)
-    :commands (company-gtags company-gtags-tcl-rigid)
-    :preface
+    :commands company-gtags company-gtags-tcl-rigid
+    :init
+    (defun company-gtags-tcl-rigid (command &optional arg &rest ignored)
+      "Support for tcl ns::proc kind of command.  COMMAND ARG IGNORED."
+      (interactive (list 'interactive))
+      (cl-case command
+        (interactive (company-begin-backend 'company-gtags-tcl-rigid))
+        (prefix (and company-gtags-executable
+                     buffer-file-name
+                     (apply #'derived-mode-p company-gtags-modes)
+                     (not (company-in-string-or-comment))
+                     (company-gtags--tags-available-p)
+                     (or (company-grab-symbol-for-tcl-rigid) 'stop)))
+        (candidates (company-gtags--fetch-tcl-tags-rigid arg))
+        (sorted t)
+        (duplicates t)
+        (annotation (company-gtags--annotation arg))
+        (meta (get-text-property 0 'meta arg))
+        (location (get-text-property 0 'location arg))
+        (post-completion (let ((anno (company-gtags--annotation arg)))
+                           (when (and company-gtags-insert-arguments anno)
+                             (insert anno)
+                             (company-template-c-like-templatify anno))))))
+    :config
     (defun company-gtags--fetch-tcl-tags-rigid (prefix)
       ;; (print prefix)
       (with-temp-buffer
@@ -64,30 +86,7 @@ Otherwise, if point is not inside a symbol, return an empty string."
            (save-excursion (skip-syntax-backward "w_.") (point)))
         (unless (and (char-after)
                      (memq (char-syntax (char-after)) '(?w ?_)))
-          "")))
-
-    (defun company-gtags-tcl-rigid (command &optional arg &rest ignored)
-      "Support for tcl ns::proc kind of command.  COMMAND ARG IGNORED."
-      (interactive (list 'interactive))
-      (cl-case command
-        (interactive (company-begin-backend 'company-gtags-tcl-rigid))
-        (prefix (and company-gtags-executable
-                     buffer-file-name
-                     (apply #'derived-mode-p company-gtags-modes)
-                     (not (company-in-string-or-comment))
-                     (company-gtags--tags-available-p)
-                     (or (company-grab-symbol-for-tcl-rigid) 'stop)))
-        (candidates (company-gtags--fetch-tcl-tags-rigid arg))
-        (sorted t)
-        (duplicates t)
-        (annotation (company-gtags--annotation arg))
-        (meta (get-text-property 0 'meta arg))
-        (location (get-text-property 0 'location arg))
-        (post-completion (let ((anno (company-gtags--annotation arg)))
-                           (when (and company-gtags-insert-arguments anno)
-                             (insert anno)
-                             (company-template-c-like-templatify anno))))))
-    )
+          ""))))
 
   (use-package tcl-hm-eldoc
     :ensure nil
@@ -114,6 +113,32 @@ Otherwise, if point is not inside a symbol, return an empty string."
       (when filename
         (kill-new (concat "source {" filename "}"))
         (message "Copied command 'source {%s}' to the clipboard." filename))))
+  (defvar tcl-hm-hm-version 12.0
+    "HyperWorks version.")
+  (defvar tcl-hm-command-file-dir (expand-file-name "documents" (getenv "USERPROFILE")))
+  (defun tcl-hm-set-help-version (version)
+    "Change HyperWorks help VERSION."
+    (interactive
+     (list (let ((versions '("12.0" "13.0" "14.0")))
+             (completing-read "HyperWorks Version(Default: 13.0): "
+                              versions nil t nil nil "13.0"))))
+    (setq tcl-hm-hm-version version)
+    (setq tcl-hm-help-directory-list nil)
+    (add-to-list 'tcl-hm-help-directory-list
+                 (concat "C:/Program Files/Altair/" version "/hw/tcl/hwt/docs"))
+    (add-to-list 'tcl-hm-help-directory-list
+                 (concat "C:/Program Files/Altair/" version "/help/hwdref/")))
+
+  (tcl-hm-set-help-version tcl-hm-hm-version)
+
+  (defun tcl-hm-open-hm-command-file ()
+    "Open hm command.tcl file."
+    (interactive)
+    (let (command-file-name)
+      (if (< (string-to-number tcl-hm-hm-version) 14)
+          (setq command-file-name "command.cmf")
+        (setq command-file-name "command.tcl"))
+      (find-file (expand-file-name command-file-name tcl-hm-command-file-dir))))
 
   (defun tcl-eval-buffer (&optional and-go)
     "Send the whole buffer to the inferior Tcl process.
@@ -147,20 +172,6 @@ Prefix argument means switch to the Tcl buffer afterwards."
                "C/Program Files (x86)/TclPro1.4/lib/tclX8.3/help/tcl/")
   (add-to-list 'tcl-help-directory-list
                "C:/Program Files (x86)/TclPro1.4/lib/tkX8.3/help/tk/")
-
-  (defun tcl-hm-set-help-version (version)
-    "Change HyperWorks help VERSION."
-    (interactive (list (read-version)))
-    (setq tcl-hm-help-directory-list nil)
-    (add-to-list 'tcl-hm-help-directory-list
-                 (concat "C:/Program Files/Altair/" version "/hw/tcl/hwt/docs"))
-    (add-to-list 'tcl-hm-help-directory-list
-                 (concat "C:/Program Files/Altair/" version "/help/hwdref/"))
-    )
-  (defsubst read-version ()
-    (let ((versions '("12.0" "13.0" "14.0")))
-      (completing-read "HyperWorks Version(Default: 13.0): " versions nil t nil nil "13.0")))
-  (tcl-hm-set-help-version "12.0")
 
   (modify-syntax-entry ?* "w" tcl-mode-syntax-table)
   (modify-syntax-entry ?_ "w" tcl-mode-syntax-table)

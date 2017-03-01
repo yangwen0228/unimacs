@@ -36,6 +36,15 @@
     (if (region-active-p)
         (mc/my-quit)
       (mc/mark-all-symbols-like-this)))
+
+  ;; mc and highlight-symbol-nav-mode key bindings conflict:
+  (add-hook 'multiple-cursors-mode-enabled-hook
+            (lambda () (when (boundp highlight-symbol-nav-mode)
+                         (highlight-symbol-nav-mode -1))))
+  (add-hook 'multiple-cursors-mode-disabled-hook
+            (lambda () (when (boundp highlight-symbol-nav-mode)
+                         (highlight-symbol-nav-mode +1))))
+
   :config (require 'multiple-cursors))
 
 (provide 'init-multiple-cursors)
