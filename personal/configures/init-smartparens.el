@@ -24,7 +24,6 @@
   (sp-pair "[" "]" :wrap "<C-\[>")
   (sp-pair "{" "}" :wrap "C-{")
   (sp-pair "(" ")" :wrap "C-(")
-  (sp-pair "<" ">" :wrap "C-<")
   (setq sp-navigate-consider-sgml-tags '(html-mode nxml-mode web-mode xml-mode))
   (sp-local-pair 'minibuffer-inactive-mode "'" nil :actions nil)
   (add-hook 'lisp-mode-hook 'turn-on-smartparens-strict-mode)
