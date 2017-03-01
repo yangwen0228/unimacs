@@ -54,6 +54,57 @@
           ;; projectile-root-top-down-recurring ; don't use svn to define root.
           ))
   :config
+  (defun projectile-kill-non-project-buffers (&optional kill-special)
+    "Kill buffers that do not belong to a `projectile' project.
+
+With prefix argument (`C-u'), also kill the special buffers."
+    (interactive "P")
+    (let ((bufs (buffer-list (selected-frame))))
+      (dolist (buf bufs)
+        (with-current-buffer buf
+          (let ((buf-name (buffer-name buf)))
+            (when (or (null (projectile-project-p))
+                      (and kill-special
+                           (string-match "^\*" buf-name)))
+              ;; Preserve buffers with names starting with *scratch or *Messages
+              (unless (string-match "^\\*\\(\\scratch\\|Messages\\)" buf-name)
+                (message "Killing buffer %s" buf-name)
+                (kill-buffer buf))))))))
+
+  (defvar projectile-special-buffers-kill-never-regexps '("\\*scratch.*\\*" "*Messages*"))
+  (setq projectile-special-buffers-kill-never-regexps
+        '("\\*scratch.*\\*" "*Messages*" "*helm ag*" "*helm gtags*" "*helm swoop*"))
+  (defun projectile-kill-non-this-project-buffers (&optional kill-special)
+    "Kill buffers that do not belong to a `projectile' project.
+
+With prefix argument (`C-u'), also kill the special buffers."
+    (interactive "P")
+    (let* ((bufs (buffer-list (selected-frame)))
+           (name (projectile-project-name))
+           (this-proj-bufs (projectile-project-buffers))
+           (del-bufs (cl-set-difference bufs this-proj-bufs))
+           (final-del-bufs '()) bn)
+
+      (dolist (buf del-bufs)
+        (when (buffer-live-p buf)
+          (setq bn (buffer-name buf))
+          (unless (or (cl-find bn projectile-special-buffers-kill-never-regexps
+                               :test (lambda (bn re)
+                                       (if (functionp re)
+                                           (funcall re bn)
+                                         (string-match re bn))))
+                      (get-buffer-process buf)
+                      (and (buffer-file-name buf) (buffer-modified-p buf))
+                      (get-buffer-window buf 'visible))
+            (add-to-list 'final-del-bufs buf t))))
+
+      (if (yes-or-no-p
+           (format "Are you sure you want to kill %d buffer(s) for '%s'? "
+                   (length final-del-bufs) name))
+          ;; we take care not to kill indirect buffers directly
+          ;; as we might encounter them after their base buffers are killed
+          (mapc #'kill-buffer (cl-remove-if 'buffer-base-buffer final-del-bufs)))))
+
   (defun projectile-remove-ignored (files &optional subdirectories)
     "Remove ignored files and folders from FILES.
 
