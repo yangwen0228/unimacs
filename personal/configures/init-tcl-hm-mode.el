@@ -113,7 +113,7 @@ Otherwise, if point is not inside a symbol, return an empty string."
       (when filename
         (kill-new (concat "source {" filename "}"))
         (message "Copied command 'source {%s}' to the clipboard." filename))))
-  (defvar tcl-hm-hm-version 12.0
+  (defvar tcl-hm-hm-version "12.0"
     "HyperWorks version.")
   (defvar tcl-hm-command-file-dir (expand-file-name "documents" (getenv "USERPROFILE")))
   (defun tcl-hm-set-help-version (version)
