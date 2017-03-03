@@ -310,17 +310,14 @@ With a prefix ARG, force recompile all files."
   (mapc 'delete-file (directory-files unimacs-core-dir 't "\.elc$"))
   (mapc 'delete-file (directory-files unimacs-configures-dir 't "\.elc$")))
 
-(defun unimacs-upgrade-errors-resolve ()
+(defun unimacs-resolve-upgrade-errors ()
   "Run this after upgrade unimacs from github, and some package errors occur.
 
 It's hard to fix the errors, then you can run this function to delete all
 the old files, like elpe, tempfiles, etc. Please backup those files before running."
   (interactive)
-  (when (yes-or-no-p "This operation will delete the elpa and tempfiles directories, please backup those files depending on your need. Do you want to proceed?")
-    (unimacs-clear-user-elcs)
-    (delete-directory unimacs-elpa-dir t t)
-    (delete-directory unimacs-tempfiles-dir t t)
-    (load-file (expand-file-name "init.el" unimacs-dir))))
+  (when (yes-or-no-p (format "Please manually delete and backup %s and %s. then restart Emacs, do you want to continue?" unimacs-elpa-dir unimacs-tempfiles-dir))
+    (unimacs-clear-user-elcs)))
 
 (defun unimacs-sudo-edit (&optional arg)
   "Edit currently visited file as root.
