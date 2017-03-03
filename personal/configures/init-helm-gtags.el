@@ -113,7 +113,7 @@
 
   (defun helm-gtags-find-tag-for-tcl-by-ctags (tag)
     "TODO: Workaround for ctags rtags: Use TAG to find all matches, then filter procs."
-    (helm-gtags--common '(helm-source-gtags-pattern) (format "(proc.*%s)|(((\\<variable\\>)|(\\<def.*Var\\>))[ \t]+%s )" tag tag)))
+    (helm-gtags--common '(helm-source-gtags-pattern) (format "(proc[ \t]+[^ \t]*\\<%s[ \t])|(((\\<variable\\>)|(\\<def.*Var\\>))[ \t]+\\<%s[ \t])" tag tag)))
 
   (defun helm-gtags-find-rtag-adapter (tag)
     "Workaround for tcl rtags: TAG: choose function according to major mode."
