@@ -123,7 +123,7 @@
                (mic-delete-overlay (aref mic-paren-overlays 1))
                (mic-delete-overlay (aref mic-paren-overlays 2))))))
 
-(use-package midnight :disabled :ensure nil
+(use-package midnight :ensure nil
   ;; midnight mode purges buffers every midnight-period time.
   :config
   (midnight-mode t)
@@ -210,6 +210,7 @@
   (setq
    smart-tab-disabled-major-modes
    (remove 'org-mode smart-tab-disabled-major-modes)) ; org-mode: yasnippet
+  (setq smart-tab-completion-functions-alist nil)
   :config
   ;; Never use auto-complete and hippie-expand, use yas-expand, so override:
   (defun smart-tab-call-completion-function ()
