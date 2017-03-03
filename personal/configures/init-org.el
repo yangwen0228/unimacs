@@ -22,7 +22,8 @@
                ("C-c c d" . cnblogs-delete-post))
     ;; Bugfix: error url-http-create-request: Multibyte text in HTTP request
     ;; @ http://www.cnblogs.com/yangwen0228/p/6238528.html
-    (defun url-http-create-request (&optional ref-url)
+    (when (boundp 'url-http--encode-string)
+      (defun url-http-create-request (&optional ref-url)
       "Create an HTTP request for `url-http-target-url', referred to by REF-URL."
       (let* ((extra-headers)
              (request nil)
@@ -165,7 +166,7 @@
                    (length request))
           (error "Multibyte text in HTTP request: %s" request))
         (url-http-debug "Request is: \n%s" request)
-        request))
+        request)))
     )
 
   (use-package org-download
