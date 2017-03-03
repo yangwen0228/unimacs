@@ -72,7 +72,7 @@
                                  ) nil t)
              collect
              (propertize (concat (match-string 1) (match-string 2))
-                         'meta (concat (match-string 5) (match-string 6) (match-string 7) (match-string 8) "\n=> file: " (match-string 4))
+                         'meta (concat (match-string 5) (match-string 6) (match-string 7) (match-string 8) " | => file: " (match-string 4))
                          'location (cons (expand-file-name (match-string 4))
                                          (string-to-number (match-string 3)))))))))
 
