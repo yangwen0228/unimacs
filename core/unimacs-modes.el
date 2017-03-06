@@ -39,8 +39,10 @@
   :diminish auto-revert-mode
   :init
   (add-hook 'find-file-hook #'(lambda () (auto-revert-mode 1)))
-  ;; :config (setq global-auto-revert-non-file-buffers t auto-revert-verbose nil)
-  )
+  :config
+  (setq global-auto-revert-non-file-buffers t
+        auto-revert-verbose nil
+        revert-without-query '(".*")))
 
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring))
