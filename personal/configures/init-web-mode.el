@@ -4,7 +4,8 @@
 
 ;;; Code:
 (use-package web-mode
-  :mode (("\\.phtml\\'"    . web-mode)
+  :mode (("\\.xml\\'"      . web-mode)
+         ("\\.phtml\\'"    . web-mode)
          ("\\.wp\\'"       . web-mode)
          ("\\.tmpl\\'"     . web-mode)
          ("\\.php\\'"      . web-mode)

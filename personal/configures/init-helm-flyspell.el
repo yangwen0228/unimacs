@@ -101,12 +101,7 @@ for programming files."
        )
       verified-p))
 
-  (put 'web-mode 'flyspell-mode-predicate 'web-mode-flyspell-verify)
-
-  (add-hook 'nxml-mode-hook
-            (lambda ()
-              (add-to-list 'flyspell-prog-text-faces 'nxml-text-face)))
-  )
+  (put 'web-mode 'flyspell-mode-predicate 'web-mode-flyspell-verify))
 
 (provide 'init-helm-flyspell)
 ;;; init-helm-flyspell.el ends here
