@@ -32,7 +32,7 @@
   (defun mc/mark-all-symbols-like-this-toggle ()
     "Toogle when only one matches!"
     (interactive)
-    (if (region-active-p)
+    (if (or multiple-cursors-mode (region-active-p))
         (mc/my-quit)
       (mc/mark-all-symbols-like-this)))
 
