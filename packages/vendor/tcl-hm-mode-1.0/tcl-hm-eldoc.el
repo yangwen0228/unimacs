@@ -368,6 +368,7 @@ If ONLY-USE-CACHED is non-nil, only look at cached documentation."
     (cond
      ((not thing) nil)
 
+     ((< (length (nth 1 thing)) 3) nil)
      ((member (nth 1 thing) tcl-hm-commands)
       (tcl-hm-get-syntax-from-html (nth 1 thing)))
 
