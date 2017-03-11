@@ -7,4 +7,5 @@
 /.projectile
 */custom.el
 *.elc
+/backups
 /personal/postload/*
