@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: itcl method define
+# key: imethod
+# group: itcl
+# --
+$0protected method ${1:name} {${2:args}}
+itcl::body `(save-excursion (if (string-match "itcl::class\\s-\+\\([^ \t]+\\)" (buffer-string)) (let ((ns (match-string 1 (buffer-string)))) ns)))`::$1 {$2} {
+}
