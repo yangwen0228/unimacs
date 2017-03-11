@@ -317,7 +317,8 @@ It's hard to fix the errors, then you can run this function to delete all
 the old files, like elpe, tempfiles, etc. Please backup those files before running."
   (interactive)
   (when (yes-or-no-p (format "Please manually delete and backup %s and %s. then restart Emacs, do you want to continue?" unimacs-elpa-dir unimacs-tempfiles-dir))
-    (unimacs-clear-user-elcs)))
+    (unimacs-clear-user-elcs)
+    (remove-hook 'kill-emacs-hook 'unimacs-recompile-user-files)))
 
 (defun unimacs-sudo-edit (&optional arg)
   "Edit currently visited file as root.
