@@ -51,7 +51,6 @@
   :config
   (unimacs-company-define-backends
    '((ensime-mode) . (company-ensime company-yasnippet company-dabbrev-code)))
-  (use-package gradle-mode)
   (require 'ensime-expand-region)
   (add-hook 'git-timemachine-mode-hook (lambda () (ensime-mode 0)))
 
