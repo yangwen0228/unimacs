@@ -47,7 +47,7 @@ If not in a project, then use file directory. Otherwise, with an optional arg `C
 
   (defun helm-ag--query ()
     (let* ((searched-word (helm-ag--searched-word))
-           (marked-word (helm-ag--marked-input t))
+           (marked-word (helm-ag--marked-input t)) ; modified: default nil -> t
            (query (read-from-minibuffer "Pattern: "
                                         (or marked-word searched-word)
                                         nil
