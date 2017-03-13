@@ -30,6 +30,35 @@
    '(helm-ag-command-option "--all-text")
    '(helm-ag-insert-at-point 'symbol))
 
+  (defun helm-ag--marked-input (escape)
+    "Bug: [] should be escaped."
+    (when (use-region-p)
+      (let ((input (buffer-substring-no-properties (region-beginning) (region-end))))
+        (deactivate-mark)
+        (if (not escape)
+            input
+          (setq input (replace-regexp-in-string "\\[" "\\\\[" input))
+          (setq input (replace-regexp-in-string "\\]" "\\\\]" input))
+          (setq input (replace-regexp-in-string "\(" "\\\\(" input))
+          (setq input (replace-regexp-in-string "\)" "\\\\)" input))
+          (setq input (replace-regexp-in-string "\{" "\\\\{" input))
+          (setq input (replace-regexp-in-string "\}" "\\\\}" input))
+          (setq input (replace-regexp-in-string "\\$" "\\\\$" input))))))
+
+  (defun helm-ag--query ()
+    (let* ((searched-word (helm-ag--searched-word))
+           (marked-word (helm-ag--marked-input t))
+           (query (read-from-minibuffer "Pattern: "
+                                        (or marked-word searched-word)
+                                        nil
+                                        nil
+                                        'helm-ag--command-history
+                                        (helm-aif (symbol-at-point)
+                                            (symbol-name it)))))
+      (when (string-empty-p query)
+        (error "Input is empty!!"))
+      (setq helm-ag--last-query query)))
+
   (defun helm-ag-projectile ()
     (interactive)
     (helm-ag (projectile-project-root)))

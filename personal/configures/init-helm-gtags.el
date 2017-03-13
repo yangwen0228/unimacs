@@ -39,6 +39,31 @@
         helm-gtags-pulse-at-cursor        t
         helm-gtags-cache-select-result    t
         helm-gtags-cache-max-result-size  (* 10 1024 1024))
+  ;; bug: SPC -> minibuffer-complete-word
+  (defun helm-gtags--read-tagname (type &optional default-tagname)
+    (let ((tagname (helm-gtags--token-at-point type))
+          (prompt (assoc-default type helm-gtags--prompt-alist))
+          (comp-func (assoc-default type helm-gtags-comp-func-alist)))
+      (if (and tagname helm-gtags-use-input-at-cursor)
+          tagname
+        (when (and (not tagname) default-tagname)
+          (setq tagname default-tagname))
+        (when tagname
+          (setq prompt (format "%s(default \"%s\") " prompt tagname)))
+        (let ((completion-ignore-case helm-gtags-ignore-case)
+              (completing-read-function 'completing-read-default))
+          (if (and helm-gtags-direct-helm-completing (memq type '(tag rtag symbol find-file)))
+              (helm-comp-read prompt comp-func
+                              :history 'helm-gtags--completing-history
+                              :exec-when-only-one t
+                              :default tagname)
+            (read-from-minibuffer "Pattern: "
+                                  tagname
+                                  nil
+                                  nil
+                                  'helm-gtags--completing-history
+                                  (helm-aif (symbol-at-point)
+                                      (symbol-name it))))))))
 
   ;; filename encoding is 'GBK, content is utf-8
   (defun helm-gtags--exec-global-command (type input &optional detail)
