@@ -13,17 +13,17 @@
 
 ;;; Code:
 (use-package helm-ag
-  :bind (("C-c M-c" . helm-ag)
-         ("C-c M-r" . helm-ag-select-directory))
+  :bind (("C-c M-r" . helm-ag-dwim))
   :preface
-  ;; helm-ag input search directory.
-  (defun helm-ag-select-directory ()
-    "Like `helm-ag', but ag from selected dir."
+  (defun helm-ag-dwim ()
+    "Like `helm-ag', but use projectile root as default directory.
+
+If not in a project, then use file directory. Otherwise, with an optional arg `C-u' select directory, `C-u C-u' select multiple directories."
     (interactive)
-    (let ((default-directory
-            (file-name-as-directory (read-directory-name "Search directory: " nil nil t))))
-      (helm-ag default-directory)
-      ))
+    (if current-prefix-arg
+        (helm-ag)
+      (helm-ag (condition-case nil (projectile-project-root) (error nil)))))
+
   :config
   (custom-set-variables
    '(helm-ag-base-command "ag --nocolor --nogroup --ignore-case")
@@ -58,10 +58,6 @@
       (when (string-empty-p query)
         (error "Input is empty!!"))
       (setq helm-ag--last-query query)))
-
-  (defun helm-ag-projectile ()
-    (interactive)
-    (helm-ag (projectile-project-root)))
 
   (defun helm-ag--remove-carrige-returns ()
     (when (helm-ag--windows-p)
