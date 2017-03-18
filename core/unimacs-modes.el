@@ -52,6 +52,32 @@
   (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
   (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode))
 
+(use-package dizzee
+  :init
+  (dz-defservice gifcap "licecap.exe" :cd "d:/temp")
+  (dz-defservice keycastow "keycastow.exe")
+  (dz-defservice-group unimacs-gifcap-keycastow
+                       (gifcap keycastow))
+  (defadvice gifcap-start (before gifcap-start activate)
+    ;; set emacs position and size
+    ;; licecap size and position is in utils/extra-bins/gifcap/bin/licecap.ini
+    ;; keycastow position is in utils/extra-bins/gifcap/keycastow.ini
+    (set-frame-position nil 300 100)
+    (set-frame-size     nil 622 500 t))
+  :config
+  (defun dz-comint-pop (name command &optional args dont-pop)
+    "Make a comint buffer for process `name', executing `command' with
+`args' and then pop to that buffer."
+    (ansi-color-for-comint-mode-on)
+    (apply 'make-comint name command nil args))
+
+  (defun dz-subp-stop (name)
+    "Check to see if the process `name' is running stop it if so."
+    (let ((proc (get-buffer-process (concat "*" name "*"))))
+      (when proc (delete-process proc))
+      (when (get-buffer (concat "*" name "*"))
+        (kill-buffer (concat "*" name "*"))))))
+
 (use-package ediff :ensure nil
   :commands (ediff-buffers
              ediff-buffers3 compare-windows
