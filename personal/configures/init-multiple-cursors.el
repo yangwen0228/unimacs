@@ -18,6 +18,7 @@
          ("C-_" . undo)                 ;undo-tree-undo point position wrong.
          ("M-n" . mc/cycle-forward)
          ("M-p" . mc/cycle-backward))
+  :preface (unbind-key "C-S-<mouse-1>")
   :init
   (require 'multiple-cursors)
   (setq mc/insert-numbers-default 1
