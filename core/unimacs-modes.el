@@ -54,7 +54,7 @@
 
 (use-package dizzee
   :init
-  (dz-defservice gifcap "licecap.exe" :cd "d:/temp")
+  (dz-defservice gifcap "licecap.exe")
   (dz-defservice keycastow "keycastow.exe")
   (dz-defservice-group unimacs-gifcap-keycastow
                        (gifcap keycastow))
