@@ -7,9 +7,8 @@
 ;;; Code:
 (use-package helm-flyspell
   :bind (("C-c s t" . flyspell-toggle-dwim)
-         ("C-c s b" . flyspell-buffer-dwim)
-         ("C-c s c" . helm-flyspell-correct))
-  :commands (helm-flyspell-correct flyspell-toggle-dwim flyspell-buffer-dwim)
+         ("C-c s b" . flyspell-buffer-dwim))
+  :commands (flyspell-toggle-dwim flyspell-buffer-dwim)
   :preface
   (defun flyspell-toggle-dwim ()
     "Use `flyspell-mode' for ordinary files, and `flyspell-prog-mode'
@@ -19,6 +18,7 @@ for programming files."
     (require 'helm-flyspell)
     (if flyspell-mode
         (progn
+          (message "Turn off flyspell...")
           (flyspell-mode -1)
           (ispell-kill-ispell t))
       (if (memq major-mode
@@ -31,10 +31,11 @@ for programming files."
       (flyspell-buffer)))
 
   (defun flyspell-buffer-dwim ()
-    "When `flyspell-mode' is on, check the buffer, otherwise, do nothing."
+    "When `flyspell-mode' is on, check the buffer, otherwise, turn on flyspell."
     (interactive)
-    (when flyspell-mode
-      (flyspell-buffer)))
+    (if flyspell-mode
+        (flyspell-buffer)
+      (flyspell-toggle-dwim)))
 
   :config
   (use-package flyspell-lazy
@@ -45,7 +46,7 @@ for programming files."
     (setq flyspell-issue-welcome-flag nil)
     (setq flyspell-issue-message-flag nil)
     (bind-key   "C-," 'flyspell-goto-next-error flyspell-mode-map)
-    (bind-key   "C-." 'flyspell-auto-correct-word flyspell-mode-map)
+    (bind-key   "C-." 'helm-flyspell-correct    flyspell-mode-map)
     (unbind-key "C-;" flyspell-mode-map)
 
     (cond
