@@ -11,8 +11,8 @@
          ("C-M-<"         . mc/skip-to-previous-like-this)
          ("C-c C-<"       . mc/mark-all-like-this)
          ("C-S-<mouse-1>" . mc/add-cursor-on-click)
-         ("C-;"           . mc/mark-all-symbols-like-this-toggle)
-         ("C-:"           . mc/mark-all-symbols-like-this-in-defun)
+         ("C-;"           . mc/mark-all-like-this-dwim)
+         ("C-:"           . mc/mark-all-like-this-in-defun-dwim)
          :map mc/keymap
          ("C-|" . mc/vertical-align-with-space)
          ("C-_" . undo)                 ;undo-tree-undo point position wrong.
@@ -36,6 +36,29 @@
     (if (or multiple-cursors-mode (region-active-p))
         (mc/my-quit)
       (mc/mark-all-symbols-like-this)))
+
+  (defun mc/mark-all-like-this-dwim ()
+    "Toggle when not using region. When using region, search first,
+if only one candidate searched, then quit!"
+    (interactive)
+    (if multiple-cursors-mode
+        (mc/my-quit)
+      (if (not (region-active-p))
+          (mc/mark-all-symbols-like-this)
+        (mc/mark-all-like-this)
+        (unless multiple-cursors-mode
+          (mc/my-quit)))))
+
+  (defun mc/mark-all-like-this-in-defun-dwim ()
+    "Like `mc/mark-all-like-this-dwim', but only in defun."
+    (interactive)
+    (if multiple-cursors-mode
+        (mc/my-quit)
+      (if (not (region-active-p))
+          (mc/mark-all-symbols-like-this-in-defun)
+        (mc/mark-all-like-this-in-defun)
+        (unless multiple-cursors-mode
+          (mc/my-quit)))))
 
   ;; mc and highlight-symbol-nav-mode key bindings conflict:
   (add-hook 'multiple-cursors-mode-enabled-hook
