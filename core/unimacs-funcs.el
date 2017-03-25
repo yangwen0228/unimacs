@@ -111,11 +111,10 @@ point reaches the beginning or end of the buffer, stop there."
   (setq arg (or arg 1))
 
   ;; Move lines first
-  (when (/= arg 1)
-    (forward-line (1- arg)))
+  (when (/= arg 1) (forward-line (1- arg)))
 
   (let ((orig-point (point)))
-    (if line-move-visual
+    (if visual-line-mode
         ;; Move by visual
         (progn
           (beginning-of-visual-line)
@@ -126,6 +125,30 @@ point reaches the beginning or end of the buffer, stop there."
       (back-to-indentation)
       (when (= orig-point (point))
         (beginning-of-line)))))
+
+(defun unimacs-move-end-of-line (arg)
+  "Move to the end of line, if `visual-line-mode' is on, then goto
+
+the end of the visual line. If word wrap is turned off, it goes to
+the beginning of next visual line.
+
+If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move lines first
+  (when (/= arg 1) (forward-line (1- arg)))
+
+  (if visual-line-mode
+      ;; Move by visual, there's a bug in visual-line-mode.
+      ;; If word-wrap is turned off, it goes to the beginning of next line when wrapped.
+      (progn
+        (end-of-visual-line)
+        (unless (or (= (point) (line-end-position)) word-wrap)
+          (backward-char)))
+    ;; Not move by visual
+    (end-of-line)))
 
 (defun unimacs-scroll-up-line (&optional arg)
   "Scroll up 1 line."

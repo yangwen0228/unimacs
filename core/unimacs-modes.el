@@ -287,6 +287,7 @@
   ;; visual-line-mode: manipulate lines by visual mode.
   :defer 0
   :config (global-visual-line-mode t)
+  (add-hook 'visual-line-mode-hook '(lambda () (toggle-word-wrap) (message "")))
   (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)))
 
 (use-package highlight-symbol

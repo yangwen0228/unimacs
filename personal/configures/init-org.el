@@ -9,6 +9,8 @@
          ("C-c k" . org-capture))
   :config
   (add-hook 'org-mode-hook 'org-indent-mode)
+  (unbind-key "C-a" org-mode-map)
+  (unbind-key "C-e" org-mode-map)
   (use-package htmlize)
   (use-package cnblogs :ensure nil
     :init

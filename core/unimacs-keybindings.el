@@ -65,6 +65,7 @@
 (bind-key "C-<backspace>"   'unimacs-kill-line-backward)
 (bind-key "C-S-<backspace>" 'unimacs-kill-whole-line)
 (bind-key "C-a"             'unimacs-move-beginning-of-line)
+(bind-key "C-e"             'unimacs-move-end-of-line)
 (bind-key "C-M-\\"          'unimacs-indent-current-line-or-region)
 (bind-key "C-M-|"           'unimacs-cleanup-buffer)
 (bind-key "C-S-o"           'unimacs-smart-open-line-above)
