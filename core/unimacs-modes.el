@@ -155,9 +155,8 @@
   ;; midnight mode purges buffers every midnight-period time.
   :config
   (midnight-mode t)
-  (midnight-delay-set 'midnight-delay "12:00am")  ; delay to midnight 24:00.
-  (setq clean-buffer-list-delay-general 0)       ; today's buffers.
-  (setq midnight-period 3600)                    ; run / 1 hour
+  (midnight-delay-set 'midnight-delay "9:00") ; start time or seconds to 24:00
+  (setq clean-buffer-list-delay-general 1)    ; clean buffers exceeding 1 day.
 
   (add-to-list 'clean-buffer-list-kill-buffer-names "*vc-dir*")
   (add-to-list 'clean-buffer-list-kill-regexps "\\*helm")
