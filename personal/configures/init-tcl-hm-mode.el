@@ -18,7 +18,7 @@
 
   (unimacs-company-define-backends
    '((tcl-hm-mode tcl-mode) .
-     ((company-keywords company-dabbrev-code)
+     ((company-dabbrev-code :with company-keywords :separate company-yasnippet company-gtags-tcl-rigid)
       company-files company-dabbrev)))
 
   (use-package company-gtags
