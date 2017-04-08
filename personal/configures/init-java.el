@@ -34,14 +34,13 @@
   )
 
 (use-package jdee :disabled
-  :mode ("\\.java$" . jdee-mode)
+  :mode ("\\.java\\'" . jdee-mode)
   :config
   (bind-key "C-<tab>" 'jdee-complete-minibuf jdee-mode-map)
   (setq jdee-server-dir (expand-file-name "jars" unimacs-utils-dir)
         jdee-complete-function 'jdee-complete-minibuf))
 
 (use-package ensime
-  :defer t
   :init
   (put 'ensime-auto-generate-config 'safe-local-variable #'booleanp)
   (setq
@@ -49,8 +48,49 @@
    ensime-startup-notification nil
    ensime-startup-snapshot-notification nil)
   :config
+  ;; company
   (unimacs-company-define-backends
-   '((ensime-mode) . (company-ensime company-yasnippet company-dabbrev-code)))
+   '((ensime-mode) . ((ensime-company company-dabbrev-code :separate company-yasnippet))))
+
+  (bind-key "." 'ensime-completing-dot ensime-mode-map)
+  ;; Interactive commands
+  (defun ensime-completing-dot ()
+    "Insert a period and show company completions."
+    (interactive "*")
+    (unless (= (char-before) ?.)
+      (when (s-matches? (rx (+ (not space)))
+                        (buffer-substring (line-beginning-position) (point)))
+        (delete-horizontal-space t))
+      (cond ((not (and (ensime-connected-p) ensime-completion-style))
+             (insert "."))
+            ((eq ensime-completion-style 'company)
+             (ensime-completing-dot-company)))))
+
+  (defun ensime-completing-dot-company ()
+    (cond (company-backend
+           (company-complete-selection)
+           (ensime-completing-dot))
+          (t
+           (insert ".")
+           (call-interactively 'ensime-company)
+           )))
+
+  ;; eldoc
+  (add-hook 'ensime-mode-hook 'ensime-enable-eldoc)
+  (defun ensime-enable-eldoc ()
+    "Show error message or type name at point by Eldoc."
+    (setq-local eldoc-documentation-function
+                #'(lambda ()
+                    (when (ensime-connected-p)
+                      (let ((msgs (append (ensime-errors-at (point))
+                                          (ensime-implicit-notes-at (point)))))
+                        (if msgs
+                          (let ((msg (mapconcat 'identity msgs "\n")))
+                            (message "%s" msg))
+                          (ensime-print-type-at-point)))
+                      )))
+    (eldoc-mode +1))
+
   (require 'ensime-expand-region)
   (add-hook 'git-timemachine-mode-hook (lambda () (ensime-mode 0)))
 
@@ -83,9 +123,8 @@
   (bind-key "C-c c" 'sbt-command sbt:mode-map)
   (bind-key "C-c e" 'next-error sbt:mode-map))
 
-(use-package java-mode
-  :ensure nil
-  :mode ("\\.java$" . java-mode)
+(use-package cc-mode :ensure nil
+  :mode ("\\.java\\'" . java-mode)
   :init
   (add-hook 'java-mode-hook (lambda () (ensime-mode t)))
   :config
@@ -101,8 +140,7 @@
   (bind-key "C-c e" 'next-error java-mode-map))
 
 (use-package scala-mode
-  :defer t
-  :mode ("\\.scala$" . scala-mode)
+  :mode ("\\.scala\\'" . scala-mode)
   :init
   (setq
    scala-indent:use-javadoc-style t
@@ -115,11 +153,12 @@
   (remove-hook 'post-self-insert-hook
                'scala-indent:indent-on-parentheses)
 
-  (sp-local-pair 'scala-mode "(" nil :post-handlers '(("||\n[i]" "RET")))
-  (sp-local-pair 'scala-mode "{" nil
-                 :post-handlers '(("||\n[i]" "RET")
-                                  ("| " "SPC")
-                                  fommil-sp-wrap-with-brackets))
+  (when (require 'smartparens-mode nil t)
+    (sp-local-pair 'scala-mode "(" nil :post-handlers '(("||\n[i]" "RET")))
+    (sp-local-pair 'scala-mode "{" nil
+                   :post-handlers '(("||\n[i]" "RET")
+                                    ("| " "SPC")
+                                    fommil-sp-wrap-with-brackets)))
 
   (defun scala-mode-newline-comments ()
     "Custom newline appropriate for `scala-mode'."
