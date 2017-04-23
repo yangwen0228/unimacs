@@ -163,11 +163,11 @@
             ;; reference:
             (progn
               (setq pattern (substring pattern 1))
-              (while (re-search-forward (concat ".*?:[0-9]+:\\s-*" pattern) nil t)
+              (while (re-search-forward (concat "^.*?:[0-9]+:\\s-*" pattern) nil t)
                 (delete-region (line-beginning-position) (line-end-position))))
           ;; definition:
           (let ((cur (point-min)))
-            (while (re-search-forward (concat ".*?:[0-9]+:\\s-*" pattern) nil t)
+            (while (re-search-forward (concat "^.*?:[0-9]+:\\s-*" pattern) nil t)
               (unless (= 1 (line-beginning-position))
                 (delete-region cur (1- (line-beginning-position))))
               (setq cur (line-end-position))
