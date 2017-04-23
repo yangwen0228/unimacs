@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: new as arg
+# key: new
+# --
+new ${1:Type}($2)

@@ -1,6 +1,6 @@
 #Author : Jonas Bonèr <jonas@jonasboner.com>
 #name : class T { .. }
 # --
-class ${1:name} {
+class ${1:`(file-name-sans-extension (buffer-name))`} {
   $0
 }

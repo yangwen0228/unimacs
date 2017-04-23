@@ -1,0 +1,5 @@
+#Author : Yang Wen
+#name : println("variable: " + variable)
+#key: prv
+# --
+println("${1:var}: " + $1)
