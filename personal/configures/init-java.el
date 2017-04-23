@@ -30,8 +30,7 @@
     (company-emacs-eclim-setup)
     (unimacs-company-define-backends
      '((java-mode) . (company-emacs-eclim company-dabbrev-code)))
-    (add-to-list 'eclim--file-coding-system-mapping '("chinese-iso-8bit-dos" . "gb2312")))
-  )
+    (add-to-list 'eclim--file-coding-system-mapping '("chinese-iso-8bit-dos" . "gb2312"))))
 
 (use-package jdee :disabled
   :mode ("\\.java\\'" . jdee-mode)
@@ -105,24 +104,7 @@
       (projectile-find-tag)))
   (bind-key "M-." 'ensime-edit-definition-with-fallback ensime-mode-map))
 
-(use-package sbt-mode
-  :commands sbt-start sbt-command
-  :init
-  (setq
-   sbt:prefer-nested-projects t
-   sbt:scroll-to-bottom-on-output nil
-   sbt:default-command ";compile ;test:compile ;it:compile")
-  :config
-  ;; WORKAROUND: https://github.com/hvesalai/sbt-mode/issues/31
-  ;; allows using SPACE when in the minibuffer
-  (substitute-key-definition
-   'minibuffer-complete-word
-   'self-insert-command
-   minibuffer-local-completion-map)
-
-  (bind-key "C-c c" 'sbt-command sbt:mode-map)
-  (bind-key "C-c e" 'next-error sbt:mode-map))
-
+;; java-mode is inside cc-mode, must use cc-mode
 (use-package cc-mode :ensure nil
   :mode ("\\.java\\'" . java-mode)
   :init
@@ -174,6 +156,33 @@
 
   (bind-key "C-c c" 'sbt-command scala-mode-map)
   (bind-key "C-c e" 'next-error scala-mode-map))
+
+;; build tools
+(use-package sbt-mode
+  :commands sbt-command
+  :init
+  (setq
+   sbt:prefer-nested-projects t
+   sbt:scroll-to-bottom-on-output nil
+   sbt:default-command ";compile ;test:compile ;it:compile")
+  :config
+  ;; WORKAROUND: https://github.com/hvesalai/sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+
+  (bind-key "C-c c" 'sbt-command sbt:mode-map)
+  (bind-key "C-c e" 'next-error sbt:mode-map))
+
+(use-package gradle-mode
+  :commands gradle-mode)
+
+(use-package groovy-mode
+  :mode ("\\.gradle\\'" . groovy-mode)
+  :config
+  (use-package groovy-imports))
 
 (provide 'init-java)
 ;;; init-java.el ends here
