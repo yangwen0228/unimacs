@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Use after Type
+# key: new
+# --
+${1:name} = new ${2:`(save-excursion (beginning-of-line) (re-search-forward "[^ \t]") (symbol-at-point))`}($3);$0
