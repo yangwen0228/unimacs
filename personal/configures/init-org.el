@@ -233,6 +233,7 @@ background of code to whatever theme I'm using's background"
         org-export-with-sub-superscripts nil
         org-export-kill-product-buffer-when-displayed t
         )
+  (require 'ox-freemind nil t)
 
   (use-package org-agenda :ensure nil
     :init
