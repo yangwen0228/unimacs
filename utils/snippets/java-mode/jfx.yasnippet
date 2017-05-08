@@ -2,7 +2,7 @@
 # name: JavaFx
 # key: jfx
 # --
-package `(file-name-sans-extension (buffer-name))`;
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/main/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") nil))`
 
 import javafx.application.Application;
 import javafx.scene.Scene;
