@@ -34,12 +34,31 @@
 
 (use-package jdee :disabled
   :mode ("\\.java\\'" . jdee-mode)
+  :commands jdee-mode
   :config
+  (use-package jdee-gradle :ensure nil)
+
+  ;; company
+  (unimacs-company-define-backends
+   '((jdee-mode) . ((company-dabbrev-code company-dabbrev) :separate company-yasnippet)))
+
+  (defun jdee-completing-dot ()
+    "Insert a period and show jdee completions."
+    (interactive "*")
+    (unless (= (char-before) ?.)
+      (when (s-matches? (rx (+ (not space)))
+                        (buffer-substring (line-beginning-position) (point)))
+        (delete-horizontal-space t))
+      (insert ".")
+      (cond (t (jdee-complete-minibuf)))))
+
   (bind-key "C-<tab>" 'jdee-complete-minibuf jdee-mode-map)
+  ;; (bind-key "." 'jdee-completing-dot jdee-mode-map)
   (setq jdee-server-dir (expand-file-name "jars" unimacs-utils-dir)
         jdee-complete-function 'jdee-complete-minibuf))
 
 (use-package ensime
+  :commands ensime-mode
   :init
   (put 'ensime-auto-generate-config 'safe-local-variable #'booleanp)
   (setq
@@ -49,7 +68,7 @@
   :config
   ;; company
   (unimacs-company-define-backends
-   '((ensime-mode) . ((ensime-company company-dabbrev-code :separate company-yasnippet))))
+   '((ensime-mode) . ((ensime-company (company-dabbrev-code company-dabbrev) :separate company-yasnippet))))
 
   (bind-key "." 'ensime-completing-dot ensime-mode-map)
   ;; Interactive commands
@@ -84,8 +103,8 @@
                       (let ((msgs (append (ensime-errors-at (point))
                                           (ensime-implicit-notes-at (point)))))
                         (if msgs
-                          (let ((msg (mapconcat 'identity msgs "\n")))
-                            (message "%s" msg))
+                            (let ((msg (mapconcat 'identity msgs "\n")))
+                              (message "%s" msg))
                           (ensime-print-type-at-point)))
                       )))
     (eldoc-mode +1))
@@ -108,7 +127,7 @@
 (use-package cc-mode :ensure nil
   :mode ("\\.java\\'" . java-mode)
   :init
-  (add-hook 'java-mode-hook (lambda () (ensime-mode t)))
+  (add-hook 'java-mode-hook (lambda () (ensime-mode +1)))
   :config
   (when (require 'cc-mode nil t)
     (defun c-mode-newline-comments ()
@@ -128,7 +147,7 @@
    scala-indent:use-javadoc-style t
    scala-indent:align-parameters t)
   (add-hook 'scala-mode-hook (lambda ()
-                               (ensime-mode t)
+                               (ensime-mode +1)
                                (scala-mode:goto-start-of-code)))
   :config
   ;; prefer smartparens for parens handling
