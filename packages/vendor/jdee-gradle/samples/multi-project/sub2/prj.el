@@ -1,0 +1,2 @@
+
+(example::subproject "sub2")

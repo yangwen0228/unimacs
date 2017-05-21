@@ -1,0 +1,9 @@
+#
+# Emacs backup files
+#
+*~
+\#*\#
+\.\#*
+
+# Generated files
+*.elc

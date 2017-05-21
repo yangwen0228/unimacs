@@ -1,0 +1,72 @@
+//
+// Defines Gradle task that creates the JDEE project file.
+// This is a modified version of the original code found at
+// http://ignatyev-dev.blogspot.com/2013/07/gradle-projects-in-jdee.html
+//
+
+def prj = { project ->
+    "(jdee-set-variables" {
+        "'(jdee-compile-option-directory" ([project.sourceSets.main.output.classesDir])
+
+        "'(jdee-sourcepath" {
+            "'(" (
+                project.sourceSets.main.allSource.srcDirs
+                + project.sourceSets.test.allSource.srcDirs)
+        }
+
+        "'(jdee-build-class-path" {
+            "'(" (
+                [] + project.sourceSets.main.output.classesDir
+                + project.sourceSets.test.output.classesDir)
+        }
+
+        "'(jdee-global-classpath" {
+            "'(" (
+                [] + project.sourceSets.main.output.classesDir
+                + project.sourceSets.test.output.classesDir
+                + project.sourceSets.main.allSource.srcDirs
+                + project.sourceSets.test.allSource.srcDirs
+                + (([] as Set) + project.configurations.compile.getFiles()
+                   + project.configurations.testCompile.getFiles()))
+        }
+    }
+}
+
+subprojects {
+    task jdee() << {
+        def output = new File(project.projectDir, "prj-generated.el").newPrintWriter()
+        output.print ';;\n'
+        output.print ';; This is a generated file.\n'
+        output.print ';; To recreate, run "gradlew jdee".\n'
+        output.print ';;\n'
+        try {
+            prj.delegate = new NodeBuilder() {
+                def lev = 0
+
+                def write = { Object file ->
+                    output.print '\n' + ''.padRight(lev, ' ') +  "\"${file}\"".tr('\\', '/')
+                }
+
+                Object createNode(Object name) {
+                    output.print '\n'  + ''.padRight(lev++, ' ') + name
+                    return name
+                }
+
+                Object createNode(Object name, Object value) {
+                    createNode(name)
+                    value.each write
+                    return name
+                }
+
+                void nodeCompleted(Object parent, Object child) {
+                    output.print ")"
+                    lev--
+                }
+            }
+            prj(project)
+            output.close()
+        } finally {
+            output.flush()
+        }
+    }
+}

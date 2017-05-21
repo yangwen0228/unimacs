@@ -1,0 +1,7 @@
+
+//
+// Emacs project support
+//
+allprojects {
+    apply from: "${rootDir}/src/ide/emacs/jdee.gradle"
+}
