@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: log
+# key: log
+# --
+private static final Logger log = LoggerFactory.getLogger(`(file-name-sans-extension (buffer-name))`.class);
