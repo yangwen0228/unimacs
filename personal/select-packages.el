@@ -80,6 +80,7 @@
         init-web-mode
         init-emmet
         init-java
+        init-sql
         init-javascript
         init-css
         ;; init-html
@@ -98,7 +99,6 @@
         ;; init-cpputils-cmake
         ;; init-compile
 
-        ;; init-sql
         ;; init-csv
         ;; init-haml
         ;; init-slime
