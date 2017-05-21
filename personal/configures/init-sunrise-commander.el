@@ -4,7 +4,6 @@
 
 ;;; Code:
 (use-package sunrise-commander
-  :disabled
   :bind (("C-c x" . sunrise)
          ("C-c X" . sunrise-cd))
   :mode (("\\.srvm\\'" . sr-virtual-mode))
