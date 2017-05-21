@@ -33,19 +33,21 @@
   "Choose the right elpa source by NAME : melpa/popkit.
 
 Because in China mainland, sometimes melpa doesn't work!"
-  (interactive
-   (list (intern (completing-read "Elpa name (default melpa): "
-                                  '("melpa" "popkit")
-                                  nil t nil nil "melpa"))))
-  (unimacs-create-package-archives name)
-  (package-list-packages))
+       (interactive
+        (list (intern (completing-read "Elpa name (default melpa): "
+                                       '("melpa" "popkit")
+                                       nil t nil nil "melpa"))))
+       (unimacs-create-package-archives name)
+       (package-list-packages))
 
 (defun unimacs-create-package-archives (name)
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")))
   (cl-ecase name
     (melpa
      (add-to-list 'package-archives
-                  '("melpa" . "http://melpa.milkbox.net/packages/") t))
+                  '("melpa" . "http://melpa.milkbox.net/packages/") t)
+     (add-to-list 'package-archives
+                  '("SC"   . "http://joseito.republika.pl/sunrise-commander/") t))
     (popkit
      (add-to-list 'package-archives
                   '("popkit" . "http://elpa.popkit.org/packages/") t)
@@ -64,14 +66,13 @@ Because in China mainland, sometimes melpa doesn't work!"
 
 ;; some packages must be loaded, and should not be maintained by selectpackages.el
 (defvar unimacs-packages
-  '(
-    ;; use-package:
-    use-package
-    bind-key
-    diminish
-    ;; core libs:
-    dash f ht s xml-rpc
-    )
+  '(;; use-package:
+        use-package
+        bind-key
+        diminish
+        ;; core libs:
+        dash f s ht xml-rpc
+        )
   "A list of packages to ensure are installed at launch.")
 
 (defun unimacs-packages-installed-p ()
@@ -88,7 +89,7 @@ Because in China mainland, sometimes melpa doesn't work!"
 (defun unimacs-require-packages (packages)
   "Ensure PACKAGES are installed.
 Missing packages are installed automatically."
-  (mapc #'unimacs-require-package packages))
+       (mapc #'unimacs-require-package packages))
 
 (defun unimacs-install-packages ()
   "Install all packages listed in `unimacs-packages'."
@@ -109,18 +110,18 @@ Missing packages are installed automatically."
 Behaves similarly to `package-list-packages', but shows only the packages that
 are installed and are not in `unimacs-packages'.  Useful for
 removing unwanted packages."
-  (interactive)
-  (package-show-package-list
-   (set-difference package-activated-list unimacs-packages)))
+       (interactive)
+       (package-show-package-list
+        (set-difference package-activated-list unimacs-packages)))
 
 (defmacro unimacs-auto-install (extension package mode)
   "When file with EXTENSION is opened triggers auto-install of PACKAGE.
 PACKAGE is installed only if not already present.  The file is opened in MODE."
-  `(add-to-list 'auto-mode-alist
-                `(,extension . (lambda ()
-                                 (unless (package-installed-p ',package)
-                                   (package-install ',package))
-                                 (,mode)))))
+          `(add-to-list 'auto-mode-alist
+                        `(,extension . (lambda ()
+                                         (unless (package-installed-p ',package)
+                                           (package-install ',package))
+                                         (,mode)))))
 
 (defvar unimacs-auto-install-alist
   '(("\\.clj\\'"           clojure-mode    clojure-mode)

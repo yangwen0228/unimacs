@@ -68,8 +68,8 @@
   (defun dz-comint-pop (name command &optional args dont-pop)
     "Make a comint buffer for process `name', executing `command' with
 `args' and then pop to that buffer."
-    (ansi-color-for-comint-mode-on)
-    (apply 'make-comint name command nil args))
+         (ansi-color-for-comint-mode-on)
+         (apply 'make-comint name command nil args))
 
   (defun dz-subp-stop (name)
     "Check to see if the process `name' is running stop it if so."
@@ -215,6 +215,12 @@
 (use-package paradox
   :commands paradox-list-packages)
 
+(use-package popup
+  :commands popup-mode popup-tip
+  :config
+  (custom-set-faces
+   '(popup-tip-face ((t (:background "orange3" :foreground "black"))))))
+
 (use-package rainbow-mode
   :commands rainbow-mode)
 
@@ -307,8 +313,8 @@
         whitespace-style '(face trailing tabs))
   (setq whitespace-display-mappings
         '(;; (newline-mark 10 [172 10]) ; 10 LINE FEED
-          ;; (tab-mark 9 [8680 9] [92 9]); 9 TAB
-          ))
+        ;; (tab-mark 9 [8680 9] [92 9]); 9 TAB
+        ))
   :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode))
 
 (use-package winner
