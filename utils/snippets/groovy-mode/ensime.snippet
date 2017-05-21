@@ -1,0 +1,28 @@
+# -*- mode: snippet -*-
+# name: build.gradle for ensime
+# key: ensime
+# --
+buildscript {
+  repositories {
+    maven {
+      url 'https://oss.jfrog.org/oss-snapshot-local'
+    }
+  }
+
+  dependencies {
+    classpath 'net.coacoas.gradle:ensime-gradle:0.3.0-SNAPSHOT'
+  }
+}
+
+ensime {
+  scalaVersion   '2.12.2'
+  cacheDir       file('.ensime.cache.d')
+
+  javaFlags      '-Xlint', '-wahoowa'
+  compilerArgs   '-Xlint'
+
+  formattingPrefs {
+    indentSpaces   4
+    indentWithTabs false
+  }
+}

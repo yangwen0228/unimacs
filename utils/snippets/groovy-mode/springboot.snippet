@@ -1,0 +1,32 @@
+# -*- mode: snippet -*-
+# name: build.gradle for springboot
+# key: springboot
+# --
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${1:1.5.3.RELEASE}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
+jar {
+    baseName = '${2:`(file-name-base (directory-file-name (file-name-directory (buffer-file-name))))`}'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = ${3:1.8}
+targetCompatibility = $3
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter${4:-web}")
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}

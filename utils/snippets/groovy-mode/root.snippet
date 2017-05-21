@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: build.gradle for root dir
+# key: root
+# --
+buildscript {
+    repositories {
+        maven {
+            url 'http://dl.bintray.com/cjstehno/public'
+        }
+    }
+    dependencies {
+        classpath 'gradle-templates:gradle-templates:${1:1.5}'
+    }
+}
+
+apply plugin:'templates'
