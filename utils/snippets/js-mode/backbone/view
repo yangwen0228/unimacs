@@ -3,7 +3,7 @@
 #key: bv
 # --
 ${1:ns}.${2:name} = Backbone.View.extend({
-    className: "${2:$(un-camelcase-string text)}",
+    className: "${2:$(un-camelcase-string yas-text)}",
 
     events: {
          "${3:event} ${4:selector}" : "${5:funcname}"

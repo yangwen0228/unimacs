@@ -1,14 +1,19 @@
 # -*- mode: snippet -*-
+# import java.io.IOException;
+# import javax.servlet.Filter;
+# import javax.servlet.FilterChain;
+# import javax.servlet.FilterConfig;
+# import javax.servlet.ServletException;
+# import javax.servlet.ServletRequest;
+# import javax.servlet.ServletResponse;
 # name: Filter
 # key: serveletfilter
 # --
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/main/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") nil))`
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 public class ${1:`(file-name-sans-extension (buffer-name))`} implements Filter {
 

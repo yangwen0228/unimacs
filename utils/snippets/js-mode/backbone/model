@@ -10,7 +10,7 @@ ${1:ns}.${2:name} = Backbone.Model.extend({
      },
 
      url: function() {
-         return '/${2:$(downcase text)}/';
+         return '/${2:$(downcase yas-text)}/';
      },
 
      initialize: function(attrs) {
