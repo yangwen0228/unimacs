@@ -26,7 +26,8 @@
    '(yas-field-highlight-face ((t (:inherit secondary-selection)))))
 
   (setq unimacs-yasnippet-dir (expand-file-name "snippets" unimacs-utils-dir))
-  (setq yas-snippet-dirs (list yas-installed-snippets-dir))
+  ;; (setq yas-snippet-dirs (list yas-installed-snippets-dir))
+  (setq yas-snippet-dirs '())
   (when (and (file-exists-p unimacs-yasnippet-dir)
              (not (member unimacs-yasnippet-dir yas-snippet-dirs)))
     (add-to-list 'yas-snippet-dirs unimacs-yasnippet-dir))
