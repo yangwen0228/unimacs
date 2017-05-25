@@ -100,9 +100,8 @@
                                             (url-scheme-get-property
                                              (url-type url-http-target-url) 'default-port))
                                         (format
-                                         "Host: %s:%d\r\n" (puny-encode-domain host)
-                                         (url-port url-http-target-url))
-                                      (format "Host: %s\r\n" (puny-encode-domain host)))
+                                         "Host: %s:%d\r\n" host (url-port url-http-target-url))
+                                      (format "Host: %s\r\n" host))
                                     ;; Who its from
                                     (if url-personal-mail-address
                                         (concat
@@ -168,8 +167,8 @@
                      (length request))
             (error "Multibyte text in HTTP request: %s" request))
           (url-http-debug "Request is: \n%s" request)
-          request)))
-    )
+          request))
+      ))
 
   (use-package org-download
     :bind ("C-S-y" . org-download-clipboard)
@@ -198,13 +197,13 @@
   (defun my/org-inline-css-hook (exporter)
     "Insert custom inline css to automatically set the
 background of code to whatever theme I'm using's background"
-         (when (eq exporter 'html)
-           (let* ((my-pre-bg (face-background 'default))
-                  (my-pre-fg (face-foreground 'default)))
-             (setq
-              org-html-head-extra
-              (format "<style type=\"text/css\">\n code {color: #FF0000}\n pre.src {background-color: %s; color: %s;}</style>\n"
-                      my-pre-bg my-pre-fg)))))
+    (when (eq exporter 'html)
+      (let* ((my-pre-bg (face-background 'default))
+             (my-pre-fg (face-foreground 'default)))
+        (setq
+         org-html-head-extra
+         (format "<style type=\"text/css\">\n code {color: #FF0000}\n pre.src {background-color: %s; color: %s;}</style>\n"
+                 my-pre-bg my-pre-fg)))))
 
   (add-hook 'org-export-before-processing-hook 'my/org-inline-css-hook)
 
@@ -367,7 +366,7 @@ background of code to whatever theme I'm using's background"
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(;; other Babel languages
-   (plantuml . t)))
+     (plantuml . t)))
   (setq org-plantuml-jar-path
         (expand-file-name "jars/plantuml.jar" unimacs-utils-dir))
 
