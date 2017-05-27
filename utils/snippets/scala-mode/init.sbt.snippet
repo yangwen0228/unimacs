@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: init sbt
+# key: init
+# --
+lazy val root = (project in file("."))
+  .settings(
+    scalaVersion := "2.12.2",
+    // scalaVersion := "2.11.8",
+    // scalaVersion := "2.10.6",
+    unmanagedJars in Compile += {
+      val ps = new sys.SystemProperties
+      val jh = ps("java.home")
+      Attributed.blank(file(jh) / "lib/ext/jfxrt.jar")
+    },
+
+    ensimeJavaFlags in ThisBuild := Seq("-Xss2m", "-Xmx2g", "-XX:MaxMetaspaceSize=512m")
+  )
+
+// import org.ensime.EnsimeKeys._
+// ensimeServerJars in ThisBuild := Seq(file("d:/git/ensime-server/target/scala-2.12/ensime_2.12-2.0.0-SNAPSHOT-assembly.jar"))
+

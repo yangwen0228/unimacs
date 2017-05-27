@@ -1,4 +1,6 @@
-#Author : Jonas Bonèr <jonas@jonasboner.com>
-#name : object name extends T
+# -*- mode: snippet -*-
+#name : object
+#key : ob
 # --
-object ${1:name} extends ${2:type} $0
+object ${1:`(file-name-sans-extension (buffer-name))`}$0 {
+}
