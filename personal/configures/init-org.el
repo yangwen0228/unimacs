@@ -12,6 +12,42 @@
   (unbind-key "C-a" org-mode-map)
   (unbind-key "C-e" org-mode-map)
   (use-package htmlize)
+  (use-package epresent
+    :commands epresent-run
+    :config
+    (setq epresent-text-scale 16)
+    (define-derived-mode epresent-mode org-mode "EPresent"
+      "Lalala."
+      ;; make Org-mode be as pretty as possible
+      (add-hook 'org-src-mode-hook 'epresent-setup-src-edit)
+      (setq epresent-inline-image-overlays org-inline-image-overlays)
+      (setq epresent-src-fontify-natively org-src-fontify-natively)
+      (setq org-src-fontify-natively t)
+      (setq org-fontify-quote-and-verse-blocks t)
+      (setq epresent-hide-emphasis-markers org-hide-emphasis-markers)
+      (setq org-hide-emphasis-markers t)
+      (setq epresent-outline-ellipsis
+            (display-table-slot standard-display-table 'selective-display))
+      (set-display-table-slot standard-display-table 'selective-display [32])
+      (setq epresent-pretty-entities org-pretty-entities)
+      (setq org-hide-pretty-entities t)
+      (setq mode-line-format (epresent-get-mode-line))
+      (add-hook 'org-babel-after-execute-hook 'epresent-refresh)
+      (condition-case ex
+          (let ((org-format-latex-options
+                 (plist-put (copy-tree org-format-latex-options)
+                            :scale epresent-format-latex-scale)))
+            (org-preview-latex-fragment '(16)))
+        ('error
+         (message "Unable to imagify latex [%s]" ex)))
+      (unimacs-set-font epresent--frame epresent-text-scale)
+      ;; (set-face-attribute 'default epresent--frame :height epresent-text-scale)
+      ;; fontify the buffer
+      (add-to-invisibility-spec '(epresent-hide))
+      ;; remove flyspell overlays
+      (flyspell-mode-off)
+      (epresent-fontify))
+    )
   (use-package cnblogs :ensure nil
     :init
     (use-package xml-rpc :init (require 'xml-rpc))
