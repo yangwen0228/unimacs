@@ -98,7 +98,12 @@ for programming files."
             (setq verified-p (string= (thing-at-point 'word) "value")))))
         verified-p))
 
-    (put 'web-mode 'flyspell-mode-predicate 'web-mode-flyspell-verify)))
+    (put 'web-mode 'flyspell-mode-predicate 'web-mode-flyspell-verify))
+
+  ;; NOTICE: Hard code this function to prevent hanging during compilation.
+  (defun ispell-check-version (&optional interactivep)
+    (interactive "p")
+    "@(#) International Ispell Version 3.1.20 (but really Aspell 0.60.7-20131207), ispell.el 3.6 - 7-Jan-2003"))
 
 (provide 'init-helm-flyspell)
 ;;; init-helm-flyspell.el ends here
