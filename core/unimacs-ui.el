@@ -65,14 +65,15 @@
                    (abbreviate-file-name (buffer-file-name))
                  "%b"))))
 
-(setq unimacs-font-size 11)
+;; font settings:
+(defvar unimacs-font-size 11)
 (defun unimacs-make-font-string (font-name font-size)
   (if (and (stringp font-size)
            (equal ":" (string (elt font-size 0))))
       (format "%s%s" font-name font-size)
     (format "%s %s" font-name font-size)))
 
-(defun unimacs-set-font ()
+(defun unimacs-set-font (frame font-size)
   "english-font-size could be set to \":pixelsize=18\" or a integer.
 If set/leave chinese-font-size to nil, it will follow english-font-size"
 
@@ -80,53 +81,30 @@ If set/leave chinese-font-size to nil, it will follow english-font-size"
   (let* ((english-fonts '("Consolas" "DejaVu Sans Mono" "Monospace" "Courier New"))
          (chinese-fonts '("新宋体" "黑体" "文泉驿等宽微米黑"))
          (en-font (unimacs-make-font-string (find-if #'x-list-fonts english-fonts)
-                                          unimacs-font-size))
+                                          font-size))
          (zh-font (font-spec :family (find-if #'x-list-fonts chinese-fonts)
                              :size nil)))
     ;; Set the default English font
-    (set-face-attribute 'default nil :font en-font)
+    (set-face-attribute 'default frame :font en-font)
 
     ;; Set Chinese font
     ;; Do not use 'unicode charset, it will cause the English font setting invalid
     (dolist (charset '(kana han symbol cjk-misc bopomofo))
       (set-fontset-font (frame-parameter nil 'font)
                         charset zh-font)))
-  (message "default font size is now %d" unimacs-font-size))
+  (message "default font size is now %d" font-size))
 
-(unimacs-set-font)
-
-(defun font-name-replace-size (font-name new-size)
-  (let ((parts (split-string font-name "-")))
-    (setcar (nthcdr 7 parts) (format "%d" new-size))
-    (mapconcat 'identity parts "-")))
-
-;; not used
-(defun increment-default-font-height (delta)
-  "Adjust the default font height by DELTA on every frame.
-The pixel size of the frame is kept (approximately) the same.
-DELTA should be a multiple of 10, in the units used by the
-:height face attribute."
-  (let* ((new-height (+ (face-attribute 'default :height) delta))
-         (new-point-height (/ new-height 10)))
-    (dolist (f (frame-list))
-      (with-selected-frame f
-        ;; Latest 'set-frame-font supports a "frames" arg, but
-        ;; we cater to Emacs 23 by looping instead.
-        (set-frame-font (font-name-replace-size (face-font 'default)
-                                                new-point-height)
-                        nil)))
-    (set-face-attribute 'default nil :height new-height)
-    (message "default font size is now %d" new-point-height)))
+(unimacs-set-font nil unimacs-font-size)
 
 (defun increase-default-font-height ()
   (interactive)
   (setq unimacs-font-size (1+ unimacs-font-size))
-  (unimacs-set-font))
+  (unimacs-set-font nil unimacs-font-size))
 
 (defun decrease-default-font-height ()
   (interactive)
   (setq unimacs-font-size (1- unimacs-font-size))
-  (unimacs-set-font))
+  (unimacs-set-font nil unimacs-font-size))
 
 (bind-key "C-M-=" 'increase-default-font-height)
 (bind-key "C-M--" 'decrease-default-font-height)

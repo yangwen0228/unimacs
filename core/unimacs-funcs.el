@@ -324,24 +324,17 @@ With a prefix ARG, force recompile all files."
   (interactive
    (list (when current-prefix-arg (setq force t))))
   (when force (unimacs-clear-user-elcs))
-  (byte-recompile-directory unimacs-core-dir 0 force)
-  (byte-recompile-directory unimacs-configures-dir 0 force))
+  (dolist (dir (list unimacs-core-dir unimacs-configures-dir))
+    (byte-recompile-directory dir 0 force))
+  (message "Recompile the configuration files!"))
 
 (defun unimacs-clear-user-elcs ()
   "Delete all the byte-compiled configuration files."
   (interactive)
-  (mapc 'delete-file (directory-files unimacs-core-dir 't "\.elc$"))
-  (mapc 'delete-file (directory-files unimacs-configures-dir 't "\.elc$")))
-
-(defun unimacs-resolve-upgrade-errors ()
-  "Run this after upgrade unimacs from github, and some package errors occur.
-
-It's hard to fix the errors, then you can run this function to delete all
-the old files, like elpe, tempfiles, etc. Please backup those files before running."
-  (interactive)
-  (when (yes-or-no-p (format "Please manually delete and backup %s and %s. then restart Emacs, do you want to continue?" unimacs-elpa-dir unimacs-tempfiles-dir))
-    (unimacs-clear-user-elcs)
-    (remove-hook 'kill-emacs-hook 'unimacs-recompile-user-files)))
+  (dolist (dir (list unimacs-core-dir unimacs-configures-dir))
+    (mapc 'delete-file (directory-files dir 't "\.elc$")))
+  (remove-hook 'kill-emacs-hook 'unimacs-recompile-user-files)
+  (message "The .elc files have been deleted!"))
 
 (defun unimacs-sudo-edit (&optional arg)
   "Edit currently visited file as root.
