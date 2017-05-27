@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+#name : package ..
+#key : pa
+# --
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/main/scala" dirname))) (if (and index (< (+ index 14) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 15))) "") "package "))`
