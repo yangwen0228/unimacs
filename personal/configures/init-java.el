@@ -40,7 +40,7 @@
 
   ;; company
   (unimacs-company-define-backends
-   '((jdee-mode) . ((company-dabbrev-code company-dabbrev) :separate company-yasnippet)))
+   '((jdee-mode) . ((company-dabbrev-code :with company-dabbrev company-yasnippet) company-files)))
 
   (defun jdee-completing-dot ()
     "Insert a period and show jdee completions."
@@ -58,7 +58,6 @@
         jdee-complete-function 'jdee-complete-minibuf))
 
 (use-package ensime
-  :commands ensime-mode
   :init
   (put 'ensime-auto-generate-config 'safe-local-variable #'booleanp)
   (setq
@@ -68,7 +67,7 @@
   :config
   ;; company
   (unimacs-company-define-backends
-   '((ensime-mode) . ((ensime-company (company-dabbrev-code company-dabbrev) :separate company-yasnippet))))
+   '((ensime-mode) . (ensime-company (company-dabbrev-code :with company-dabbrev company-yasnippet) company-files)))
 
   (bind-key "." 'ensime-completing-dot ensime-mode-map)
   ;; Interactive commands
