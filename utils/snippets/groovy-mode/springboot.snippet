@@ -30,3 +30,27 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter${4:-web}")
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
+`(let ((package-name (file-name-base (directory-file-name (file-name-directory (buffer-file-name))))))
+  (f-mkdir "src")
+  (f-mkdir "src/main")
+  (f-mkdir "src/main/java")
+  (f-mkdir (concat "src/main/java/" package-name))
+  (f-mkdir "src/test")
+  (f-mkdir "src/test/java")
+  (f-mkdir (concat "src/test/java/" package-name))
+  (f-mkdir "src/main/resources")
+  (f-mkdir "src/main/resources/templates")
+  (f-mkdir "src/main/resources/static")
+  (f-touch "src/main/resources/applicantion.properties")
+  (with-temp-file (concat "src/main/java/" package-name "/Application.java")
+    (insert "package " package-name ";\n\n")
+    (insert "import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}")))`
