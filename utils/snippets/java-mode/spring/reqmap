@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: @RequestMapping("/")
+# group: spring
+# key: reqmap
+# --
+@RequestMapping("${1:/}")

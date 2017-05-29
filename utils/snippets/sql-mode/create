@@ -1,0 +1,8 @@
+#contributor : Alejandro Espinoza Esparza <aespinoza@structum.com.mx>
+#name : create table ...
+# --
+CREATE TABLE ${2:TableName}
+(
+${3:id} ${4:INT IDENTITY(1,1)} ${5:NOT NULL}
+$0
+)

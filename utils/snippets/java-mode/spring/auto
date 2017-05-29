@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: @Autowired
+# group: spring
+# key: auto
+# --
+private ${1:Type} ${2:val};
+
+@Autowired
+public `(file-name-sans-extension (buffer-name))`($1 $2) {
+this.$2 = $2;
+}$0

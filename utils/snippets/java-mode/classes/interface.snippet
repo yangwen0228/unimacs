@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: interface
+# key: int
+# --
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/main/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") nil))`
+
+public interface ${1:`(file-name-sans-extension (buffer-name))`} extends $2 {
+    $0
+}
