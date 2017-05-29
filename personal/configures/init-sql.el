@@ -6,10 +6,59 @@
 (use-package sql :ensure nil
   :mode ("\\.sql\\'" . sql-mode)
   :commands (sql-mode sql-mysql)
+  :init (add-hook 'sql-mode-hook 'sqlup-mode)
   :config
+  (defun company-sql (command &optional arg &rest ignored)
+    "A `company-mode' completion back-end for interactive sql."
+    (interactive (list 'interactive))
+    (case command
+      ('interactive (company-begin-backend 'company-sql))
+      ('prefix (and (derived-mode-p 'sql-interactive-mode)
+                    (not (company-in-string-or-comment))
+                    (company-sql--grab-symbol)))
+      ('candidates (sql-mysql-complete-command-company arg))))
+
+  (defun company-sql--grab-symbol ()
+    (let ((symbol (company-grab-symbol)))
+      (when symbol
+        (cons symbol
+              (save-excursion
+                (let ((pos (point)))
+                  (goto-char (- (point) (length symbol)))
+                  (while (eq (char-before) ?.)
+                    (goto-char (1- (point)))
+                    (skip-syntax-backward "w_"))
+                  (- pos (point))))))))
+
+  ;; completion functions
+  (defun sql-mysql-complete-command-company (opt)
+    (when opt
+      (all-completions (upcase opt) sql-mysql-command-alist)))
+
+  (defun sql-mysql-complete-comopt ()
+    (let ((opt (comint-match-partial-filename))
+          (cmd (upcase (save-excursion
+                         (comint-bol nil)
+                         (skip-chars-forward " \t")
+                         (current-word)))))
+      (when opt
+        (let ((success (let ((comint-completion-addsuffix nil))
+                         (comint-dynamic-simple-complete
+                          (upcase opt)
+                          (assoc cmd sql-mysql-command-option-alist)))))
+          (when success
+            (upcase-region (save-excursion (backward-word) (point))
+                           (point))
+            (if (and (memq success '(sole shortest))
+                     comint-completion-addsuffix)
+                (insert " ")))
+          success))))
+
+  (unimacs-company-define-backends
+   '((sql-mode) . (company-dabbrev :with company-yasnippet)))
+
   (use-package sql-indent)
-  (use-package sqlup-mode
-    :init (sqlup-mode +1))
+  (use-package sqlup-mode)
 
   (setq sql-mysql-program "c:/Program Files/MySQL/MySQL Server 5.7/bin/mysql.exe")
   (setq sql-mysql-options '("-C" "-f" "-t" "-n")) ; for windows
@@ -20,7 +69,7 @@
           (server :default "localhost")
           (port :default 3306)))
 
-;;; hooks
+  ;; hooks
   (add-hook 'sql-interactive-mode-hook
             (lambda ()
               (toggle-truncate-lines t)
@@ -30,7 +79,7 @@
             (lambda ()
               (setq-local ac-ignore-case t)))
 
-;;; server list
+  ;; server list
   (setq sql-connection-alist
         '((local.mysql (sql-product 'mysql)
                        (sql-port 3306)
@@ -39,7 +88,7 @@
                        (sql-database "test"))
           ))
 
-;;; TODO update this function
+  ;; TODO update this function
   (defun tmtxt/sql-connect-server (connection)
     "Connect to the input server using tmtxt/sql-servers-list"
     (interactive
