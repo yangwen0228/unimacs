@@ -53,7 +53,10 @@
     (sp-local-pair "\\[" "\\]")
     (sp-local-pair "hwi OpenStack" "hwi CloseStack")
     (sp-local-pair "OpenStack" "CloseStack"))
-
+  (sp-with-modes 'java-mode
+    (sp-local-pair "<" ">" :when '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC"))))
+  (sp-with-modes 'scala-mode
+    (sp-local-pair "<" ">" :when '(sp-point-after-word-p) :post-handlers '(("[d1]" "SPC"))))
   :diminish (smartparens-mode smartparens-global-mode))
 
 (provide 'init-smartparens)
