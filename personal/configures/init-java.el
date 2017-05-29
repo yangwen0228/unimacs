@@ -65,6 +65,10 @@
    ensime-startup-notification nil
    ensime-startup-snapshot-notification nil)
   :config
+  (unbind-key "M-n" ensime-mode-map)
+  (unbind-key "M-p" ensime-mode-map)
+  (unbind-key "M-," ensime-mode-map)
+  (unbind-key "M-." ensime-mode-map)
   ;; company
   (unimacs-company-define-backends
    '((ensime-mode) . (ensime-company (company-dabbrev-code :with company-dabbrev company-yasnippet) company-files)))
