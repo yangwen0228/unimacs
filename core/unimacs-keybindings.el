@@ -83,6 +83,9 @@
 (bind-key "C-S-M-h"         'unimacs-copy-func)
 (bind-key "C-x H"           'unimacs-copy-whole-buffer)
 
+(bind-key "C-M-v"           '(lambda () (interactive) (scroll-other-window 1)))
+(bind-key "C-M-S-v"         '(lambda () (interactive) (scroll-other-window-down 1)))
+
 (bind-key "<wheel-down>"        'unimacs-scroll-up-line)
 (bind-key "<wheel-up>"          'unimacs-scroll-down-line)
 (bind-key "<double-wheel-down>" '(lambda () (interactive) (unimacs-scroll-up-line 2)))
