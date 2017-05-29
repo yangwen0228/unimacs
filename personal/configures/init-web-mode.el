@@ -21,15 +21,16 @@
          ("\\.html?\\'"    . web-mode)
          ("\\.xul?\\'"     . web-mode))
   :config
+  (use-package company-web
+    :bind ("C-<tab>" . company-web-html))
+  (unimacs-company-define-backends
+   '((web-mode) . ((company-dabbrev-code :with company-dabbrev company-yasnippet) company-files)))
   (add-hook 'web-mode-hook
             (lambda ()
-              (set (make-local-variable 'company-backends) (append company-backends '((company-web-html company-web-jade company-yasnippet))))
-              ;; (flyspell-mode 1)
               (remove-hook 'yas-after-exit-snippet-hook
                            'web-mode-yasnippet-exit-hook t)
               (remove-hook 'yas/after-exit-snippet-hook
-                           'web-mode-yasnippet-exit-hook t)
-              ))
+                           'web-mode-yasnippet-exit-hook t)))
   ;; make org-mode export fail, I use evil and evil-matchit
   ;; to select text, so expand-region.el is not used
   (remove-hook 'web-mode-hook 'er/add-web-mode-expansions)
