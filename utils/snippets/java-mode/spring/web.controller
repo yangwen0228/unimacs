@@ -1,23 +1,25 @@
 # -*- mode: snippet -*-
-# name: web controller
+# name: web controller template
 # group: spring
 # key: web.control
 # --
-`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/main/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") nil))`
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") "package ;"))`
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
-@RequestMapping("${1:/}")
 public class ${2:`(file-name-sans-extension (buffer-name))`} {
-    private ${3:Demo}Repository ${3:$(s-downcase yas-text)}Repository;
-
     @Autowired
-    public $2($3Repository ${3:$(s-downcase yas-text)}Repository) {
-        this.${3:$(s-downcase yas-text)}Repository = ${3:$(s-downcase yas-text)}Repository;
+    ${3:Demo}Repository ${3:$(s-downcase yas-text)}Repo;
+
+    @RequestMapping("/")
+    public String ${4:home}(Model model)
+    {
+        model.addAttribute("${3:$(s-downcase yas-text)}s", ${3:$(s-downcase yas-text)}Repo.findAll());
+        return "index";
     }
     $0
 }

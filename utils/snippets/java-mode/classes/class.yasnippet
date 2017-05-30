@@ -2,7 +2,7 @@
 # name: class
 # key: cla
 # --
-`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/main/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") nil))`
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") "package ;"))`
 
 public class ${1:`(file-name-sans-extension (buffer-name))`}$2 {
     $0

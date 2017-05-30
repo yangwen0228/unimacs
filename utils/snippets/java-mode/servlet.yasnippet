@@ -7,7 +7,7 @@
 # name: HttpServlet
 # key: servlet
 # --
-`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/main/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") nil))`
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") "package ;"))`
 
 import java.io.*;
 import javax.servlet.*;

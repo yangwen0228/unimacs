@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: import for repository
+# name: import for @Repository
 # group: spring
 # key: imp.rep
 # --

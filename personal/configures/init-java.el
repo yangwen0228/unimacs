@@ -71,7 +71,7 @@
   (unbind-key "M-." ensime-mode-map)
   ;; company
   (unimacs-company-define-backends
-   '((ensime-mode) . (ensime-company (company-dabbrev-code :with company-dabbrev company-yasnippet) company-files)))
+   '((ensime-mode) . ((company-dabbrev-code :with company-dabbrev company-yasnippet ensime-company) company-files)))
 
   (bind-key "." 'ensime-completing-dot ensime-mode-map)
   ;; Interactive commands
