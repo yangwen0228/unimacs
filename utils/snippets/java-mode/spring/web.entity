@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: web entity template
+# group: spring
+# key: web.entity
+# --
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") "package ;"))`
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+public class ${2:`(file-name-sans-extension (buffer-name))`} {
+    @Id @GeneratedValue(strategy=GenerationType.AUTO)
+    $0
+}

@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: init springboot project
+# key: springboot
+# --
+lazy val commonSettings = Seq(
+  organization := "${1:com.example}",
+  version := "${2:0.1.0}",
+  scalaVersion := "2.12.2",
+  ensimeJavaFlags in ThisBuild := Seq("-Xss2m", "-Xmx2g", "-XX:MaxMetaspaceSize=512m")
+)
+
+lazy val root = (project in file("."))
+  .settings(
+    commonSettings,
+    name := "${3:`(file-name-base (directory-file-name (file-name-directory (buffer-file-name))))`}"
+  )
+
+libraryDependencies += "org.springframework.boot" % "spring-boot-starter-web" % "latest.integration"
+// libraryDependencies += "org.springframework.boot" % "spring-boot-starter-data-jpa" % "latest.integration"
+// libraryDependencies += "org.springframework.boot" % "spring-boot-starter-thymeleaf" % "latest.integration"
+// libraryDependencies += "com.h2database" % "h2" % "latest.integration"
+// libraryDependencies += "mysql" % "mysql-connector-java" % "latest.integration"
+libraryDependencies += "org.springframework.boot" % "spring-boot-starter-test" % "latest.integration"
+
+// import org.ensime.EnsimeKeys._
+// ensimeServerJars in ThisBuild := Seq(file("d:/git/ensime-server/target/scala-2.12/ensime_2.12-2.0.0-SNAPSHOT-assembly.jar"))
