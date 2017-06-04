@@ -97,8 +97,8 @@
                  ("gtags"  utf-8 . utf-8)
                  ("ctags"  utf-8 . utf-8)
                  ("ag"     utf-8 . utf-8)
-                 ("java"   gbk-dos . gbk-dos)
-                 ("javac"  gbk-dos . gbk-dos)
+                 ("java"   utf-8 . utf-8)
+                 ("javac"  utf-8 . utf-8)
                  ))
   )
 

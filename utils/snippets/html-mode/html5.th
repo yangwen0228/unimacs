@@ -17,9 +17,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.id}">Id</td>
-                    <td th:text="${user.name}">Name</td>
+                <tr th:each="${2:user} : $\{${3:users}\}">
+                    <td th:text="$\{$2.id\}">Id</td>
+                    <td th:text="$\{$2.name\}">Name</td>
                 </tr>
             </tbody>
         </table>

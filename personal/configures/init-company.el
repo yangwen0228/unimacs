@@ -33,8 +33,11 @@
           (add-hook hook func)))))
   :config
   (global-company-mode t)
-  (unimacs-company-define-backends '((c-mode c++-mode objc-mode) . ((company-irony company-dabbrev-code) company-c-headers)))
-  (unimacs-company-define-backends '((web-mode) . (company-web-html company-dabbrev-code company-css company-files)))
+  (unimacs-company-define-backends
+   '((c-mode c++-mode objc-mode) . ((company-irony :with company-yasnippet)
+                                    (company-dabbrev-code :with company-dabbrev company-yasnippet)
+                                    company-c-headers company-files)))
+  ;; (unimacs-company-define-backends '((web-mode) . (company-web-html company-dabbrev-code company-css company-files)))
 
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "C-j") 'company-show-location)

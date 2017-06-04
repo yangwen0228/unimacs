@@ -69,9 +69,25 @@
   (unbind-key "M-p" ensime-mode-map)
   (unbind-key "M-," ensime-mode-map)
   (unbind-key "M-." ensime-mode-map)
-  ;; company
+  ;; already PR
+  (defun ensime-get-completions-async
+    (max-results case-sense callback)
+  (ensime-rpc-async-completions-at-point
+   max-results case-sense
+   (lexical-let ((continuation callback))
+     (lambda (info)
+       (let* ((candidates (remove-if
+                           '(lambda (candidate)
+                              (string-match "\\$" (getf candidate :name)))
+                           (plist-get info :completions)))
+              (candidates (ensime--annotate-completions candidates)))
+         (funcall continuation candidates))))))
+  ;; company: If ensime is on, use ensime and yasnippet. Otherwise, use dabbrev and yasnippet.
+  (setq ensime-company-case-sensitive t)
   (unimacs-company-define-backends
-   '((ensime-mode) . ((company-dabbrev-code :with company-dabbrev company-yasnippet ensime-company) company-files)))
+   '((ensime-mode) . ((ensime-company :with company-yasnippet)
+                      (company-dabbrev-code :with company-dabbrev company-yasnippet)
+                      company-files)))
 
   (bind-key "." 'ensime-completing-dot ensime-mode-map)
   ;; Interactive commands

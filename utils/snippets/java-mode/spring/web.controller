@@ -19,7 +19,7 @@ public class ${2:`(file-name-sans-extension (buffer-name))`} {
     public String ${4:home}(Model model)
     {
         model.addAttribute("${3:$(s-downcase yas-text)}s", ${3:$(s-downcase yas-text)}Repo.findAll());
-        return "index";
+        return "$4";
     }
     $0
 }

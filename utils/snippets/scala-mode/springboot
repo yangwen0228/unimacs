@@ -6,6 +6,7 @@ lazy val commonSettings = Seq(
   organization := "${1:com.example}",
   version := "${2:0.1.0}",
   scalaVersion := "2.12.2",
+  javacOptions ++= Seq("-encoding", "UTF-8"),
   ensimeJavaFlags in ThisBuild := Seq("-Xss2m", "-Xmx2g", "-XX:MaxMetaspaceSize=512m")
 )
 

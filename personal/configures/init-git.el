@@ -4,7 +4,8 @@
 
 ;;; Code:
 
-(use-package magit :disabled
+(use-package magit
+  :commands magit-mode
   :config
   (setq magit-save-some-buffers nil
         magit-process-popup-time 10
@@ -207,6 +208,11 @@
   (setq magit-highlight-overlay t)
   ;; }}
   )
+;; require curl
+(use-package gitter :disabled
+  :commands gitter
+  :config
+  (setq gitter-token "c1024ce4d68a1b8a4780b6a104ffcbd3895ff976"))
 
 (provide 'init-git)
 ;;; init-git.el ends here
