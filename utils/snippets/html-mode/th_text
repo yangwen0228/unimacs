@@ -1,0 +1,4 @@
+#name : th:text
+#group : thymeleaf
+# --
+th:text="$\{$1\}"

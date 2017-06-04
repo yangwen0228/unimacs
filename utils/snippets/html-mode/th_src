@@ -1,0 +1,4 @@
+#name : th:src
+#group : thymeleaf
+# --
+th:src="@{$1}"

@@ -1,0 +1,4 @@
+#name : th:if
+#group : thymeleaf
+# --
+th:if="$\{$1\}"

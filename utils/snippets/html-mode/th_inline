@@ -1,0 +1,4 @@
+#name : th:inline
+#group : thymeleaf
+# --
+th:inline="javascript"
