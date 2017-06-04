@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: setter
+# key: set
+# --
+public void set${1:Name}(${2:String} ${1:$(s-lower-camel-case yas-text)}) {
+    this.${1:$(s-lower-camel-case yas-text)} = ${1:$(s-lower-camel-case yas-text)};
+}
