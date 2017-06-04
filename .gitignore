@@ -9,3 +9,4 @@
 *.elc
 /backups
 /personal/postload/*
+./
