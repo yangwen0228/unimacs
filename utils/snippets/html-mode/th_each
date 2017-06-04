@@ -1,4 +1,4 @@
 #name : th:each
 #group : thymeleaf
 # --
-th:each"$1: $\{$2\}"
+th:each="$1: $\{$2\}"
