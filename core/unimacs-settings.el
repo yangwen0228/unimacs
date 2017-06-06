@@ -82,7 +82,7 @@
 (set-selection-coding-system 'utf-8-unix)
 (set-clipboard-coding-system 'utf-8-unix)
 (set-file-name-coding-system 'utf-8-unix)
-(setq-default buffer-file-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8-unix)
 
 ;; Chinese filenames in shell commands.
 (when (eq system-type 'windows-nt)
