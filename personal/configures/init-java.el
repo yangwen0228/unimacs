@@ -89,6 +89,7 @@
                       (company-dabbrev-code :with company-dabbrev company-yasnippet)
                       company-files)))
 
+  (bind-key "C-<tab>" 'company-dabbrev-code ensime-mode-map)
   (bind-key "." 'ensime-completing-dot ensime-mode-map)
   ;; Interactive commands
   (defun ensime-completing-dot ()
@@ -221,6 +222,14 @@
   :mode ("\\.gradle\\'" . groovy-mode)
   :config
   (use-package groovy-imports))
+
+(use-package restclient
+  :mode ("\\.rest\\'" . restclient-mode)
+  :commands restclient-mode
+  :config
+  (use-package company-restclient)
+  (unimacs-company-define-backends
+   '((restclient-mode) . ((company-restclient :with company-dabbrev company-dabbrev company-yasnippet) company-files))))
 
 (provide 'init-java)
 ;;; init-java.el ends here
