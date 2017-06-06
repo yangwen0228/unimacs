@@ -310,7 +310,7 @@
   :init
   (global-whitespace-mode)
   (setq whitespace-line-column 120
-        whitespace-style '(face trailing tabs))
+        whitespace-style '(face trailing tabs lines-tail))
   (setq whitespace-display-mappings
         '(;; (newline-mark 10 [172 10]) ; 10 LINE FEED
           ;; (tab-mark 9 [8680 9] [92 9]); 9 TAB
@@ -319,8 +319,8 @@
 
 (use-package winner
   ;; window layout undo/redo
-  :bind (("C-c ," . winner-undo)
-         ("C-c ." . winner-redo))
+  :bind (("C-," . winner-undo)
+         ("C-." . winner-redo))
   :init (winner-mode 1))
 
 (use-package whole-line-or-region
