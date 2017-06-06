@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: import cur package
+# group: spring
+# key: imp.curpkg
+# --
+import `(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ""))`;
