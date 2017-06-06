@@ -23,6 +23,7 @@
         init-emacs
         init-exec-path
         init-dired
+        init-trees
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
@@ -59,7 +60,6 @@
         init-hideshow ;  folding
         ;; init-origami ;  folding
         init-comment-dwim-2 ; evil-nerd-commentar
-        init-ztree ; compare like beyond compare
         ;;-------------------------------------------------------------------
         ;; auto company && auto check
         ;;-------------------------------------------------------------------
