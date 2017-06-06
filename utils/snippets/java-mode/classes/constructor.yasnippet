@@ -1,7 +1,22 @@
 # -*- mode: snippet -*-
-# name: constructor
+# name: constructor for variables
 # key: con
 # --
-public ${1:`(file-name-sans-extension (buffer-name))`}($2) {
-    $0
+public ${1:`(file-name-sans-extension (buffer-name))`}() {
 }
+
+public $1(`(save-excursion
+  (goto-char (point-min))
+  (string-join (cl-loop
+   while
+   (re-search-forward (concat "^\\s-*private\\s-+\\([^ \t]+\\)\\s-+\\(\\w+\\)\\s-*;") nil t)
+   collect
+   (concat (match-string-no-properties 1) " " (match-string-no-properties 2))) ", "))`) {
+   `(save-excursion
+  (goto-char (point-min))
+  (string-join (cl-loop
+   while
+   (re-search-forward (concat "^\\s-*private\\s-+\\([^ \t]+\\)\\s-+\\(\\w+\\)\\s-*;") nil t)
+   collect
+   (concat "this." (match-string-no-properties 2) " = " (match-string-no-properties 2) ";")) "\n"))`
+}$0

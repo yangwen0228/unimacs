@@ -22,6 +22,7 @@ libraryDependencies += "org.springframework.boot" % "spring-boot-starter-web" % 
 // libraryDependencies += "com.h2database" % "h2" % "latest.integration"
 // libraryDependencies += "mysql" % "mysql-connector-java" % "latest.integration"
 libraryDependencies += "org.springframework.boot" % "spring-boot-starter-test" % "latest.integration"
+libraryDependencies += "junit" % "junit" % "latest.integration"
 
 // import org.ensime.EnsimeKeys._
 // ensimeServerJars in ThisBuild := Seq(file("d:/git/ensime-server/target/scala-2.12/ensime_2.12-2.0.0-SNAPSHOT-assembly.jar"))

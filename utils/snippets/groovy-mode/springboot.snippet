@@ -3,15 +3,29 @@
 # key: springboot
 # --
 buildscript {
+    ext {
+        springBootVersion = '${1:1.5.3.RELEASE}'
+    }
     repositories {
-        mavenCentral()
+        // mavenCentral()
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${1:1.5.3.RELEASE}")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:$\{springBootVersion\}")
+        // classpath('se.transmode.gradle:gradle-docker:1.2')
+    }
+}
+
+allprojects {
+    repositories {
+        // mavenCentral()
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
     }
 }
 
 apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
 jar {
@@ -28,46 +42,17 @@ targetCompatibility = $3
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter${4:-web}")
+    // compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    // compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    // compile("com.h2database:h2")
+    // compile("mysql:mysql-connector-java")
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile("junit:junit")
 }
-`(let ((groupId "")
-       (artifactId (file-name-base (directory-file-name (file-name-directory (buffer-file-name))))))
-  (f-mkdir "src")
-  (f-mkdir "src/main")
-  (f-mkdir "src/main/java")
-  (f-mkdir (concat "src/main/java/" artifactId))
-  (f-mkdir "src/test")
-  (f-mkdir "src/test/java")
-  (f-mkdir (concat "src/test/java/" artifactId))
-  (f-mkdir "src/main/resources")
-  (f-mkdir "src/main/resources/templates")
-  (f-mkdir "src/main/resources/static")
-  (f-touch "src/main/resources/application.properties")
-  (with-temp-file (concat "src/main/java/" artifactId "/Application.java")
-    (insert "package " artifactId ";\n\n")
-    (insert "import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-public class Application {
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+eclipse {
+    classpath {
+        containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+        containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
     }
-}"))
-  (with-temp-file (concat "src/test/java/" artifactId "/ApplicationTest.java")
-    (insert "package " artifactId ";\n\n")
-    (insert "import static org.junit.Assert.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class ApplicationTest {
-    @Test
-    public void contextLoads() {
-    }
-}")))`
+}
