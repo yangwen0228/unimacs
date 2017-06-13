@@ -28,7 +28,9 @@
 -/.*image/
 -/libs/encoding
 -/.*.dll$
-"))))
+")))
+    ;; Add to the know projects.
+    (projectile-add-known-project dir))
   :config
   (helm-projectile-on)
   (projectile-mode t))
