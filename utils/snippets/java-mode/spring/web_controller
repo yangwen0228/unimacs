@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: web controller template
+# group: spring
+# --
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") "package ;"))`
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class ${2:`(file-name-sans-extension (buffer-name))`} {
+    @Autowired
+    ${3:Demo}Repository ${3:$(s-downcase yas-text)}Repo;
+
+    @RequestMapping("/")
+    public String ${4:home}(Model model)
+    {
+        model.addAttribute("${3:$(s-downcase yas-text)}s", ${3:$(s-downcase yas-text)}Repo.findAll());
+        return "$4";
+    }
+    $0
+}

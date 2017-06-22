@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: private static final
+# key: pri_sf
+# --
+private static final 

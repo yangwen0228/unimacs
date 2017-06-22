@@ -1,0 +1,66 @@
+# -*- mode: snippet -*-
+# name: init springboot dirs
+# key: sb_init_dir
+# --
+`(let* ((group-id (save-excursion
+                  (goto-char (point-min))
+                  (re-search-forward "organization\\s-*:=\\s-*\"" nil t)
+                  (let ((beg (point)))
+                    (if (= beg 1)
+                        ""
+                      (search-forward "\"")
+                      (substring-no-properties (buffer-string) (1- beg) (1- (1- (point))))))))
+       (group-dir (subst-char-in-string ?. ?/ group-id))
+       (artifact-id (save-excursion
+                     (goto-char (point-min))
+                     (re-search-forward "name\\s-*:=\\s-*\"" nil t)
+                     (let ((beg (point)))
+                       (if (= beg 1)
+                           ""
+                         (search-forward "\"")
+                         (substring-no-properties (buffer-string) (1- beg) (1- (1- (point))))))))
+       (main-pkg-dir (if (string= group-dir "")
+                       (concat "src/main/java/" artifact-id)
+                     (concat "src/main/java/" group-dir "/" artifact-id)))
+       (test-pkg-dir (if (string= group-dir "")
+                       (concat "src/test/java/" artifact-id)
+                       (concat "src/test/java/" group-dir "/" artifact-id)))
+       (pkg-name (concat group-id "." artifact-id)))
+  (mkdir main-pkg-dir ".")
+  (mkdir test-pkg-dir ".")
+  (f-mkdir "src/main/resources")
+  (f-mkdir "src/main/resources/templates")
+  (f-mkdir "src/main/resources/static")
+  (f-touch "src/main/resources/application.properties")
+  (f-mkdir "src/test/resources")
+  (f-mkdir "src/test/resources/templates")
+  (f-mkdir "src/test/resources/static")
+  (f-touch "src/test/resources/application.properties")
+  (with-temp-file (concat main-pkg-dir "/Application.java")
+    (insert "package " pkg-name ";\n\n")
+    (insert "import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}"))
+  (with-temp-file (concat test-pkg-dir "/ApplicationTest.java")
+    (insert "package " pkg-name ";\n\n")
+    (insert "import static org.junit.Assert.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class ApplicationTest {
+    @Test
+    public void contextLoads() {
+    }
+}")))`
