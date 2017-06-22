@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: class nested static
+# --
+public staitc class ${1:Name} {
+    $0
+}

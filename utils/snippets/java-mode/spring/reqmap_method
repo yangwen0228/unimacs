@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: @RequestMapping("/") with method
+# group: spring
+# --
+@RequestMapping("/${1:test}")
+${2:public }${3:String} $1($5) {
+     return "$4";
+}

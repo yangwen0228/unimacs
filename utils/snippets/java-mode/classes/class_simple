@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: class simple
+# --
+class ${1:Name} {
+    $0
+}

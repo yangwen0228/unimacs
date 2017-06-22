@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: class public
+# --
+public class ${1:Name} {
+    $0
+}

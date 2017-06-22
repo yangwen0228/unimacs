@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: web simple controller
+# group: spring
+# --
+`(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") "package ;"))`
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class ${2:`(file-name-sans-extension (buffer-name))`} {
+    @RequestMapping("/")
+    @ResponseBody
+    public String ${3:hello}()
+    {
+        return "Hello, world!";
+    }$0
+}

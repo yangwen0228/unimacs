@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: @RequestMapping(value,method)
+# group: spring
+# --
+@RequestMapping(value="${1:/}", method=RequestMethod.${2:GET})

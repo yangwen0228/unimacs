@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: finally
+# key: fina
+# --
+finally {
+    $0
+}
