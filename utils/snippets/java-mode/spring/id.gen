@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: @Id @GeneratedValue
-# group: spring
-# key: id.gen
-# --
-@Id @GeneratedValue(strategy=GenerationType.AUTO)

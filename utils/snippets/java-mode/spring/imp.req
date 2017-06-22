@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: import for @RequestMapping
-# group: spring
-# key: imp.req
-# --
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;

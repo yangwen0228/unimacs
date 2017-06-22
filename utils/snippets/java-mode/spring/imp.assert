@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: import assertEquals
-# group: spring
-# key: imp.assert
-# --
-import static org.junit.Assert.assertEquals;
