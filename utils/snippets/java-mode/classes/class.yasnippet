@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: class
+# name: class with package
 # key: cla
 # --
 `(let* ((dirname (directory-file-name (file-name-directory (buffer-file-name)))) (index (string-match "src/\\(\\(main\\)\\|\\(test\\)\\)/java" dirname))) (if (and index (< (+ index 13) (length dirname))) (concat "package " (subst-char-in-string ?/ ?. (substring dirname (+ index 14))) ";") "package ;"))`

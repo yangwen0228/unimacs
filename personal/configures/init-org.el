@@ -53,6 +53,7 @@
     (use-package xml-rpc :init (require 'xml-rpc))
     (require 'cnblogs)
     (cnblogs-minor-mode t)
+    (setq cnblogs-file-root-path (expand-file-name "cnblogs" unimacs-tempfiles-dir))
     ;; Run command: cnblogs-setup-blog to set up, blog-id == username.
     (bind-keys ("C-c c p" . cnblogs-post)
                ("C-c c n" . cnblogs-new-post)

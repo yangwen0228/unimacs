@@ -5,7 +5,7 @@
 ;;; Code:
 (use-package string-edit
   :bind ("C-c C-e" . string-edit-at-point)
-  :preface
+  :config
   ;; override
   ;; make it can choose major-mode for string
   (defun string-edit-at-point ()

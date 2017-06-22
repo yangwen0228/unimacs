@@ -3,14 +3,15 @@
 # key: java
 # --
 apply plugin: 'java'
+apply plugin: 'application'
 compileJava.options.encoding = 'utf-8'
 
 jar {
   manifest {
-    attributes 'Main-Class': 'test'
+    attributes 'Main-Class': 'Main'
   }
 }
 
 apply plugin: 'application'
-mainClassName = "test"
+mainClassName = 'Main'
 applicationDefaultJvmArgs = ["-ea"]

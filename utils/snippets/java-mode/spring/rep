@@ -1,6 +1,5 @@
 # -*- mode: snippet -*-
 # name: @Repository
 # group: spring
-# key: rep
 # --
 @Repository

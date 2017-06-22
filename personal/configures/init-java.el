@@ -71,17 +71,36 @@
   (unbind-key "M-." ensime-mode-map)
   ;; already PR
   (defun ensime-get-completions-async
-    (max-results case-sense callback)
-  (ensime-rpc-async-completions-at-point
-   max-results case-sense
-   (lexical-let ((continuation callback))
-     (lambda (info)
-       (let* ((candidates (remove-if
-                           '(lambda (candidate)
-                              (string-match "\\$" (getf candidate :name)))
-                           (plist-get info :completions)))
-              (candidates (ensime--annotate-completions candidates)))
-         (funcall continuation candidates))))))
+      (max-results case-sense callback)
+    (ensime-rpc-async-completions-at-point
+     max-results case-sense
+     (lexical-let ((continuation callback))
+       (lambda (info)
+         (let* (name
+                (prefix (ensime-completion-prefix-at-point))
+                (candidates (remove-if
+                             '(lambda (candidate)
+                                (setq name (getf candidate :name))
+                                (or (string-match "\\$" name)
+                                    (not (string-match prefix name))))
+                             (plist-get info :completions)))
+                (candidates (ensime--annotate-completions candidates)))
+           (funcall continuation candidates))))))
+
+  (defun ensime-computed-point ()
+    "Subtract one to convert to 0-indexed buffer offsets.
+ Additionally, in buffers with windows-encoded line-endings,
+ add the appropriate number of CRs to compensate for characters
+ that are hidden by Emacs."
+    (let ((utf8-count 0)
+          (pos (point)))
+      (goto-char (point-min))
+      (while (not (= (point) pos))
+        (unless (string= "ascii" (char-charset (char-after)))
+          (setq utf8-count (1+ utf8-count)))
+        (goto-char (1+ (point))))
+      (ensime-externalize-offset (+ (point) (/ (1+ utf8-count) 2)))))
+
   ;; company: If ensime is on, use ensime and yasnippet. Otherwise, use dabbrev and yasnippet.
   (setq ensime-company-case-sensitive t)
   (unimacs-company-define-backends
@@ -221,7 +240,9 @@
 (use-package groovy-mode
   :mode ("\\.gradle\\'" . groovy-mode)
   :config
-  (use-package groovy-imports))
+  (use-package groovy-imports)
+  (unimacs-company-define-backends
+   '((groovy-mode) . ((company-dabbrev-code :with company-dabbrev company-yasnippet)))))
 
 (use-package restclient
   :mode ("\\.rest\\'" . restclient-mode)

@@ -2,6 +2,8 @@
 # name: constructor
 # key: constr
 # --
-public ${1:`(file-name-sans-extension (buffer-name))`}($2) {
+public ${1:`(save-excursion
+  (when (re-search-backward "\\<class \\(\\sw+\\)" nil t)
+    (match-string-no-properties 1)))`}($2) {
     $0
 }

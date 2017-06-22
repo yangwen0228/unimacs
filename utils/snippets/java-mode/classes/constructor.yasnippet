@@ -2,21 +2,27 @@
 # name: constructor for variables
 # key: con
 # --
-public ${1:`(file-name-sans-extension (buffer-name))`}() {
+public ${1:`(save-excursion
+  (when (re-search-backward "\\<class \\(\\sw+\\)" nil t)
+    (match-string-no-properties 1)))`}() {
 }
 
 public $1(`(save-excursion
   (goto-char (point-min))
-  (string-join (cl-loop
+  (string-join
+  (cl-loop
    while
    (re-search-forward (concat "^\\s-*private\\s-+\\([^ \t]+\\)\\s-+\\(\\w+\\)\\s-*;") nil t)
    collect
-   (concat (match-string-no-properties 1) " " (match-string-no-properties 2))) ", "))`) {
+   (concat (match-string-no-properties 1) " " (match-string-no-properties 2)))
+   ", "))`) {
    `(save-excursion
   (goto-char (point-min))
-  (string-join (cl-loop
+  (string-join
+  (cl-loop
    while
    (re-search-forward (concat "^\\s-*private\\s-+\\([^ \t]+\\)\\s-+\\(\\w+\\)\\s-*;") nil t)
    collect
-   (concat "this." (match-string-no-properties 2) " = " (match-string-no-properties 2) ";")) "\n"))`
+   (concat "this." (match-string-no-properties 2) " = " (match-string-no-properties 2) ";"))
+   "\n"))`
 }$0

@@ -66,6 +66,7 @@
   (setq sql-mysql-login-params
         '((user :default "root")
           (database)
+          (password :default "123456")
           (server :default "localhost")
           (port :default 3306)))
 

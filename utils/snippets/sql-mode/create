@@ -1,8 +1,8 @@
-#contributor : Alejandro Espinoza Esparza <aespinoza@structum.com.mx>
-#name : create table ...
+#name : mysql: create table
 # --
+DROP TABLE IF EXISTS $2;
 CREATE TABLE ${2:TableName}
 (
-${3:id} ${4:INT IDENTITY(1,1)} ${5:NOT NULL}
-$0
-)
+${3:id} ${4:INT} ${5:NOT NULL} ${AUTO_INCREMENT},
+PRIMARY KEY (id) $0
+);

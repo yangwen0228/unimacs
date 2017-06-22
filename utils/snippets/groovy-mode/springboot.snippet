@@ -28,20 +28,17 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
+group = '${2:com.example}'
 jar {
-    baseName = '${2:`(file-name-base (directory-file-name (file-name-directory (buffer-file-name))))`}'
+    baseName = '${3:`(file-name-base (directory-file-name (file-name-directory (buffer-file-name))))`}'
     version =  '0.1.0'
 }
 
-repositories {
-    mavenCentral()
-}
-
-sourceCompatibility = ${3:1.8}
-targetCompatibility = $3
+sourceCompatibility = ${4:1.8}
+targetCompatibility = $4
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter${4:-web}")
+    compile("org.springframework.boot:spring-boot-starter${5:-web}")
     // compile("org.springframework.boot:spring-boot-starter-data-jpa")
     // compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     // compile("com.h2database:h2")

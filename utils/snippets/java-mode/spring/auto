@@ -1,7 +1,6 @@
 # -*- mode: snippet -*-
 # name: @Autowired
 # group: spring
-# key: auto
 # --
 @Autowired
 private ${1:Type} ${2:val};

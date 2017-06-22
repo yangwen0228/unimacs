@@ -54,6 +54,8 @@
        avy-goto-char avy-goto-char-2
        helm-gtags-find-pattern helm-gtags-find-tag-adapter helm-gtags-find-rtag-adapter
        helm-ag-select-directory
+       ensime-edit-definition
+       ensime-edit-definition-with-fallback
        isearch-forward
        end-of-buffer beginning-of-buffer))
    '(jumplist-ex-mode t))
