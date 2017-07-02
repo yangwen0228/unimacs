@@ -60,7 +60,9 @@
   (use-package sql-indent)
   (use-package sqlup-mode)
 
-  (setq sql-mysql-program "c:/Program Files/MySQL/MySQL Server 5.7/bin/mysql.exe")
+  (cond
+   (*win32* (setq sql-mysql-program "c:/Program Files/MySQL/MySQL Server 5.7/bin/mysql.exe"))
+   (*is-a-mac* (setq sql-mysql-program "/usr/local/mysql/bin/mysql")))
   (setq sql-mysql-options '("-C" "-f" "-t" "-n")) ; for windows
 
   (setq sql-mysql-login-params
