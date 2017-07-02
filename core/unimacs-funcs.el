@@ -192,15 +192,15 @@ point reaches the beginning or end of the buffer, stop there."
                      (propertize (format "A")
                                  'display '(left-fringe right-triangle)))))))
 
-(defun unimacs-copy-file-name-to-clipboard ()
-  "Copy the current buffer file name to the clipboard."
+(defun unimacs-copy-file-path-to-clipboard ()
+  "Copy the current buffer file path to the clipboard."
   (interactive)
-  (let ((filename (if (equal major-mode 'dired-mode)
+  (let ((filepath (if (equal major-mode 'dired-mode)
                       default-directory
                     (buffer-file-name))))
-    (when filename
-      (kill-new filename)
-      (message "Copied buffer file name '%s' to the clipboard." filename))))
+    (when filepath
+      (kill-new filepath)
+      (message "Copied buffer file path '%s' to the clipboard." filepath))))
 
 (defun unimacs-get-positions-of-buffer-or-region ()
   "Return positions (beg . end) of the current buffer or region."
@@ -264,14 +264,14 @@ there's a region, all lines that region covers will be duplicated."
 (defun unimacs-rename-file-and-buffer ()
   "Renames current buffer and file it is visiting."
   (interactive)
-  (let ((filename (buffer-file-name)))
-    (if (not (and filename (file-exists-p filename)))
+  (let ((filepath (buffer-file-name)))
+    (if (not (and filepath (file-exists-p filepath)))
         (message "Buffer is not visiting a file!")
-      (let ((new-name (read-file-name "New name: " filename)))
+      (let ((new-name (read-file-name "New name: " filepath)))
         (cond
-         ((vc-backend filename) (vc-rename-file filename new-name))
+         ((vc-backend filepath) (vc-rename-file filepath new-name))
          (t
-          (rename-file filename new-name t)
+          (rename-file filepath new-name t)
           (rename-buffer new-name)
           (set-visited-file-name new-name)
           (set-buffer-modified-p nil)))))))
@@ -279,13 +279,13 @@ there's a region, all lines that region covers will be duplicated."
 (defun unimacs-delete-file-and-buffer ()
   "Kill the current buffer and deletes the file it is visiting."
   (interactive)
-  (let ((filename (buffer-file-name)))
-    (when filename
-      (if (vc-backend filename)
-          (vc-delete-file filename)
-        (when (y-or-n-p (format "Are you sure you want to delete %s? " filename))
-          (delete-file filename delete-by-moving-to-trash)
-          (message "Deleted file %s" filename)
+  (let ((filepath (buffer-file-name)))
+    (when filepath
+      (if (vc-backend filepath)
+          (vc-delete-file filepath)
+        (when (y-or-n-p (format "Are you sure you want to delete %s? " filepath))
+          (delete-file filepath delete-by-moving-to-trash)
+          (message "Deleted file %s" filepath)
           (kill-buffer))))))
 
 (defun unimacs-copy-file-and-rename-buffer ()
@@ -294,15 +294,15 @@ there's a region, all lines that region covers will be duplicated."
 If the old file is under version control, the new file is added into
 version control automatically"
   (interactive)
-  (let ((filename (buffer-file-name)))
-    (if (not (and filename (file-exists-p filename)))
+  (let ((filepath (buffer-file-name)))
+    (if (not (and filepath (file-exists-p filepath)))
         (message "Buffer is not visiting a file!")
-      (let ((new-name (read-file-name "New name: " filename)))
-        (copy-file filename new-name t)
+      (let ((new-name (read-file-name "New name: " filepath)))
+        (copy-file filepath new-name t)
         (rename-buffer new-name)
         (set-visited-file-name new-name)
         (set-buffer-modified-p nil)
-        (when (vc-backend filename)
+        (when (vc-backend filepath)
           (vc-register))))))
 
 (defun unimacs-untabify-buffer ()
