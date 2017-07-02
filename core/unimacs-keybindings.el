@@ -98,5 +98,15 @@
 (bind-key "<C-m>"           'unimacs-scroll-up-line)
 (bind-key "M-m"             'unimacs-scroll-down-line)
 
+;; Workaround: MacOsX Pinyin Input bug:
+(when *is-a-mac*
+  (bind-key "C-—" 'undo-tree-undo)
+  (bind-key "C-，" 'winner-undo)
+  (bind-key "C-。" 'winner-redo)
+  (bind-key "M-，" 'jumplist-previous)
+  (bind-key "M-。" 'jumplist-next)
+  (bind-key "M-《" 'beginning-of-buffer)
+  (bind-key "M-》" 'end-of-buffer))
+
 (provide 'unimacs-keybindings)
 ;;; unimacs-keybindings.el ends here
