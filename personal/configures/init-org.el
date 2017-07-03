@@ -214,18 +214,17 @@
     (cond
      (*win32*
       (setq org-download-clipboard-temp-file "d:/temp/screenshot.png")
-      (setq org-download-clipboard-method "\"c:/Program\sFiles/ImageMagick-6.9.3-Q16/convert.exe\" clipboard:myimage %s"))
+      (setq org-download-clipboard-cmd (format "\"c:/Program\sFiles/ImageMagick-6.9.3-Q16/convert.exe\" clipboard:myimage %s" org-download-clipboard-temp-file)))
      (*is-a-mac*
       ;; brew install pngpaste
       (setq org-download-clipboard-temp-file "/tmp/screenshot.png")
-      (setq org-download-clipboard-method "pngpaste %s")))
+      (setq org-download-clipboard-cmd (format "pngpaste %s && convert %s -scale 50%% %s" org-download-clipboard-temp-file org-download-clipboard-temp-file org-download-clipboard-temp-file))))
     (defun org-download-clipboard ()
       "Save the captured image from clipboard to file, and insert into buffer. Or org-download-yank."
       (interactive)
-      (let ((link org-download-clipboard-temp-file))
-        (if (eq 0 (shell-command (format org-download-clipboard-method link) "*screenshot2file*" "*screenshot2file*"))
-            (org-download-image link)
-          (org-download-yank)))))
+      (if (eq 0 (shell-command org-download-clipboard-cmd "*screenshot2file*" "*screenshot2file*"))
+          (org-download-image org-download-clipboard-temp-file)
+        (org-download-yank))))
 
   ;; browse links
   (defadvice org-open-at-point (around org-open-at-point-choose-browser activate)
