@@ -46,6 +46,9 @@
      '(unimacs-move-beginning-of-line
        end-of-visual-line
        beginning-of-defun end-of-defun
+       end-of-buffer beginning-of-buffer
+       unimacs-move-beginning-of-window
+       unimacs-move-end-of-window
        sp-forward-sexp sp-backward-sexp
        helm-swoop helm-imenu helm-find-files helm-multi-files
        helm-projectile-switch-project helm-projectile-find-file
@@ -56,8 +59,7 @@
        helm-ag-select-directory
        ensime-edit-definition
        ensime-edit-definition-with-fallback
-       isearch-forward
-       end-of-buffer beginning-of-buffer))
+       isearch-forward))
    '(jumplist-ex-mode t))
   )
 

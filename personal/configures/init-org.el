@@ -273,6 +273,7 @@ background of code to whatever theme I'm using's background"
   ;; org-export settings:
   (setq org-export-with-creator t
         org-export-preserve-breaks t    ; return as new line
+        org-export-babel-evaluate nil   ; don't evaluate codeblock during export.
         org-export-with-sub-superscripts nil
         org-export-kill-product-buffer-when-displayed t
         )
