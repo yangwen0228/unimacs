@@ -92,6 +92,7 @@ If set/leave chinese-font-size to nil, it will follow english-font-size"
     (dolist (charset '(kana han symbol cjk-misc bopomofo))
       (set-fontset-font (frame-parameter nil 'font)
                         charset zh-font)))
+  (when (*is-a-mac* (fboundp 'restore-frame)) (restore-frame))
   (message "default font size is now %d" font-size))
 
 (unimacs-set-font nil unimacs-font-size)
