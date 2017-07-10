@@ -1,6 +1,7 @@
 *tempfiles
 *packages/elpa
 *~
+.DS_Store
 /GTAGS
 /GRTAGS
 /GPATH

@@ -3,6 +3,6 @@
 DROP TABLE IF EXISTS $2;
 CREATE TABLE ${2:TableName}
 (
-${3:id} ${4:INT} ${5:NOT NULL} ${AUTO_INCREMENT},
+${3:id} ${4:INT(8)} ${5:NOT NULL} ${AUTO_INCREMENT},
 PRIMARY KEY (id) $0
 );

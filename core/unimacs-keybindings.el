@@ -66,6 +66,8 @@
 (bind-key "C-S-<backspace>" 'unimacs-kill-whole-line)
 (bind-key "C-a"             'unimacs-move-beginning-of-line)
 (bind-key "C-e"             'unimacs-move-end-of-line)
+(bind-key "C-M-,"           'unimacs-move-beginning-of-window)
+(bind-key "C-M-."           'unimacs-move-end-of-window)
 (bind-key "C-M-\\"          'unimacs-indent-current-line-or-region)
 (bind-key "C-M-|"           'unimacs-cleanup-buffer)
 (bind-key "C-S-o"           'unimacs-smart-open-line-above)
@@ -97,6 +99,19 @@
 (define-key input-decode-map [?\C-m] [C-m])
 (bind-key "<C-m>"           'unimacs-scroll-up-line)
 (bind-key "M-m"             'unimacs-scroll-down-line)
+
+;; Workaround: MacOsX Pinyin Input bug:
+(when *is-a-mac*
+  (bind-key "C-—" 'undo-tree-undo)
+  (bind-key "C-，" 'winner-undo)
+  (bind-key "C-。" 'winner-redo)
+  (bind-key "C-；" 'mc/mark-all-like-this-dwim)
+  (bind-key "C-《" 'mc/mark-previous-like-this)
+  (bind-key "C-》" 'mc/mark-next-like-this)
+  (bind-key "M-，" 'jumplist-previous)
+  (bind-key "M-。" 'jumplist-next)
+  (bind-key "M-《" 'beginning-of-buffer)
+  (bind-key "M-》" 'end-of-buffer))
 
 (provide 'unimacs-keybindings)
 ;;; unimacs-keybindings.el ends here

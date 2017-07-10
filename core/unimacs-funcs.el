@@ -150,6 +150,18 @@ point reaches the beginning or end of the buffer, stop there."
     ;; Not move by visual
     (end-of-line)))
 
+(defun unimacs-move-beginning-of-window (arg)
+  "Move to the beginning of the window."
+  (interactive (list 0))
+  (setq arg (or arg 0))
+  (move-to-window-line arg))
+
+(defun unimacs-move-end-of-window (arg)
+  "Move to the end of the window."
+  (interactive "^p")
+  (setq arg (or arg 1))
+  (move-to-window-line (* -1 arg)))
+
 (defun unimacs-scroll-up-line (&optional arg)
   "Scroll up 1 line."
   (interactive "^p")

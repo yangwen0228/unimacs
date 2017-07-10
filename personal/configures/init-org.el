@@ -51,9 +51,9 @@
   (use-package cnblogs :ensure nil
     :init
     (use-package xml-rpc :init (require 'xml-rpc))
+    (setq cnblogs-file-root-path (expand-file-name "cnblogs/" unimacs-tempfiles-dir))
     (require 'cnblogs)
     (cnblogs-minor-mode t)
-    (setq cnblogs-file-root-path (expand-file-name "cnblogs" unimacs-tempfiles-dir))
     ;; Run command: cnblogs-setup-blog to set up, blog-id == username.
     (bind-keys ("C-c c p" . cnblogs-post)
                ("C-c c n" . cnblogs-new-post)
@@ -211,13 +211,20 @@
     :bind ("C-S-y" . org-download-clipboard)
     :init
     (require 'org-download)
+    (cond
+     (*win32*
+      (setq org-download-clipboard-temp-file "d:/temp/screenshot.png")
+      (setq org-download-clipboard-cmd (format "\"c:/Program\sFiles/ImageMagick-6.9.3-Q16/convert.exe\" clipboard:myimage %s" org-download-clipboard-temp-file)))
+     (*is-a-mac*
+      ;; brew install pngpaste
+      (setq org-download-clipboard-temp-file "/tmp/screenshot.png")
+      (setq org-download-clipboard-cmd (format "pngpaste %s && convert %s -scale 50%% %s" org-download-clipboard-temp-file org-download-clipboard-temp-file org-download-clipboard-temp-file))))
     (defun org-download-clipboard ()
       "Save the captured image from clipboard to file, and insert into buffer. Or org-download-yank."
       (interactive)
-      (let ((link "d:/temp/screenshot.png"))
-        (if (eq 0 (shell-command (format "\"c:/Program\sFiles/ImageMagick-6.9.3-Q16/convert.exe\" clipboard:myimage %s" link) "*screenshot2file*" "*screenshot2file*"))
-            (org-download-image link)
-          (org-download-yank)))))
+      (if (eq 0 (shell-command org-download-clipboard-cmd "*screenshot2file*" "*screenshot2file*"))
+          (org-download-image org-download-clipboard-temp-file)
+        (org-download-yank))))
 
   ;; browse links
   (defadvice org-open-at-point (around org-open-at-point-choose-browser activate)
@@ -266,6 +273,7 @@ background of code to whatever theme I'm using's background"
   ;; org-export settings:
   (setq org-export-with-creator t
         org-export-preserve-breaks t    ; return as new line
+        org-export-babel-evaluate nil   ; don't evaluate codeblock during export.
         org-export-with-sub-superscripts nil
         org-export-kill-product-buffer-when-displayed t
         )
