@@ -18,7 +18,7 @@
 
   (unimacs-company-define-backends
    '((tcl-hm-mode tcl-mode) .
-     ((company-dabbrev-code :with company-gtags-tcl-rigid company-dabbrev company-keywords company-yasnippet)
+     ((company-dabbrev-code company-dabbrev :with company-gtags-tcl-rigid company-keywords company-yasnippet)
       company-files)))
 
   (setq company-transformers nil)
