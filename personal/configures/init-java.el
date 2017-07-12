@@ -175,6 +175,12 @@
       (c-indent-new-comment-line)
       (indent-according-to-mode))
     (bind-key "RET" 'c-mode-newline-comments java-mode-map))
+  (add-to-list 'cc-imenu-java-generic-expression
+               (list "Class"
+                     (concat
+                      "\\s-+class\\s-+" ; definition
+                      "\\([-A-Za-z0-9_:+*]+\\)" ; class name
+                      ) 1))
 
   (bind-key "C-c c" 'sbt-command java-mode-map)
   (bind-key "C-c e" 'next-error java-mode-map))

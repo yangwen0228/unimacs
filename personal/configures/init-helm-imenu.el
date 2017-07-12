@@ -17,12 +17,6 @@
                      (concat
                       "^\\s-*(use-package\\s-+" ; definition
                       "\\([-A-Za-z0-9_:+*]+\\)" ; package name
-                      ) 1))
-  (add-to-list 'cc-imenu-java-generic-expression
-               (list "Class"
-                     (concat
-                      "\\s-+class\\s-+" ; definition
-                      "\\([-A-Za-z0-9_:+*]+\\)" ; class name
                       ) 1)))
 
 (provide 'init-helm-imenu)
