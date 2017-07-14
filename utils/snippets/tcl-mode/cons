@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: constructor
+# --
+constructor {} [string map [list @dir@ [file normalize [file dir [info script]]]] {
+::msgcat::mclocale "cn"
+::msgcat::mcload [file join {@dir@} locales]
+}]
