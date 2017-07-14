@@ -1,0 +1,5 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: delete entities
+# --
+hm_createmark ${1:comps} 1 "by ${2:id} only" ${3:var}
+if {[hm_marklength $1 1]} {*deletemark $1 1}
