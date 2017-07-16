@@ -7,7 +7,7 @@
   :mode (("SConstruct\\'" . python-mode)
          ("SConscript\\'" . python-mode)
          ("\\.py\\'"      . python-mode))
-  :interpreter ("python" . python-mode)
+  :interpreter (("python" . python-mode) ("python3" . python-mode))
   :config
   (setq py-shell-name nil)              ; Use the env path version
 
