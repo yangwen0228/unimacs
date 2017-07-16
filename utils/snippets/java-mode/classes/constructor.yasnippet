@@ -2,7 +2,9 @@
 # name: constructor for variables
 # key: con
 # --
-public $1(`(save-excursion
+public ${1:`(save-excursion
+  (when (re-search-backward "\\<class \\(\\sw+\\)" nil t)
+    (match-string-no-properties 1)))`}(`(save-excursion
   (goto-char (point-min))
   (string-join
   (cl-loop
