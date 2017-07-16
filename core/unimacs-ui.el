@@ -66,7 +66,10 @@
                  "%b"))))
 
 ;; font settings:
-(defvar unimacs-font-size 11)
+(defvar unimacs-font-size
+  (cond
+   (*win32* 11)
+   (*is-a-mac* 14)))
 (defun unimacs-make-font-string (font-name font-size)
   (if (and (stringp font-size)
            (equal ":" (string (elt font-size 0))))
