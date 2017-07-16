@@ -284,7 +284,7 @@ background of code to whatever theme I'm using's background"
     (defun org-update-agenda-files ()
       "Update the agenda files under a directory!"
       (interactive)
-      (let ((my-agenda-directory "d:/orgs/notes")
+      (let ((my-agenda-directory org-directory)
             org-files)
         (dolist (org-file (f-files my-agenda-directory))
           (when (and (string= (f-ext org-file) "org")
@@ -354,13 +354,15 @@ background of code to whatever theme I'm using's background"
 
   (use-package org-capture :ensure nil
     :init
-    (setq org-directory "d:/orgs/notes")
+    (setq org-directory (cond
+                         (*win32* "d:/orgs/notes")
+                         (*is-a-mac* "~/Documents/orgs/notes")))
     (setq org-default-notes-file (expand-file-name "refile.org" org-directory))
     (setq org-default-diary-file (expand-file-name "diary.org" org-directory))
 
     ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
     (setq org-capture-templates
-          (quote (("j" "Journal"      entry (file+datetree org-default-diary-file)
+          (quote (("d" "Diary"        entry (file+datetree org-default-diary-file)
                    "* %?\n%U\n" :clock-in t :clock-resume t)
                   ("t" "todo"         entry (file org-default-notes-file)
                    "* TODO %?\n%U\n" :clock-in t :clock-resume t)
@@ -411,9 +413,16 @@ background of code to whatever theme I'm using's background"
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(;; other Babel languages
-     (plantuml . t)))
+     (plantuml . t)
+     (dot . t)))
+  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
+  (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
   (setq org-plantuml-jar-path
         (expand-file-name "jars/plantuml.jar" unimacs-utils-dir))
+  (use-package plantuml-mode
+    :init
+    (setq plantuml-jar-path org-plantuml-jar-path
+          plantuml-java-args '("-Djava.awt.headless=true" "-jar")))
 
   ;; export to MicroOffice Word:
   (require 'ox-odt)
