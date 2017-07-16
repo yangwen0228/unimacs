@@ -2,8 +2,10 @@
 # name: dot
 # key: dot
 # --
-#+begin_src dot :file ${1:file} :cmdline -T${2:pdf} :exports none :results silent
-            $0
+#+begin_src dot :file ./`(progn (mkdir (file-name-sans-extension (buffer-name)) ".") (file-name-sans-extension (buffer-name)))`/${1:name}.png :cmdline -T${2:png} :exports results
+digraph {
+rankdir = LR
+node [shape=box]
+$0
+}
 #+end_src
-
-[[file:$1]]

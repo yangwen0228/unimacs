@@ -1,6 +1,5 @@
 #name : plantuml
 # --
-#+BEGIN_SRC plantuml :file ./`(progn (mkdir (file-name-sans-extension (buffer-name)) ".") (file-name-sans-extension (buffer-name)))`/${1:name}.png :exports both :cmdline -charset utf-8
-title ${2:name}
-
+#+BEGIN_SRC plantuml :file ./`(progn (mkdir (file-name-sans-extension (buffer-name)) ".") (file-name-sans-extension (buffer-name)))`/${1:name}.png :exports ${2:results} :cmdline -charset utf-8
+title ${3:name}$0
 #+END_SRC
