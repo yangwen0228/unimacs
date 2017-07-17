@@ -32,9 +32,7 @@
     ;;                                       unimacs-extra-bin-dir))
     (setenv "GTAGSCONF" (expand-file-name "gtags.conf" unimacs-extra-bin-dir)))
    (*is-a-mac*
-    (setenv "PATH" (concat "/usr/local/texlive/2014/bin/universal-darwin:"
-                           (getenv "PATH")))
-    (add-to-list 'exec-path "/usr/local/texlive/2014/bin/universal-darwin"))))
+    (setenv "GTAGSCONF" (expand-file-name "gtags.conf" unimacs-extra-bin-dir)))))
 
 (provide 'init-exec-path)
 ;;; init-exec-path.el ends here
