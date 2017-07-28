@@ -8,6 +8,7 @@
          ("C-_"   . undo-tree-undo)
          ("C--"   . undo-tree-redo))
   :init
+  (unbind-key "M-_" undo-tree-map)
   ;; Bugfix: the cursor jump twice
   (defun undo-tree-undo (&optional arg)
     "Undo changes.
