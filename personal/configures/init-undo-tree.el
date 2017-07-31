@@ -8,7 +8,6 @@
          ("C-_"   . undo-tree-undo)
          ("C--"   . undo-tree-redo))
   :init
-  (unbind-key "M-_" undo-tree-map)
   ;; Bugfix: the cursor jump twice
   (defun undo-tree-undo (&optional arg)
     "Undo changes.
@@ -35,6 +34,8 @@ changes within the current region."
   (global-undo-tree-mode 1)
   (setq undo-tree-auto-save-history nil)
   (setq undo-tree-history-directory-alist `((".*" . ,(expand-file-name "undo" unimacs-tempfiles-dir))))
+  :config
+  (unbind-key "M-_" undo-tree-map)
   :diminish (undo-tree-mode))
 
 (provide 'init-undo-tree)
