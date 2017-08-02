@@ -45,7 +45,24 @@
         revert-without-query '(".*")))
 
 (use-package browse-kill-ring
-  :bind ("M-y" . browse-kill-ring))
+  :bind ("M-y" . browse-kill-ring)
+  :config
+  ;; override: support multiple-cursors
+  (defun browse-kill-ring-insert-and-quit()
+    "Insert the selected text at all cursors"
+    (interactive)
+    (let* ((buf (current-buffer))
+           (text (browse-kill-ring-current-string buf (point)))
+           (command (lambda () (interactive) (when text (insert text)))))
+
+      (switch-to-buffer browse-kill-ring-original-buffer)
+      (when (and (boundp 'multiple-cursors-mode) multiple-cursors-mode)
+        ;; Execute the command for each fake cursor
+        (mc/execute-command-for-all-fake-cursors command))
+      (switch-to-buffer buf))
+
+    ;; Finally execute the command for current cursor
+    (browse-kill-ring-insert t)))
 
 (use-package diff-hl
   :init
