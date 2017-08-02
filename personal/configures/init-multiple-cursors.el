@@ -21,6 +21,7 @@
   :preface (unbind-key "C-S-<mouse-1>")
   :init
   (require 'multiple-cursors)
+  (setq mc/list-file (expand-file-name "mc-config.el" unimacs-personal-postload-dir))
   (setq mc/insert-numbers-default 1
         mc/cycle-looping-behaviour 'stop)
 
