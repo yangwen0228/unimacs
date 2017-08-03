@@ -867,6 +867,9 @@
   "Tree jump-prev/jump-next."
   :group 'jump-prev)
 
+(defvar jump-tree-jump-prev-list '()
+  "Jump history list, contain entries '(file-name . pointer).")
+
 (defcustom jump-tree-mode-lighter " Jump-Tree"
   "Lighter displayed in mode line
 when `jump-tree-mode' is enabled."
