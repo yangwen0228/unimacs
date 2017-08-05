@@ -227,8 +227,7 @@
 ;; Compressing jump-prev history:
 ;;
 ;;   Jump-Prev history files cannot grow beyond the maximum jump-prev tree size, which
-;;   is limited by `jump-prev-limit', `jump-prev-strong-limit' and
-;;   `jump-prev-outer-limit'. Nevertheless, jump-prev history files can grow quite
+;;   is limited by `jump-tree-pos-list-limit'. Nevertheless, jump-prev history files can grow quite
 ;;   large. If you want to automatically compress jump-prev history, add the
 ;;   following advice to your .emacs file (replacing ".gz" with the filename
 ;;   extension of your favourite compression algorithm):
@@ -430,9 +429,7 @@
 ;; to *check* that you've got back to where you want! Because you'll break the
 ;; jump-prev chain, and then you'll have to traverse the entire string of jump-prevs
 ;; again, just to get back to the point at which you broke the
-;; chain. Jump-Prev-in-region and commands such as `jump-prev-only' help to make using
-;; Emacs' jump-prev a little easier, but nonetheless it remains confusing for many
-;; people.
+;; chain.
 ;;
 ;;
 ;; So what does `jump-tree-mode' do? Remember the diagram we drew to represent
@@ -595,75 +592,6 @@
 (unless (fboundp 'registerv-data)
   (defmacro registerv-data (data) data))
 
-;; `diff-no-select' and `diff-file-local-copy' aren't defined in Emacs
-;; versions < 24 (copied and adapted from Emacs 24)
-(unless (fboundp 'diff-no-select)
-  (defun diff-no-select (old new &optional switches no-async buf)
-    ;; Noninteractive helper for creating and reverting diff buffers
-    (unless (bufferp new) (setq new (expand-file-name new)))
-    (unless (bufferp old) (setq old (expand-file-name old)))
-    (or switches (setq switches diff-switches)) ; If not specified, use default.
-    (unless (listp switches) (setq switches (list switches)))
-    (or buf (setq buf (get-buffer-create "*Diff*")))
-    (let* ((old-alt (diff-file-local-copy old))
-           (new-alt (diff-file-local-copy new))
-           (command
-            (mapconcat 'identity
-                       `(,diff-command
-                         ;; Use explicitly specified switches
-                         ,@switches
-                         ,@(mapcar #'shell-quote-argument
-                                   (nconc
-                                    (when (or old-alt new-alt)
-                                      (list "-L" (if (stringp old)
-                                                     old (prin1-to-string old))
-                                            "-L" (if (stringp new)
-                                                     new (prin1-to-string new))))
-                                    (list (or old-alt old)
-                                          (or new-alt new)))))
-                       " "))
-           (thisdir default-directory))
-      (with-current-buffer buf
-        (setq buffer-read-only t)
-        (buffer-disable-jump-prev (current-buffer))
-        (let ((inhibit-read-only t))
-          (erase-buffer))
-        (buffer-enable-jump-prev (current-buffer))
-        (diff-mode)
-        (set (make-local-variable 'revert-buffer-function)
-             (lambda (_ignore-auto _noconfirm)
-               (diff-no-select old new switches no-async (current-buffer))))
-        (setq default-directory thisdir)
-        (let ((inhibit-read-only t))
-          (insert command "\n"))
-        (if (and (not no-async) (fboundp 'start-process))
-            (let ((proc (start-process "Diff" buf shell-file-name
-                                       shell-command-switch command)))
-              (set-process-filter proc 'diff-process-filter)
-              (set-process-sentinel
-               proc (lambda (proc _msg)
-                      (with-current-buffer (process-buffer proc)
-                        (diff-sentinel (process-exit-status proc))
-                        (if old-alt (delete-file old-alt))
-                        (if new-alt (delete-file new-alt))))))
-          ;; Async processes aren't available.
-          (let ((inhibit-read-only t))
-            (diff-sentinel
-             (call-process shell-file-name nil buf nil
-                           shell-command-switch command))
-            (if old-alt (delete-file old-alt))
-            (if new-alt (delete-file new-alt)))))
-      buf)))
-
-(unless (fboundp 'diff-file-local-copy)
-  (defun diff-file-local-copy (file-or-buf)
-    (if (bufferp file-or-buf)
-        (with-current-buffer file-or-buf
-          (let ((tempfile (make-temp-file "buffer-content-")))
-            (write-region nil nil tempfile nil 'nomessage)
-            tempfile))
-      (file-local-copy file-or-buf))))
-
 ;; `user-error' isn't defined in Emacs < 24.3
 (unless (fboundp 'user-error)
   (defalias 'user-error 'error)
@@ -680,10 +608,10 @@
   "Tree jump-prev/jump-next."
   :group 'jump-prev)
 
-(defvar jump-tree-global-tree nil
+(defvar jump-tree-pos-tree nil
   "Tree of jump-prev entries globally.")
 
-(defvar jump-tree-global-list '()
+(defvar jump-tree-pos-list '()
   "Jump history list, contain entries '(file-name . pointer).")
 
 (defcustom jump-tree-mode-lighter " Jump-Tree"
@@ -697,16 +625,6 @@ when `jump-tree-mode' is enabled."
 \(See `turn-on-jump-tree-mode'.\)"
   :group 'jump-tree
   :type '(repeat symbol))
-
-(defcustom jump-tree-enable-jump-prev-in-region t
-  "When non-nil, enable jump-prev-in-region.
-
-When jump-prev-in-region is enabled, jump-preving or jump-nexting when the
-region is active (in `transient-mark-mode') or with a prefix
-argument (not in `transient-mark-mode') only jump-preves changes
-within the current region."
-  :group 'jump-tree
-  :type 'boolean)
 
 (defcustom jump-tree-auto-save-history nil
   "When non-nil, `jump-tree-mode' will save jump-prev history to file
@@ -828,12 +746,6 @@ enabled. However, this effect is quite rare in practice."
 (defface jump-tree-visualizer-register-face
   '((((class color)) :foreground "yellow"))
   "Face used to highlight jump-tree nodes saved to a register
-in visualizer."
-  :group 'jump-tree)
-
-(defface jump-tree-visualizer-unmodified-face
-  '((((class color)) :foreground "cyan"))
-  "Face used to highlight nodes corresponding to unmodified buffers
 in visualizer."
   :group 'jump-tree)
 
@@ -1016,112 +928,71 @@ in visualizer."
                     (root (jump-tree-make-node nil nil))
                     (current root)
                     (size 0)
-                    (count 0)
-                    (object-pool (make-hash-table :test 'eq :weakness 'value))))
+                    (count 0)))
      ;;(:copier nil)
      )
-  root current size count object-pool)
+  root current size count)
 
 (defstruct
     (jump-tree-node
      (:type vector)   ; create unnamed struct
      (:constructor nil)
      (:constructor jump-tree-make-node
-                   (previous jump-prev
-                             &optional jump-next
+                   (previous position
                              &aux
                              (timestamp (current-time))
                              (branch 0)))
      (:constructor jump-tree-make-node-backwards
-                   (next-node jump-prev
-                              &optional jump-next
+                   (next-node position
                               &aux
                               (next (list next-node))
                               (timestamp (current-time))
                               (branch 0)))
      (:copier nil))
-  previous next jump-prev jump-next timestamp branch meta-data)
+  previous next position timestamp branch meta-data)
 
 (defmacro jump-tree-node-p (n)
   (let ((len (length (jump-tree-make-node nil nil))))
     `(and (vectorp ,n) (= (length ,n) ,len))))
 
 (defstruct
-    (jump-tree-region-data
+    (jump-tree-position-data
      (:type vector)   ; create unnamed struct
      (:constructor nil)
-     (:constructor jump-tree-make-region-data
-                   (&optional jump-prev-beginning jump-prev-end
-                              jump-next-beginning jump-next-end))
-     (:constructor jump-tree-make-jump-prev-region-data
-                   (jump-prev-beginning jump-prev-end))
-     (:constructor jump-tree-make-jump-next-region-data
-                   (jump-next-beginning jump-next-end))
+     (:constructor jump-tree-make-position-data
+                   (&optional file-path pointer))
      (:copier nil))
-  jump-prev-beginning jump-prev-end jump-next-beginning jump-next-end)
+  file-path pointer)
 
-(defmacro jump-tree-region-data-p (r)
-  (let ((len (length (jump-tree-make-region-data))))
-    `(and (vectorp ,r) (= (length ,r) ,len))))
+(defmacro jump-tree-position-data-p (pos)
+  (let ((len (length (jump-tree-make-position-data))))
+    `(and (vectorp ,pos) (= (length ,pos) ,len))))
 
-(defmacro jump-tree-node-clear-region-data (node)
-  `(setf (jump-tree-node-meta-data ,node)
-         (delq nil
-               (delq :region
-                     (plist-put (jump-tree-node-meta-data ,node)
-                                :region nil)))))
+(defmacro jump-tree-node-file-path (node)
+  `(let ((pos (plist-get (jump-tree-node-meta-data ,node) :position)))
+     (when (jump-tree-position-data-p pos)
+       (jump-tree-position-data-file-path pos))))
 
-(defmacro jump-tree-node-jump-prev-beginning (node)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (when (jump-tree-region-data-p r)
-       (jump-tree-region-data-jump-prev-beginning r))))
+(defmacro jump-tree-node-pointer (node)
+  `(let ((pos (plist-get (jump-tree-node-meta-data ,node) :position)))
+     (when (jump-tree-position-data-p pos)
+       (jump-tree-position-data-pointer pos))))
 
-(defmacro jump-tree-node-jump-prev-end (node)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (when (jump-tree-region-data-p r)
-       (jump-tree-region-data-jump-prev-end r))))
-
-(defmacro jump-tree-node-jump-next-beginning (node)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (when (jump-tree-region-data-p r)
-       (jump-tree-region-data-jump-next-beginning r))))
-
-(defmacro jump-tree-node-jump-next-end (node)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (when (jump-tree-region-data-p r)
-       (jump-tree-region-data-jump-next-end r))))
-
-(defsetf jump-tree-node-jump-prev-beginning (node) (val)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (unless (jump-tree-region-data-p r)
+(defsetf jump-tree-node-file-path (node) (val)
+  `(let ((pos (plist-get (jump-tree-node-meta-data ,node) :position)))
+     (unless (jump-tree-position-data-p pos)
        (setf (jump-tree-node-meta-data ,node)
-             (plist-put (jump-tree-node-meta-data ,node) :region
-                        (setq r (jump-tree-make-region-data)))))
-     (setf (jump-tree-region-data-jump-prev-beginning r) ,val)))
+             (plist-put (jump-tree-node-meta-data ,node) :position
+                        (setq pos (jump-tree-make-position-data)))))
+     (setf (jump-tree-position-data-file-path pos) ,val)))
 
-(defsetf jump-tree-node-jump-prev-end (node) (val)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (unless (jump-tree-region-data-p r)
+(defsetf jump-tree-node-pointer (node) (val)
+  `(let ((pos (plist-get (jump-tree-node-meta-data ,node) :position)))
+     (unless (jump-tree-position-data-p pos)
        (setf (jump-tree-node-meta-data ,node)
-             (plist-put (jump-tree-node-meta-data ,node) :region
-                        (setq r (jump-tree-make-region-data)))))
-     (setf (jump-tree-region-data-jump-prev-end r) ,val)))
-
-(defsetf jump-tree-node-jump-next-beginning (node) (val)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (unless (jump-tree-region-data-p r)
-       (setf (jump-tree-node-meta-data ,node)
-             (plist-put (jump-tree-node-meta-data ,node) :region
-                        (setq r (jump-tree-make-region-data)))))
-     (setf (jump-tree-region-data-jump-next-beginning r) ,val)))
-
-(defsetf jump-tree-node-jump-next-end (node) (val)
-  `(let ((r (plist-get (jump-tree-node-meta-data ,node) :region)))
-     (unless (jump-tree-region-data-p r)
-       (setf (jump-tree-node-meta-data ,node)
-             (plist-put (jump-tree-node-meta-data ,node) :region
-                        (setq r (jump-tree-make-region-data)))))
-     (setf (jump-tree-region-data-jump-next-end r) ,val)))
+             (plist-put (jump-tree-node-meta-data ,node) :position
+                        (setq pos (jump-tree-make-position-data)))))
+     (setf (jump-tree-position-data-pointer pos) ,val)))
 
 (defstruct
     (jump-tree-visualizer-data
@@ -1223,27 +1094,32 @@ in visualizer."
 ;;; =====================================================================
 ;;;              Basic jump-tree data structure functions
 
-(defun jump-tree-grow (jump-prev)
-  "Add an JUMP-PREV node to current branch of `jump-tree-global-tree'."
-  (let* ((current (jump-tree-current jump-tree-global-tree))
-         (new (jump-tree-make-node current jump-prev)))
+(defun jump-tree-grow (position)
+  "Add an JUMP-PREV node to current branch of `jump-tree-pos-tree'."
+  (let* ((current (jump-tree-current jump-tree-pos-tree))
+         (new (jump-tree-make-node current position)))
     (push new (jump-tree-node-next current))
-    (setf (jump-tree-current jump-tree-global-tree) new)))
+    (setf (jump-tree-current jump-tree-pos-tree) new)))
 
-(defun jump-tree-grow-backwards (node jump-prev &optional jump-next)
+(defun jump-tree-grow-backwards (node position)
   "Add new node *above* jump-tree NODE, and return new node.
 Note that this will overwrite NODE's \"previous\" link, so should
 only be used on a detached NODE, never on nodes that are already
-part of `jump-tree-global-tree'."
-  (let ((new (jump-tree-make-node-backwards node jump-prev jump-next)))
+part of `jump-tree-pos-tree'."
+  ;; (let ((new (jump-tree-make-node-backwards node position)))
+  ;;   (setf (jump-tree-node-previous node) new)
+  ;;   new)
+  (let ((new (jump-tree-make-node nil position)))
+    (setf (jump-tree-node-next new) (list node))
     (setf (jump-tree-node-previous node) new)
-    new))
+    new)
+  )
 
 (defun jump-tree-splice-node (node splice)
   "Splice NODE into jump-prev tree, below node SPLICE.
 Note that this will overwrite NODE's \"next\" and \"previous\"
 links, so should only be used on a detached NODE, never on nodes
-that are already part of `jump-tree-global-tree'."
+that are already part of `jump-tree-pos-tree'."
   (setf (jump-tree-node-next node) (jump-tree-node-next splice)
         (jump-tree-node-branch node) (jump-tree-node-branch splice)
         (jump-tree-node-previous node) splice
@@ -1295,7 +1171,7 @@ that are already part of `jump-tree-global-tree'."
 
 (defmacro jump-tree-num-branches ()
   "Return number of branches at current jump-prev tree node."
-  '(length (jump-tree-node-next (jump-tree-current jump-tree-global-tree))))
+  '(length (jump-tree-node-next (jump-tree-current jump-tree-pos-tree))))
 
 (defun jump-tree-position (node list)
   "Find the first occurrence of NODE in LIST.
@@ -1339,173 +1215,70 @@ Comparison is done with `eq'."
 
 ;;; =====================================================================
 ;;;             Jump-Prev list and jump-prev changeset utility functions
+(defun jump-tree-pos-list-pop-changeset (&optional discard-pos)
+  ;; Pop changeset from `jump-tree-pos-list'.
 
-(defmacro jump-prev-list-marker-elt-p (elt)
-  `(markerp (car-safe ,elt)))
+  ;; (let* ((changeset (list (pop jump-tree-pos-list)))
+  ;;        (p changeset))
+  ;;   (while jump-tree-pos-list
+  ;;     (setcdr p (list (pop jump-tree-pos-list)))
+  ;;     (setq p (cdr p)))
+  ;;   changeset)
+  (pop jump-tree-pos-list)
+  )
 
-(defmacro jump-prev-list-GCd-marker-elt-p (elt)
-  ;; Return t if ELT is a marker element whose marker has been moved to the
-  ;; object-pool, so may potentially have been garbage-collected.
-  ;; Note: Valid marker jump-prev elements should be uniquely identified as cons
-  ;; cells with a symbol in the car (replacing the marker), and a number in
-  ;; the cdr. However, to guard against future changes to jump-prev element
-  ;; formats, we perform an additional redundant check on the symbol name.
-  `(and (car-safe ,elt)
-        (symbolp (car ,elt))
-        (let ((str (symbol-name (car ,elt))))
-          (and (> (length str) 12)
-               (string= (substring str 0 12) "jump-tree-id")))
-        (numberp (cdr-safe ,elt))))
+(defun jump-tree-pos-list-transfer-to-tree ()
+  ;; Transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'.
 
-(defun jump-tree-move-GC-elts-to-pool (elt)
-  ;; Move elements that can be garbage-collected into `jump-tree-global-tree'
-  ;; object pool, substituting a unique id that can be used to retrieve them
-  ;; later. (Only markers require this treatment currently.)
-  (when (jump-prev-list-marker-elt-p elt)
-    (let ((id (jump-tree-generate-id)))
-      (puthash id (car elt) (jump-tree-object-pool jump-tree-global-tree))
-      (setcar elt id))))
+  ;; `jump-tree-pos-list-transfer-to-tree' should never be called when jump-prev is disabled
+  ;; (i.e. `jump-tree-pos-tree' is t)
+  (assert (not (eq jump-tree-pos-tree t)))
 
-(defun jump-tree-restore-GC-elts-from-pool (elt)
-  ;; Replace object id's in ELT with corresponding objects from
-  ;; `jump-tree-global-tree' object pool and return modified ELT, or return nil if
-  ;; any object in ELT has been garbage-collected.
-  (if (jump-prev-list-GCd-marker-elt-p elt)
-      (when (setcar elt (gethash (car elt)
-                                 (jump-tree-object-pool jump-tree-global-tree)))
-        elt)
-    elt))
+  ;; if `jump-tree-pos-tree' is empty, create initial jump-tree
+  (when (null jump-tree-pos-tree) (setq jump-tree-pos-tree (make-jump-tree)))
 
-(defun jump-prev-list-clean-GCd-elts (jump-prev-list)
-  ;; Remove object id's from JUMP-PREV-LIST that refer to elements that have been
-  ;; garbage-collected. JUMP-PREV-LIST is modified by side-effect.
-  (while (jump-prev-list-GCd-marker-elt-p (car jump-prev-list))
-    (unless (gethash (caar jump-prev-list)
-                     (jump-tree-object-pool jump-tree-global-tree))
-      (setq jump-prev-list (cdr jump-prev-list))))
-  (let ((p jump-prev-list))
-    (while (cdr p)
-      (when (and (jump-prev-list-GCd-marker-elt-p (cadr p))
-                 (null (gethash (car (cadr p))
-                                (jump-tree-object-pool jump-tree-global-tree))))
-        (setcdr p (cddr p)))
-      (setq p (cdr p))))
-  jump-prev-list)
-
-(defun jump-prev-list-pop-changeset (&optional discard-pos)
-  ;; Pop changeset from `jump-tree-global-list'. If DISCARD-POS is non-nil, discard
-  ;; any position entries from changeset.
-
-  ;; discard jump-prev boundaries and (if DISCARD-POS is non-nil) position entries
-  ;; at head of jump-prev list
-  (while (or (null (car jump-tree-global-list))
-             (and discard-pos (integerp (car jump-tree-global-list))))
-    (setq jump-tree-global-list (cdr jump-tree-global-list)))
-  ;; pop elements up to next jump-prev boundary, discarding position entries if
-  ;; DISCARD-POS is non-nil
-  (if (eq (car jump-tree-global-list) 'jump-tree-canary)
-      (push nil jump-tree-global-list)
-    (let* ((changeset (list (pop jump-tree-global-list)))
-           (p changeset))
-      (while (progn
-               (jump-tree-move-GC-elts-to-pool (car p))
-               (while (and discard-pos (integerp (car jump-tree-global-list)))
-                 (setq jump-tree-global-list (cdr jump-tree-global-list)))
-               (and (car jump-tree-global-list)
-                    (not (eq (car jump-tree-global-list) 'jump-tree-canary))))
-        (setcdr p (list (pop jump-tree-global-list)))
-        (setq p (cdr p)))
-      changeset)))
-
-(defun jump-tree-copy-list (jump-prev-list)
-  ;; Return a deep copy of first changeset in `jump-prev-list'. Object id's are
-  ;; replaced by corresponding objects from `jump-tree-global-tree' object-pool.
-  (let (copy p)
-    ;; if first element contains an object id, replace it with object from
-    ;; pool, discarding element entirely if it's been GC'd
-    (while (and jump-prev-list (null copy))
-      (setq copy
-            (jump-tree-restore-GC-elts-from-pool (pop jump-prev-list))))
-    (when copy
-      (setq copy (list copy)
-            p copy)
-      ;; copy remaining elements, replacing object id's with objects from
-      ;; pool, or discarding them entirely if they've been GC'd
-      (while jump-prev-list
-        (when (setcdr p (jump-tree-restore-GC-elts-from-pool
-                         (jump-prev-copy-list-1 (pop jump-prev-list))))
-          (setcdr p (list (cdr p)))
-          (setq p (cdr p))))
-      copy)))
-
-(defun jump-prev-list-transfer-to-tree ()
-  ;; Transfer entries accumulated in `jump-tree-global-list' to `jump-tree-global-tree'.
-
-  ;; `jump-prev-list-transfer-to-tree' should never be called when jump-prev is disabled
-  ;; (i.e. `jump-tree-global-tree' is t)
-  (assert (not (eq jump-tree-global-tree t)))
-
-  ;; if `jump-tree-global-tree' is empty, create initial jump-tree
-  (when (null jump-tree-global-tree) (setq jump-tree-global-tree (make-jump-tree)))
-  ;; make sure there's a canary at end of `jump-tree-global-list'
-  (when (null jump-tree-global-list)
-    (setq jump-tree-global-list '(nil jump-tree-canary)))
-
-  (unless (or (eq (cadr jump-tree-global-list) 'jump-tree-canary)
-              (eq (car jump-tree-global-list) 'jump-tree-canary))
-    ;; create new node from first changeset in `jump-tree-global-list', save old
-    ;; `jump-tree-global-tree' current node, and make new node the current node
-    (let* ((node (jump-tree-make-node nil (jump-prev-list-pop-changeset)))
-           (splice (jump-tree-current jump-tree-global-tree))
-           (size (jump-prev-list-byte-size (jump-tree-node-jump-prev node)))
+  (when jump-tree-pos-list
+    ;; create new node from first changeset in `jump-tree-pos-list', save old
+    ;; `jump-tree-pos-tree' current node, and make new node the current node
+    (let* ((node (jump-tree-make-node nil (jump-tree-pos-list-pop-changeset)))
+           (splice (jump-tree-current jump-tree-pos-tree))
+           (size (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
            (count 1))
-      (setf (jump-tree-current jump-tree-global-tree) node)
-      ;; grow tree fragment backwards using `jump-tree-global-list' changesets
-      (while (and jump-tree-global-list
-                  (not (eq (cadr jump-tree-global-list) 'jump-tree-canary)))
+      (setf (jump-tree-current jump-tree-pos-tree) node)
+      ;; grow tree fragment backwards using `jump-tree-pos-list' changesets
+      (while jump-tree-pos-list
         (setq node
-              (jump-tree-grow-backwards node (jump-prev-list-pop-changeset)))
-        (incf size (jump-prev-list-byte-size (jump-tree-node-jump-prev node)))
+              (jump-tree-grow-backwards node (jump-tree-pos-list-pop-changeset)))
+        (incf size (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
         (incf count))
-      ;; if no jump-prev history has been discarded from `jump-tree-global-list' since
-      ;; last transfer, splice new tree fragment onto end of old
-      ;; `jump-tree-global-tree' current node
-      (if (or (eq (cadr jump-tree-global-list) 'jump-tree-canary)
-              (eq (car jump-tree-global-list) 'jump-tree-canary))
-          (progn
-            (setf (jump-tree-node-previous node) splice)
-            (push node (jump-tree-node-next splice))
-            (setf (jump-tree-node-branch splice) 0)
-            (incf (jump-tree-size jump-tree-global-tree) size)
-            (incf (jump-tree-count jump-tree-global-tree) count))
-        ;; if jump-prev history has been discarded, replace entire
-        ;; `jump-tree-global-tree' with new tree fragment
-        (setq node (jump-tree-grow-backwards node nil))
-        (setf (jump-tree-root jump-tree-global-tree) node)
-        (setq jump-tree-global-list '(nil jump-tree-canary))
-        (setf (jump-tree-size jump-tree-global-tree) size)
-        (setf (jump-tree-count jump-tree-global-tree) count)
-        (setq jump-tree-global-list '(nil jump-tree-canary))))
+      (setf (jump-tree-node-previous node) splice)
+      (push node (jump-tree-node-next splice))
+      (setf (jump-tree-node-branch splice) 0)
+      (incf (jump-tree-size jump-tree-pos-tree) size)
+      (incf (jump-tree-count jump-tree-pos-tree) count)
+      )
     ;; discard jump-prev history if necessary
     (jump-tree-discard-history)))
 
-(defun jump-prev-list-byte-size (jump-prev-list)
-  ;; Return size (in bytes) of JUMP-PREV-LIST
-  (let ((size 0) (p jump-prev-list))
-    (while p
-      (incf size 8)  ; cons cells use up 8 bytes
-      (when (and (consp (car p)) (stringp (caar p)))
-        (incf size (string-bytes (caar p))))
-      (setq p (cdr p)))
-    size))
+(defun jump-tree-pos-list-byte-size (position-list)
+  ;; Return size (in bytes) of POSITION-LIST
+  ;; (let ((size 0) (p position-list))
+  ;;   (while p
+  ;;     (incf size 8)  ; cons cells use up 8 bytes
+  ;;     (when (and (consp (car p)) (stringp (caar p)))
+  ;;       (incf size (string-bytes (caar p))))
+  ;;     (setq p (cdr p)))
+  ;;   size)
+  8
+  )
 
-(defun jump-prev-list-rebuild-from-tree ()
-  "Rebuild `jump-tree-global-list' from information in `jump-tree-global-tree'."
-  (unless (eq jump-tree-global-list t)
-    (jump-prev-list-transfer-to-tree)
-    (setq jump-tree-global-list nil)
-    (when jump-tree-global-tree
-      (let ((stack (list (list (jump-tree-root jump-tree-global-tree)))))
+(defun jump-tree-pos-list-rebuild-from-tree ()
+  "Rebuild `jump-tree-pos-list' from information in `jump-tree-pos-tree'."
+  (unless (eq jump-tree-pos-list t)
+    (jump-tree-pos-list-transfer-to-tree)
+    (setq jump-tree-pos-list nil)
+    (when jump-tree-pos-tree
+      (let ((stack (list (list (jump-tree-root jump-tree-pos-tree)))))
         (push (sort (mapcar 'identity (jump-tree-node-next (caar stack)))
                     (lambda (a b)
                       (time-less-p (jump-tree-node-timestamp a)
@@ -1515,13 +1288,12 @@ Comparison is done with `eq'."
         ;; on the way down, and jump-next records on the way up.
         (while (or (car stack)
                    (not (eq (car (nth 1 stack))
-                            (jump-tree-current jump-tree-global-tree))))
+                            (jump-tree-current jump-tree-pos-tree))))
           (if (car stack)
               (progn
-                (setq jump-tree-global-list
-                      (append (jump-tree-node-jump-prev (caar stack))
-                              jump-tree-global-list))
-                (jump-prev-boundary)
+                (setq jump-tree-pos-list
+                      (append (jump-tree-node-position (caar stack))
+                              jump-tree-pos-list))
                 (push (sort (mapcar 'identity
                                     (jump-tree-node-next (caar stack)))
                             (lambda (a b)
@@ -1529,10 +1301,6 @@ Comparison is done with `eq'."
                                            (jump-tree-node-timestamp b))))
                       stack))
             (pop stack)
-            (setq jump-tree-global-list
-                  (append (jump-tree-node-jump-next (caar stack))
-                          jump-tree-global-list))
-            (jump-prev-boundary)
             (pop (car stack))))))))
 
 
@@ -1550,14 +1318,14 @@ Comparison is done with `eq'."
   node)
 
 (defun jump-tree-discard-node (node)
-  ;; Discard NODE from `jump-tree-global-tree', and return next in line for
+  ;; Discard NODE from `jump-tree-pos-tree', and return next in line for
   ;; discarding.
 
   ;; don't discard current node
-  (unless (eq node (jump-tree-current jump-tree-global-tree))
+  (unless (eq node (jump-tree-current jump-tree-pos-tree))
 
     ;; discarding root node...
-    (if (eq node (jump-tree-root jump-tree-global-tree))
+    (if (eq node (jump-tree-root jump-tree-pos-tree))
         (cond
          ;; should always discard branches before root
          ((> (length (jump-tree-node-next node)) 1)
@@ -1565,31 +1333,29 @@ Comparison is done with `eq'."
  has multiple branches"))
          ;; don't discard root if current node is only child
          ((eq (car (jump-tree-node-next node))
-              (jump-tree-current jump-tree-global-tree))
+              (jump-tree-current jump-tree-pos-tree))
           nil)
          ;; discard root
          (t
           ;; clear any register referring to root
-          (let ((r (jump-tree-node-register node)))
-            (when (and r (eq (get-register r) node))
-              (set-register r nil)))
+          (let ((pos (jump-tree-node-register node)))
+            (when (and pos (eq (get-register pos) node))
+              (set-register pos nil)))
           ;; make child of root into new root
-          (setq node (setf (jump-tree-root jump-tree-global-tree)
+          (setq node (setf (jump-tree-root jump-tree-pos-tree)
                            (car (jump-tree-node-next node))))
           ;; update jump-tree size
-          (decf (jump-tree-size jump-tree-global-tree)
-                (+ (jump-prev-list-byte-size (jump-tree-node-jump-prev node))
-                   (jump-prev-list-byte-size (jump-tree-node-jump-next node))))
-          (decf (jump-tree-count jump-tree-global-tree))
+          (decf (jump-tree-size jump-tree-pos-tree)
+                (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
+          (decf (jump-tree-count jump-tree-pos-tree))
           ;; discard new root's jump-prev data and PREVIOUS link
-          (setf (jump-tree-node-jump-prev node) nil
-                (jump-tree-node-jump-next node) nil
+          (setf (jump-tree-node-position node) nil
                 (jump-tree-node-previous node) nil)
           ;; if new root has branches, or new root is current node, next node
           ;; to discard is oldest leaf, otherwise it's new root
           (if (or (> (length (jump-tree-node-next node)) 1)
                   (eq (car (jump-tree-node-next node))
-                      (jump-tree-current jump-tree-global-tree)))
+                      (jump-tree-current jump-tree-pos-tree)))
               (jump-tree-oldest-leaf node)
             node)))
 
@@ -1598,14 +1364,13 @@ Comparison is done with `eq'."
              (current (nth (jump-tree-node-branch parent)
                            (jump-tree-node-next parent))))
         ;; clear any register referring to the discarded node
-        (let ((r (jump-tree-node-register node)))
-          (when (and r (eq (get-register r) node))
-            (set-register r nil)))
+        (let ((pos (jump-tree-node-register node)))
+          (when (and pos (eq (get-register pos) node))
+            (set-register pos nil)))
         ;; update jump-tree size
-        (decf (jump-tree-size jump-tree-global-tree)
-              (+ (jump-prev-list-byte-size (jump-tree-node-jump-prev node))
-                 (jump-prev-list-byte-size (jump-tree-node-jump-next node))))
-        (decf (jump-tree-count jump-tree-global-tree))
+        (decf (jump-tree-size jump-tree-pos-tree)
+              (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
+        (decf (jump-tree-count jump-tree-pos-tree))
         ;; discard leaf
         (setf (jump-tree-node-next parent)
               (delq node (jump-tree-node-next parent))
@@ -1613,92 +1378,43 @@ Comparison is done with `eq'."
               (jump-tree-position current (jump-tree-node-next parent)))
         ;; if parent has branches, or parent is current node, next node to
         ;; discard is oldest leaf, otherwise it's the parent itself
-        (if (or (eq parent (jump-tree-current jump-tree-global-tree))
+        (if (or (eq parent (jump-tree-current jump-tree-pos-tree))
                 (and (jump-tree-node-next parent)
-                     (or (not (eq parent (jump-tree-root jump-tree-global-tree)))
+                     (or (not (eq parent (jump-tree-root jump-tree-pos-tree)))
                          (> (length (jump-tree-node-next parent)) 1))))
             (jump-tree-oldest-leaf parent)
           parent)))))
 
 (defun jump-tree-discard-history ()
   "Discard jump-prev history until we're within memory usage limits
-set by `jump-prev-limit', `jump-prev-strong-limit' and `jump-prev-outer-limit'."
+set by `jump-tree-pos-list-limit'."
 
-  (when (> (jump-tree-size jump-tree-global-tree) jump-prev-limit)
+  (when (> (jump-tree-size jump-tree-pos-tree) jump-tree-pos-list-limit)
     ;; if there are no branches off root, first node to discard is root;
     ;; otherwise it's leaf node at botom of oldest branch
     (let ((node (if (> (length (jump-tree-node-next
-                                (jump-tree-root jump-tree-global-tree))) 1)
-                    (jump-tree-oldest-leaf (jump-tree-root jump-tree-global-tree))
-                  (jump-tree-root jump-tree-global-tree))))
-
-      ;; discard nodes until memory use is within `jump-prev-strong-limit'
-      (while (and node
-                  (> (jump-tree-size jump-tree-global-tree) jump-prev-strong-limit))
-        (setq node (jump-tree-discard-node node)))
+                                (jump-tree-root jump-tree-pos-tree))) 1)
+                    (jump-tree-oldest-leaf (jump-tree-root jump-tree-pos-tree))
+                  (jump-tree-root jump-tree-pos-tree))))
 
       ;; discard nodes until next node to discard would bring memory use
-      ;; within `jump-prev-limit'
+      ;; within `jump-tree-pos-list-limit'
       (while (and node
-                  ;; check first if last discard has brought us within
-                  ;; `jump-prev-limit', in case we can avoid more expensive
-                  ;; `jump-prev-strong-limit' calculation
-                  ;; Note: this assumes jump-prev-strong-limit > jump-prev-limit;
-                  ;;       if not, effectively jump-prev-strong-limit = jump-prev-limit
-                  (> (jump-tree-size jump-tree-global-tree) jump-prev-limit)
-                  (> (- (jump-tree-size jump-tree-global-tree)
+                  (> (jump-tree-size jump-tree-pos-tree) jump-tree-pos-list-limit)
+                  (> (- (jump-tree-size jump-tree-pos-tree)
                         ;; if next node to discard is root, the memory we
                         ;; free-up comes from discarding changesets from its
                         ;; only child...
-                        (if (eq node (jump-tree-root jump-tree-global-tree))
-                            (+ (jump-prev-list-byte-size
-                                (jump-tree-node-jump-prev
-                                 (car (jump-tree-node-next node))))
-                               (jump-prev-list-byte-size
-                                (jump-tree-node-jump-next
-                                 (car (jump-tree-node-next node)))))
+                        (if (eq node (jump-tree-root jump-tree-pos-tree))
+                            (jump-tree-pos-list-byte-size
+                             (jump-tree-node-position
+                              (car (jump-tree-node-next node))))
                           ;; ...otherwise, it comes from discarding changesets
                           ;; from along with the node itself
-                          (+ (jump-prev-list-byte-size (jump-tree-node-jump-prev node))
-                             (jump-prev-list-byte-size (jump-tree-node-jump-next node)))
+                          (jump-tree-pos-list-byte-size (jump-tree-node-position node))
                           ))
-                     jump-prev-limit))
-        (setq node (jump-tree-discard-node node)))
-
-      ;; if we're still over the `jump-prev-outer-limit', discard entire history
-      (when (> (jump-tree-size jump-tree-global-tree) jump-prev-outer-limit)
-        ;; query first if `jump-prev-ask-before-discard' is set
-        (if jump-prev-ask-before-discard
-            (when (yes-or-no-p
-                   (format
-                    "Buffer `%s' jump-prev info is %d bytes long;  discard it? "
-                    (buffer-name) (jump-tree-size jump-tree-global-tree)))
-              (setq jump-tree-global-tree nil))
-          ;; otherwise, discard and display warning
-          (display-warning
-           '(jump-prev discard-info)
-           (concat
-            (format "Buffer `%s' jump-prev info was %d bytes long.\n"
-                    (buffer-name) (jump-tree-size jump-tree-global-tree))
-            "The jump-prev info was discarded because it exceeded\
- `jump-prev-outer-limit'.
-
-This is normal if you executed a command that made a huge change
-to the buffer. In that case, to prevent similar problems in the
-future, set `jump-prev-outer-limit' to a value that is large enough to
-cover the maximum size of normal changes you expect a single
-command to make, but not so large that it might exceed the
-maximum memory allotted to Emacs.
-
-If you did not execute any such command, the situation is
-probably due to a bug and you should report it.
-
-You can disable the popping up of this buffer by adding the entry
-\(jump-prev discard-info) to the user option `warning-suppress-types',
-which is defined in the `warnings' library.\n")
-           :warning)
-          (setq jump-tree-global-tree nil)))
-      )))
+                     jump-tree-pos-list-limit))
+        (setq node (jump-tree-discard-node node))))))
 
 
 ;;; =====================================================================
@@ -1795,481 +1511,6 @@ which is defined in the `warnings' library.\n")
    (lambda (n) (jump-tree-node-clear-visualizer-data n))
    (jump-tree-root tree)))
 
-(defun jump-tree-node-unmodified-p (node &optional mtime)
-  ;; Return non-nil if NODE corresponds to a buffer state that once upon a
-  ;; time was unmodified. If a file modification time MTIME is specified,
-  ;; return non-nil if the corresponding buffer state really is unmodified.
-  (let (changeset ntime)
-    (setq changeset
-          (or (jump-tree-node-jump-next node)
-              (and (setq changeset (car (jump-tree-node-next node)))
-                   (jump-tree-node-jump-prev changeset)))
-          ntime
-          (catch 'found
-            (dolist (elt changeset)
-              (when (and (consp elt) (eq (car elt) t) (consp (cdr elt))
-                         (throw 'found (cdr elt)))))))
-    (and ntime
-         (or (null mtime)
-             ;; high-precision timestamps
-             (if (listp (cdr ntime))
-                 (equal ntime mtime)
-               ;; old-style timestamps
-               (and (= (car ntime) (car mtime))
-                    (= (cdr ntime) (cadr mtime))))))))
-
-
-;;; =====================================================================
-;;;                  Jump-Prev-in-region utility functions
-
-;; `jump-prev-elt-in-region' uses this as a dynamically-scoped variable
-(defvar jump-prev-adjusted-markers nil)
-
-(defun jump-tree-pull-jump-prev-in-region-branch (start end)
-  ;; Pull out entries from jump-prev changesets to create a new jump-prev-in-region
-  ;; branch, which jump-preves changeset entries lying between START and END first,
-  ;; followed by remaining entries from the changesets, before rejoining the
-  ;; existing jump-prev tree history. Repeated calls will, if appropriate, extend
-  ;; the current jump-prev-in-region branch rather than creating a new one.
-  ;; if we're just reverting the last jump-next-in-region, we don't need to
-  ;; manipulate the jump-prev tree at all
-  (if (jump-tree-reverting-jump-next-in-region-p start end)
-      t  ; return t to indicate success
-    ;; We build the `region-changeset' and `delta-list' lists forwards, using
-    ;; pointers `r' and `d' to the penultimate element of the list. So that we
-    ;; don't have to treat the first element differently, we prepend a dummy
-    ;; leading nil to the lists, and have the pointers point to that
-    ;; initially.
-    ;; Note: using '(nil) instead of (list nil) in the `let*' results in
-    ;;       bizarre errors when the code is byte-compiled, where parts of the
-    ;;       lists appear to survive across different calls to this function.
-    ;;       An obscure byte-compiler bug, perhaps?
-    (let* ((region-changeset (list nil))
-           (r region-changeset)
-           (delta-list (list nil))
-           (d delta-list)
-           (node (jump-tree-current jump-tree-global-tree))
-           (repeated-jump-prev-in-region
-            (jump-tree-repeated-jump-prev-in-region-p start end))
-           jump-prev-adjusted-markers  ; `jump-prev-elt-in-region' expects this
-           fragment splice original-fragment original-splice original-current
-           got-visible-elt jump-prev-list elt)
-      ;; --- initialisation ---
-      (cond
-       ;; if this is a repeated jump-prev in the same region, start pulling changes
-       ;; from NODE at which jump-prev-in-region branch iss attached, and detatch
-       ;; the branch, using it as initial FRAGMENT of branch being constructed
-       (repeated-jump-prev-in-region
-        (setq original-current node
-              fragment (car (jump-tree-node-next node))
-              splice node)
-        ;; jump-prev up to node at which jump-prev-in-region branch is attached
-        ;; (recognizable as first node with more than one branch)
-        (let ((mark-active nil))
-          (while (= (length (jump-tree-node-next node)) 1)
-            (jump-tree-jump-prev-1)
-            (setq fragment node
-                  node (jump-tree-current jump-tree-global-tree))))
-        (when (eq splice node) (setq splice nil))
-        ;; detatch jump-prev-in-region branch
-        (setf (jump-tree-node-next node)
-              (delq fragment (jump-tree-node-next node))
-              (jump-tree-node-previous fragment) nil
-              original-fragment fragment
-              original-splice node))
-       ;; if this is a new jump-prev-in-region, initial FRAGMENT is a copy of all
-       ;; nodes below the current one in the active branch
-       ((jump-tree-node-next node)
-        (setq fragment (jump-tree-make-node nil nil)
-              splice fragment)
-        (while (setq node (nth (jump-tree-node-branch node)
-                               (jump-tree-node-next node)))
-          (push (jump-tree-make-node
-                 splice
-                 (jump-prev-copy-list (jump-tree-node-jump-prev node))
-                 (jump-prev-copy-list (jump-tree-node-jump-next node)))
-                (jump-tree-node-next splice))
-          (setq splice (car (jump-tree-node-next splice))))
-        (setq fragment (car (jump-tree-node-next fragment))
-              splice nil
-              node (jump-tree-current jump-tree-global-tree))))
-
-      ;; --- pull jump-prev-in-region elements into branch ---
-      ;; work backwards up tree, pulling out jump-prev elements within region until
-      ;; we've got one that jump-preves a visible change (insertion or deletion)
-      (catch 'abort
-        (while (and (not got-visible-elt) node (jump-tree-node-jump-prev node))
-          ;; we cons a dummy nil element on the front of the changeset so that
-          ;; we can conveniently remove the first (real) element from the
-          ;; changeset if we need to; the leading nil is removed once we're
-          ;; done with this changeset
-          (setq jump-prev-list (cons nil (jump-prev-copy-list (jump-tree-node-jump-prev node)))
-                elt (cadr jump-prev-list))
-          (if fragment
-              (progn
-                (setq fragment (jump-tree-grow-backwards fragment jump-prev-list))
-                (unless splice (setq splice fragment)))
-            (setq fragment (jump-tree-make-node nil jump-prev-list))
-            (setq splice fragment))
-          (while elt
-            (cond
-             ;; keep elements within region
-             ((jump-prev-elt-in-region elt start end)
-              ;; set flag if kept element is visible (insertion or deletion)
-              (when (and (consp elt)
-                         (or (stringp (car elt)) (integerp (car elt))))
-                (setq got-visible-elt t))
-              ;; adjust buffer positions in elements previously jump-prevne before
-              ;; kept element, as kept element will now be jump-prevne first
-              (jump-tree-adjust-elements-to-elt splice elt)
-              ;; move kept element to jump-prev-in-region changeset, adjusting its
-              ;; buffer position as it will now be jump-prevne first
-              (setcdr r (list (jump-tree-apply-deltas elt (cdr delta-list))))
-              (setq r (cdr r))
-              (setcdr jump-prev-list (cddr jump-prev-list)))
-             ;; discard "was unmodified" elements
-             ;; FIXME: deal properly with these
-             ((and (consp elt) (eq (car elt) t))
-              (setcdr jump-prev-list (cddr jump-prev-list)))
-             ;; if element crosses region, we can't pull any more elements
-             ((jump-prev-elt-crosses-region elt start end)
-              ;; if we've found a visible element, it must be earlier in
-              ;; current node's changeset; stop pulling elements (null
-              ;; `jump-prev-list' and non-nil `got-visible-elt' cause loop to exit)
-              (if got-visible-elt
-                  (setq jump-prev-list nil)
-                ;; if we haven't found a visible element yet, pulling
-                ;; jump-prev-in-region branch has failed
-                (setq region-changeset nil)
-                (throw 'abort t)))
-             ;; if rejecting element, add its delta (if any) to the list
-             (t
-              (let ((delta (jump-prev-delta elt)))
-                (when (/= 0 (cdr delta))
-                  (setcdr d (list delta))
-                  (setq d (cdr d))))
-              (setq jump-prev-list (cdr jump-prev-list))))
-            ;; process next element of current changeset
-            (setq elt (cadr jump-prev-list)))
-          ;; if there are remaining elements in changeset, remove dummy nil
-          ;; from front
-          (if (cadr (jump-tree-node-jump-prev fragment))
-              (pop (jump-tree-node-jump-prev fragment))
-            ;; otherwise, if we've kept all elements in changeset, discard
-            ;; empty changeset
-            (when (eq splice fragment) (setq splice nil))
-            (setq fragment (car (jump-tree-node-next fragment))))
-          ;; process changeset from next node up the tree
-          (setq node (jump-tree-node-previous node))))
-      ;; pop dummy nil from front of `region-changeset'
-      (setq region-changeset (cdr region-changeset))
-
-      ;; --- integrate branch into tree ---
-      ;; if no jump-prev-in-region elements were found, restore jump-prev tree
-      (if (null region-changeset)
-          (when original-current
-            (push original-fragment (jump-tree-node-next original-splice))
-            (setf (jump-tree-node-branch original-splice) 0
-                  (jump-tree-node-previous original-fragment) original-splice)
-            (let ((mark-active nil))
-              (while (not (eq (jump-tree-current jump-tree-global-tree)
-                              original-current))
-                (jump-tree-jump-next-1)))
-            nil)  ; return nil to indicate failure
-        ;; otherwise...
-        ;; need to jump-prev up to node where new branch will be attached, to
-        ;; ensure jump-next entries are populated, and then jump-next back to where we
-        ;; started
-        (let ((mark-active nil)
-              (current (jump-tree-current jump-tree-global-tree)))
-          (while (not (eq (jump-tree-current jump-tree-global-tree) node))
-            (jump-tree-jump-prev-1))
-          (while (not (eq (jump-tree-current jump-tree-global-tree) current))
-            (jump-tree-jump-next-1)))
-        (cond
-         ;; if there's no remaining fragment, just create jump-prev-in-region node
-         ;; and attach it to parent of last node from which elements were
-         ;; pulled
-         ((null fragment)
-          (setq fragment (jump-tree-make-node node region-changeset))
-          (push fragment (jump-tree-node-next node))
-          (setf (jump-tree-node-branch node) 0)
-          ;; set current node to jump-prev-in-region node
-          (setf (jump-tree-current jump-tree-global-tree) fragment))
-         ;; if no splice point has been set, add jump-prev-in-region node to top of
-         ;; fragment and attach it to parent of last node from which elements
-         ;; were pulled
-         ((null splice)
-          (setq fragment (jump-tree-grow-backwards fragment region-changeset))
-          (push fragment (jump-tree-node-next node))
-          (setf (jump-tree-node-branch node) 0
-                (jump-tree-node-previous fragment) node)
-          ;; set current node to jump-prev-in-region node
-          (setf (jump-tree-current jump-tree-global-tree) fragment))
-         ;; if fragment contains nodes, attach fragment to parent of last node
-         ;; from which elements were pulled, and splice in jump-prev-in-region node
-         (t
-          (setf (jump-tree-node-previous fragment) node)
-          (push fragment (jump-tree-node-next node))
-          (setf (jump-tree-node-branch node) 0)
-          ;; if this is a repeated jump-prev-in-region, then we've left the current
-          ;; node at the original splice-point; we need to set the current
-          ;; node to the equivalent node on the jump-prev-in-region branch and jump-next
-          ;; back to where we started
-          (when repeated-jump-prev-in-region
-            (setf (jump-tree-current jump-tree-global-tree)
-                  (jump-tree-node-previous original-fragment))
-            (let ((mark-active nil))
-              (while (not (eq (jump-tree-current jump-tree-global-tree) splice))
-                (jump-tree-jump-next-1 nil 'preserve-jump-prev))))
-          ;; splice new jump-prev-in-region node into fragment
-          (setq node (jump-tree-make-node nil region-changeset))
-          (jump-tree-splice-node node splice)
-          ;; set current node to jump-prev-in-region node
-          (setf (jump-tree-current jump-tree-global-tree) node)))
-        ;; update jump-tree size
-        (setq node (jump-tree-node-previous fragment))
-        (while (progn
-                 (and (setq node (car (jump-tree-node-next node)))
-                      (not (eq node original-fragment))
-                      (incf (jump-tree-count jump-tree-global-tree))
-                      (incf (jump-tree-size jump-tree-global-tree)
-                            (+ (jump-prev-list-byte-size (jump-tree-node-jump-prev node))
-                               (jump-prev-list-byte-size (jump-tree-node-jump-next node)))))))
-        t)  ; indicate jump-prev-in-region branch was successfully pulled
-      )))
-
-(defun jump-tree-pull-jump-next-in-region-branch (start end)
-  ;; Pull out entries from jump-next changesets to create a new jump-next-in-region
-  ;; branch, which jump-nextes changeset entries lying between START and END first,
-  ;; followed by remaining entries from the changesets. Repeated calls will,
-  ;; if appropriate, extend the current jump-next-in-region branch rather than
-  ;; creating a new one.
-  ;; if we're just reverting the last jump-prev-in-region, we don't need to
-  ;; manipulate the jump-prev tree at all
-  (if (jump-tree-reverting-jump-prev-in-region-p start end)
-      t  ; return t to indicate success
-    ;; We build the `region-changeset' and `delta-list' lists forwards, using
-    ;; pointers `r' and `d' to the penultimate element of the list. So that we
-    ;; don't have to treat the first element differently, we prepend a dummy
-    ;; leading nil to the lists, and have the pointers point to that
-    ;; initially.
-    ;; Note: using '(nil) instead of (list nil) in the `let*' causes bizarre
-    ;;       errors when the code is byte-compiled, where parts of the lists
-    ;;       appear to survive across different calls to this function.  An
-    ;;       obscure byte-compiler bug, perhaps?
-    (let* ((region-changeset (list nil))
-           (r region-changeset)
-           (delta-list (list nil))
-           (d delta-list)
-           (node (jump-tree-current jump-tree-global-tree))
-           (repeated-jump-next-in-region
-            (jump-tree-repeated-jump-next-in-region-p start end))
-           jump-prev-adjusted-markers  ; `jump-prev-elt-in-region' expects this
-           fragment splice got-visible-elt jump-next-list elt)
-      ;; --- inisitalisation ---
-      (cond
-       ;; if this is a repeated jump-next-in-region, detach fragment below current
-       ;; node
-       (repeated-jump-next-in-region
-        (when (setq fragment (car (jump-tree-node-next node)))
-          (setf (jump-tree-node-previous fragment) nil
-                (jump-tree-node-next node)
-                (delq fragment (jump-tree-node-next node)))))
-       ;; if this is a new jump-next-in-region, initial fragment is a copy of all
-       ;; nodes below the current one in the active branch
-       ((jump-tree-node-next node)
-        (setq fragment (jump-tree-make-node nil nil)
-              splice fragment)
-        (while (setq node (nth (jump-tree-node-branch node)
-                               (jump-tree-node-next node)))
-          (push (jump-tree-make-node
-                 splice nil
-                 (jump-prev-copy-list (jump-tree-node-jump-next node)))
-                (jump-tree-node-next splice))
-          (setq splice (car (jump-tree-node-next splice))))
-        (setq fragment (car (jump-tree-node-next fragment)))))
-
-      ;; --- pull jump-next-in-region elements into branch ---
-      ;; work down fragment, pulling out jump-next elements within region until
-      ;; we've got one that jump-nextes a visible change (insertion or deletion)
-      (setq node fragment)
-      (catch 'abort
-        (while (and (not got-visible-elt) node (jump-tree-node-jump-next node))
-          ;; we cons a dummy nil element on the front of the changeset so that
-          ;; we can conveniently remove the first (real) element from the
-          ;; changeset if we need to; the leading nil is removed once we're
-          ;; done with this changeset
-          (setq jump-next-list (push nil (jump-tree-node-jump-next node))
-                elt (cadr jump-next-list))
-          (while elt
-            (cond
-             ;; keep elements within region
-             ((jump-prev-elt-in-region elt start end)
-              ;; set flag if kept element is visible (insertion or deletion)
-              (when (and (consp elt)
-                         (or (stringp (car elt)) (integerp (car elt))))
-                (setq got-visible-elt t))
-              ;; adjust buffer positions in elements previously jump-nextne before
-              ;; kept element, as kept element will now be jump-nextne first
-              (jump-tree-adjust-elements-to-elt fragment elt t)
-              ;; move kept element to jump-next-in-region changeset, adjusting its
-              ;; buffer position as it will now be jump-nextne first
-              (setcdr r (list (jump-tree-apply-deltas elt (cdr delta-list) -1)))
-              (setq r (cdr r))
-              (setcdr jump-next-list (cddr jump-next-list)))
-             ;; discard "was unmodified" elements
-             ;; FIXME: deal properly with these
-             ((and (consp elt) (eq (car elt) t))
-              (setcdr jump-next-list (cddr jump-next-list)))
-             ;; if element crosses region, we can't pull any more elements
-             ((jump-prev-elt-crosses-region elt start end)
-              ;; if we've found a visible element, it must be earlier in
-              ;; current node's changeset; stop pulling elements (null
-              ;; `jump-next-list' and non-nil `got-visible-elt' cause loop to exit)
-              (if got-visible-elt
-                  (setq jump-next-list nil)
-                ;; if we haven't found a visible element yet, pulling
-                ;; jump-next-in-region branch has failed
-                (setq region-changeset nil)
-                (throw 'abort t)))
-             ;; if rejecting element, add its delta (if any) to the list
-             (t
-              (let ((delta (jump-prev-delta elt)))
-                (when (/= 0 (cdr delta))
-                  (setcdr d (list delta))
-                  (setq d (cdr d))))
-              (setq jump-next-list (cdr jump-next-list))))
-            ;; process next element of current changeset
-            (setq elt (cadr jump-next-list)))
-          ;; if there are remaining elements in changeset, remove dummy nil
-          ;; from front
-          (if (cadr (jump-tree-node-jump-next node))
-              (pop (jump-tree-node-jump-prev node))
-            ;; otherwise, if we've kept all elements in changeset, discard
-            ;; empty changeset
-            (if (eq fragment node)
-                (setq fragment (car (jump-tree-node-next fragment)))
-              (jump-tree-snip-node node)))
-          ;; process changeset from next node in fragment
-          (setq node (car (jump-tree-node-next node)))))
-      ;; pop dummy nil from front of `region-changeset'
-      (setq region-changeset (cdr region-changeset))
-
-      ;; --- integrate branch into tree ---
-      (setq node (jump-tree-current jump-tree-global-tree))
-      ;; if no jump-next-in-region elements were found, restore jump-prev tree
-      (if (null (car region-changeset))
-          (when (and repeated-jump-next-in-region fragment)
-            (push fragment (jump-tree-node-next node))
-            (setf (jump-tree-node-branch node) 0
-                  (jump-tree-node-previous fragment) node)
-            nil)  ; return nil to indicate failure
-        ;; otherwise, add jump-next-in-region node to top of fragment, and attach
-        ;; it below current node
-        (setq fragment
-              (if fragment
-                  (jump-tree-grow-backwards fragment nil region-changeset)
-                (jump-tree-make-node nil nil region-changeset)))
-        (push fragment (jump-tree-node-next node))
-        (setf (jump-tree-node-branch node) 0
-              (jump-tree-node-previous fragment) node)
-        ;; update jump-tree size
-        (unless repeated-jump-next-in-region
-          (setq node fragment)
-          (while (and (setq node (car (jump-tree-node-next node)))
-                      (incf (jump-tree-count jump-tree-global-tree))
-                      (incf (jump-tree-size jump-tree-global-tree)
-                            (jump-prev-list-byte-size
-                             (jump-tree-node-jump-next node))))))
-        (incf (jump-tree-size jump-tree-global-tree)
-              (jump-prev-list-byte-size (jump-tree-node-jump-next fragment)))
-        t)  ; indicate jump-next-in-region branch was successfully pulled
-      )))
-
-(defun jump-tree-adjust-elements-to-elt (node jump-prev-elt &optional below)
-  "Adjust buffer positions of jump-prev elements, starting at NODE's
-and going up the tree (or down the active branch if BELOW is
-non-nil) and through the nodes' jump-prev elements until we reach
-JUMP-PREV-ELT.  JUMP-PREV-ELT must appear somewhere in the jump-prev changeset
-of either NODE itself or some node above it in the tree."
-  (let ((delta (list (jump-prev-delta jump-prev-elt)))
-        (jump-prev-list (jump-tree-node-jump-prev node)))
-    ;; adjust elements until we reach JUMP-PREV-ELT
-    (while (and (car jump-prev-list)
-                (not (eq (car jump-prev-list) jump-prev-elt)))
-      (setcar jump-prev-list
-              (jump-tree-apply-deltas (car jump-prev-list) delta -1))
-      ;; move to next jump-prev element in list, or to next node if we've run out
-      ;; of elements
-      (unless (car (setq jump-prev-list (cdr jump-prev-list)))
-        (if below
-            (setq node (nth (jump-tree-node-branch node)
-                            (jump-tree-node-next node)))
-          (setq node (jump-tree-node-previous node)))
-        (setq jump-prev-list (jump-tree-node-jump-prev node))))))
-
-(defun jump-tree-apply-deltas (jump-prev-elt deltas &optional sgn)
-  ;; Apply DELTAS in order to JUMP-PREV-ELT, multiplying deltas by SGN
-  ;; (only useful value for SGN is -1).
-  (let (position offset)
-    (dolist (delta deltas)
-      (setq position (car delta)
-            offset (* (cdr delta) (or sgn 1)))
-      (cond
-       ;; POSITION
-       ((integerp jump-prev-elt)
-        (when (>= jump-prev-elt position)
-          (setq jump-prev-elt (- jump-prev-elt offset))))
-       ;; nil (or any other atom)
-       ((atom jump-prev-elt))
-       ;; (TEXT . POSITION)
-       ((stringp (car jump-prev-elt))
-        (let ((text-pos (abs (cdr jump-prev-elt)))
-              (point-at-end (< (cdr jump-prev-elt) 0)))
-          (if (>= text-pos position)
-              (setcdr jump-prev-elt (* (if point-at-end -1 1)
-                                  (- text-pos offset))))))
-       ;; (BEGIN . END)
-       ((integerp (car jump-prev-elt))
-        (when (>= (car jump-prev-elt) position)
-          (setcar jump-prev-elt (- (car jump-prev-elt) offset))
-          (setcdr jump-prev-elt (- (cdr jump-prev-elt) offset))))
-       ;; (nil PROPERTY VALUE BEG . END)
-       ((null (car jump-prev-elt))
-        (let ((tail (nthcdr 3 jump-prev-elt)))
-          (when (>= (car tail) position)
-            (setcar tail (- (car tail) offset))
-            (setcdr tail (- (cdr tail) offset)))))
-       ))
-    jump-prev-elt))
-
-(defun jump-tree-repeated-jump-prev-in-region-p (start end)
-  ;; Return non-nil if jump-prev-in-region between START and END is a repeated
-  ;; jump-prev-in-region
-  (let ((node (jump-tree-current jump-tree-global-tree)))
-    (and (setq node
-               (nth (jump-tree-node-branch node) (jump-tree-node-next node)))
-         (eq (jump-tree-node-jump-prev-beginning node) start)
-         (eq (jump-tree-node-jump-prev-end node) end))))
-
-(defun jump-tree-repeated-jump-next-in-region-p (start end)
-  ;; Return non-nil if jump-prev-in-region between START and END is a repeated
-  ;; jump-prev-in-region
-  (let ((node (jump-tree-current jump-tree-global-tree)))
-    (and (eq (jump-tree-node-jump-next-beginning node) start)
-         (eq (jump-tree-node-jump-next-end node) end))))
-
-;; Return non-nil if jump-prev-in-region between START and END is simply
-;; reverting the last jump-next-in-region
-(defalias 'jump-tree-reverting-jump-prev-in-region-p
-  'jump-tree-repeated-jump-prev-in-region-p)
-
-;; Return non-nil if jump-next-in-region between START and END is simply
-;; reverting the last jump-prev-in-region
-(defalias 'jump-tree-reverting-jump-next-in-region-p
-  'jump-tree-repeated-jump-next-in-region-p)
-
 
 ;;; =====================================================================
 ;;;                        jump-tree commands
@@ -2290,11 +1531,9 @@ Within the jump-tree visualizer, the following keys are available:
   nil                       ; init value
   jump-tree-mode-lighter    ; lighter
   jump-tree-map             ; keymap
-  ;; if disabling `jump-tree-mode', rebuild `jump-tree-global-list' from tree so
-  ;; Emacs jump-prev can work
   (when (not jump-tree-mode)
-    (jump-prev-list-rebuild-from-tree)
-    (setq jump-tree-global-tree nil)))
+    (setq jump-tree-pos-list nil)
+    (setq jump-tree-pos-tree nil)))
 
 (defun turn-on-jump-tree-mode (&optional print-message)
   "Enable `jump-tree-mode' in the current buffer, when appropriate.
@@ -2353,13 +1592,13 @@ changes within the current region."
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
   ;; throw error if jump-prev is disabled in buffer
-  (when (eq jump-tree-global-list t)
+  (when (eq jump-tree-pos-list t)
     (user-error "No jump-prev information in this buffer"))
   (jump-tree-jump-prev-1 arg)
   ;; inform user if at branch point
   (when (> (jump-tree-num-branches) 1) (message "Jump-Prev branch point!")))
 
-(defun jump-tree-jump-prev-1 (&optional arg preserve-jump-next preserve-timestamps)
+(defun jump-tree-jump-prev-1 (&optional arg)
   ;; Internal jump-prev function. Non-nil PRESERVE-JUMP-NEXT
   ;; causes the existing jump-next record to be preserved, rather than replacing it
   ;; with the new one generated by jump-preving. Non-nil PRESERVE-TIMESTAMPS
@@ -2368,55 +1607,27 @@ changes within the current region."
   ;; immediately returning to the original state afterwards. Otherwise, it
   ;; could cause history-discarding errors.)
   (setq deactivate-mark t)
-  (let ((jump-prev-in-progress t)
-        (jump-prev-in-region (and jump-tree-enable-jump-prev-in-region
-                             (or (region-active-p)
-                                 (and arg (not (numberp arg))))))
+  (let ((jump-tree-in-progress t)
         pos current)
-    ;; transfer entries accumulated in `jump-tree-global-list' to
-    ;; `jump-tree-global-tree'
-    (jump-prev-list-transfer-to-tree)
+    ;; transfer entries accumulated in `jump-tree-pos-list' to
+    ;; `jump-tree-pos-tree'
+    (jump-tree-pos-list-transfer-to-tree)
     (dotimes (i (or (and (numberp arg) (prefix-numeric-value arg)) 1))
       ;; check if at top of jump-prev tree
-      (unless (jump-tree-node-previous (jump-tree-current jump-tree-global-tree))
+      (unless (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree))
         (user-error "No further jump-prev information"))
-      ;; remove any GC'd elements from node's jump-prev list
-      (setq current (jump-tree-current jump-tree-global-tree))
-      (decf (jump-tree-size jump-tree-global-tree)
-            (jump-prev-list-byte-size (jump-tree-node-jump-prev current)))
-      (setf (jump-tree-node-jump-prev current)
-            (jump-prev-list-clean-GCd-elts (jump-tree-node-jump-prev current)))
-      (incf (jump-tree-size jump-tree-global-tree)
-            (jump-prev-list-byte-size (jump-tree-node-jump-prev current)))
-      (primitive-undo 1 (jump-tree-copy-list (jump-tree-node-jump-prev current)))
-      ;; if preserving old jump-next record, discard new jump-next entries that
-      ;; `primitive-jump-prev' has added to `jump-tree-global-list', and remove any GC'd
-      ;; elements from node's jump-next list
-      (if preserve-jump-next
-          (progn
-            (jump-prev-list-pop-changeset)
-            (decf (jump-tree-size jump-tree-global-tree)
-                  (jump-prev-list-byte-size (jump-tree-node-jump-next current)))
-            (setf (jump-tree-node-jump-next current)
-                  (jump-prev-list-clean-GCd-elts (jump-tree-node-jump-next current)))
-            (incf (jump-tree-size jump-tree-global-tree)
-                  (jump-prev-list-byte-size (jump-tree-node-jump-next current))))
-        ;; otherwise, record jump-next entries that `primitive-jump-prev' has added to
-        ;; `jump-tree-global-list' in current node's jump-next record, replacing
-        ;; existing entry if one already exists
-        (decf (jump-tree-size jump-tree-global-tree)
-              (jump-prev-list-byte-size (jump-tree-node-jump-next current)))
-        (setf (jump-tree-node-jump-next current)
-              (jump-prev-list-pop-changeset 'discard-pos))
-        (incf (jump-tree-size jump-tree-global-tree)
-              (jump-prev-list-byte-size (jump-tree-node-jump-next current))))
+      (setq current (jump-tree-current jump-tree-pos-tree))
+      (decf (jump-tree-size jump-tree-pos-tree)
+            (jump-tree-pos-list-byte-size (jump-tree-node-position current)))
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;; (print (jump-tree-node-position current))
+      (jump-tree-pos-list--do-jump (jump-tree-node-position current))
+
       ;; rewind current node and update timestamp
-      (setf (jump-tree-current jump-tree-global-tree)
-            (jump-tree-node-previous (jump-tree-current jump-tree-global-tree)))
-      (unless preserve-timestamps
-        (setf (jump-tree-node-timestamp (jump-tree-current jump-tree-global-tree))
-              (current-time)))
-      (jump-tree-node-clear-region-data current))))
+      (setf (jump-tree-current jump-tree-pos-tree)
+            (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree)))
+      )))
 
 (defun jump-tree-jump-next (&optional arg)
   "Jump-Next changes. A numeric ARG serves as a repeat count.
@@ -2428,13 +1639,13 @@ changes within the current region."
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
   ;; throw error if jump-prev is disabled in buffer
-  (when (eq jump-tree-global-list t)
+  (when (eq jump-tree-pos-list t)
     (user-error "No jump-prev information in this buffer"))
   (jump-tree-jump-next-1 arg)
   ;; inform user if at branch point
   (when (> (jump-tree-num-branches) 1) (message "Jump-Prev branch point!")))
 
-(defun jump-tree-jump-next-1 (&optional arg preserve-jump-prev preserve-timestamps)
+(defun jump-tree-jump-next-1 (&optional arg)
   ;; Internal jump-next function. An active mark in `transient-mark-mode', or
   ;; non-nil ARG otherwise, enables jump-prev-in-region. Non-nil PRESERVE-JUMP-PREV
   ;; causes the existing jump-next record to be preserved, rather than replacing it
@@ -2444,69 +1655,39 @@ changes within the current region."
   ;; immediately returning to the original state afterwards. Otherwise, it
   ;; could cause history-discarding errors.)
   (setq deactivate-mark t)
-  (let ((jump-prev-in-progress t)
-        (jump-next-in-region (and jump-tree-enable-jump-prev-in-region
-                             (or (region-active-p)
-                                 (and arg (not (numberp arg))))))
+  (let ((jump-tree-in-progress t)
         pos current)
-    ;; transfer entries accumulated in `jump-tree-global-list' to
-    ;; `jump-tree-global-tree'
-    (jump-prev-list-transfer-to-tree)
+    ;; transfer entries accumulated in `jump-tree-pos-list' to
+    ;; `jump-tree-pos-tree'
+    (jump-tree-pos-list-transfer-to-tree)
     (dotimes (i (or (and (numberp arg) (prefix-numeric-value arg)) 1))
       ;; check if at bottom of jump-prev tree
-      (when (null (jump-tree-node-next (jump-tree-current jump-tree-global-tree)))
+      (when (null (jump-tree-node-next (jump-tree-current jump-tree-pos-tree)))
         (user-error "No further jump-next information"))
       ;; get next node (but DON'T advance current node in tree yet, in case
       ;; jump-nexting fails)
-      (setq current (jump-tree-current jump-tree-global-tree)
+      (setq current (jump-tree-current jump-tree-pos-tree)
             current (nth (jump-tree-node-branch current)
                          (jump-tree-node-next current)))
-      ;; remove any GC'd elements from node's jump-next list
-      (decf (jump-tree-size jump-tree-global-tree)
-            (jump-prev-list-byte-size (jump-tree-node-jump-next current)))
-      (setf (jump-tree-node-jump-next current)
-            (jump-prev-list-clean-GCd-elts (jump-tree-node-jump-next current)))
-      (incf (jump-tree-size jump-tree-global-tree)
-            (jump-prev-list-byte-size (jump-tree-node-jump-next current)))
-      (primitive-undo 1 (jump-tree-copy-list (jump-tree-node-jump-next current)))
+      (decf (jump-tree-size jump-tree-pos-tree)
+            (jump-tree-pos-list-byte-size (jump-tree-node-position current)))
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (jump-tree-global-list--do-jump (jump-tree-node-position current))
+
       ;; advance current node in tree
-      (setf (jump-tree-current jump-tree-global-tree) current)
-      ;; if preserving old jump-prev record, discard new jump-prev entries that
-      ;; `primitive-jump-prev' has added to `jump-tree-global-list', and remove any GC'd
-      ;; elements from node's jump-next list
-      (if preserve-jump-prev
-          (progn
-            (jump-prev-list-pop-changeset)
-            (decf (jump-tree-size jump-tree-global-tree)
-                  (jump-prev-list-byte-size (jump-tree-node-jump-prev current)))
-            (setf (jump-tree-node-jump-prev current)
-                  (jump-prev-list-clean-GCd-elts (jump-tree-node-jump-prev current)))
-            (incf (jump-tree-size jump-tree-global-tree)
-                  (jump-prev-list-byte-size (jump-tree-node-jump-prev current))))
-        ;; otherwise, record jump-prev entries that `primitive-jump-prev' has added to
-        ;; `jump-tree-global-list' in current node's jump-prev record, replacing
-        ;; existing entry if one already exists
-        (decf (jump-tree-size jump-tree-global-tree)
-              (jump-prev-list-byte-size (jump-tree-node-jump-prev current)))
-        (setf (jump-tree-node-jump-prev current)
-              (jump-prev-list-pop-changeset 'discard-pos))
-        (incf (jump-tree-size jump-tree-global-tree)
-              (jump-prev-list-byte-size (jump-tree-node-jump-prev current))))
-      ;; update timestamp
-      (unless preserve-timestamps
-        (setf (jump-tree-node-timestamp current) (current-time)))
-      (jump-tree-node-clear-region-data current))))
+      (setf (jump-tree-current jump-tree-pos-tree) current))))
 
 (defun jump-tree-switch-branch (branch)
   "Switch to a different BRANCH of the jump-prev tree.
 This will affect which branch to descend when *jump-nexting* changes
 using `jump-tree-jump-next'."
   (interactive (list (or (and prefix-arg (prefix-numeric-value prefix-arg))
-                         (and (not (eq jump-tree-global-list t))
-                              (or (jump-prev-list-transfer-to-tree) t)
+                         (and (not (eq jump-tree-pos-list t))
+                              (or (jump-tree-pos-list-transfer-to-tree) t)
                               (let ((b (jump-tree-node-branch
                                         (jump-tree-current
-                                         jump-tree-global-tree))))
+                                         jump-tree-pos-tree))))
                                 (cond
                                  ;; switch to other branch if only 2
                                  ((= (jump-tree-num-branches) 2) (- 1 b))
@@ -2519,17 +1700,17 @@ using `jump-tree-jump-next'."
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
   ;; throw error if jump-prev is disabled in buffer
-  (when (eq jump-tree-global-list t)
+  (when (eq jump-tree-pos-list t)
     (user-error "No jump-prev information in this buffer"))
   ;; sanity check branch number
   (when (<= (jump-tree-num-branches) 1)
     (user-error "Not at jump-prev branch point"))
   (when (or (< branch 0) (> branch (1- (jump-tree-num-branches))))
     (user-error "Invalid branch number"))
-  ;; transfer entries accumulated in `jump-tree-global-list' to `jump-tree-global-tree'
-  (jump-prev-list-transfer-to-tree)
+  ;; transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'
+  (jump-tree-pos-list-transfer-to-tree)
   ;; switch branch
-  (setf (jump-tree-node-branch (jump-tree-current jump-tree-global-tree))
+  (setf (jump-tree-node-branch (jump-tree-current jump-tree-pos-tree))
         branch)
   (message "Switched to branch %d" branch))
 
@@ -2542,7 +1723,7 @@ using `jump-tree-jump-next'."
   ;; afterwards. Otherwise, it could cause history-discarding errors.)
   (let ((path (make-hash-table :test 'eq))
         (n node))
-    (puthash (jump-tree-root jump-tree-global-tree) t path)
+    (puthash (jump-tree-root jump-tree-pos-tree) t path)
     ;; build list of nodes leading back from selected node to root, updating
     ;; branches as we go to point down to selected node
     (while (progn
@@ -2554,14 +1735,14 @@ using `jump-tree-jump-next'."
                (setq n (jump-tree-node-previous n)))))
     ;; work backwards from current node until we intersect path back from
     ;; selected node
-    (setq n (jump-tree-current jump-tree-global-tree))
+    (setq n (jump-tree-current jump-tree-pos-tree))
     (while (not (gethash n path))
       (setq n (jump-tree-node-previous n)))
     ;; ascend tree until intersection node
-    (while (not (eq (jump-tree-current jump-tree-global-tree) n))
+    (while (not (eq (jump-tree-current jump-tree-pos-tree) n))
       (jump-tree-jump-prev-1 nil nil preserve-timestamps))
     ;; descend tree until selected node
-    (while (not (eq (jump-tree-current jump-tree-global-tree) node))
+    (while (not (eq (jump-tree-current jump-tree-pos-tree) node))
       (jump-tree-jump-next-1 nil nil preserve-timestamps))
     n))  ; return intersection node
 
@@ -2574,18 +1755,18 @@ Argument is a character, naming the register."
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
   ;; throw error if jump-prev is disabled in buffer
-  (when (eq jump-tree-global-list t)
+  (when (eq jump-tree-pos-list t)
     (user-error "No jump-prev information in this buffer"))
-  ;; transfer entries accumulated in `jump-tree-global-list' to `jump-tree-global-tree'
-  (jump-prev-list-transfer-to-tree)
+  ;; transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'
+  (jump-tree-pos-list-transfer-to-tree)
   ;; save current node to REGISTER
   (set-register
    register (registerv-make
              (jump-tree-make-register-data
-              (current-buffer) (jump-tree-current jump-tree-global-tree))
+              (current-buffer) (jump-tree-current jump-tree-pos-tree))
              :print-func 'jump-tree-register-data-print-func))
   ;; record REGISTER in current node, for visualizer
-  (setf (jump-tree-node-register (jump-tree-current jump-tree-global-tree))
+  (setf (jump-tree-node-register (jump-tree-current jump-tree-pos-tree))
         register))
 
 (defun jump-tree-restore-state-from-register (register)
@@ -2599,14 +1780,14 @@ Argument is a character, naming the register."
   ;; an jump-tree node
   (let ((data (registerv-data (get-register register))))
     (cond
-     ((eq jump-tree-global-list t)
+     ((eq jump-tree-pos-list t)
       (user-error "No jump-prev information in this buffer"))
      ((not (jump-tree-register-data-p data))
       (user-error "Register doesn't contain jump-tree state"))
      ((not (eq (current-buffer) (jump-tree-register-data-buffer data)))
       (user-error "Register contains jump-tree state for a different buffer")))
-    ;; transfer entries accumulated in `jump-tree-global-list' to `jump-tree-global-tree'
-    (jump-prev-list-transfer-to-tree)
+    ;; transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'
+    (jump-tree-pos-list-transfer-to-tree)
     ;; restore buffer state corresponding to saved node
     (jump-tree-set (jump-tree-register-data-node data))))
 
@@ -2620,14 +1801,14 @@ Argument is a character, naming the register."
     (user-error "jump-tree mode not enabled in buffer"))
   (deactivate-mark)
   ;; throw error if jump-prev is disabled in buffer
-  (when (eq jump-tree-global-list t)
+  (when (eq jump-tree-pos-list t)
     (user-error "No jump-prev information in this buffer"))
-  ;; transfer entries accumulated in `jump-tree-global-list' to `jump-tree-global-tree'
-  (jump-prev-list-transfer-to-tree)
+  ;; transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'
+  (jump-tree-pos-list-transfer-to-tree)
   ;; add hook to kill visualizer buffer if original buffer is changed
   (add-hook 'before-change-functions 'jump-tree-kill-visualizer nil t)
   ;; prepare *jump-tree* buffer, then draw tree in it
-  (let ((jump-tree jump-tree-global-tree)
+  (let ((jump-tree jump-tree-pos-tree)
         (buff (current-buffer))
         (display-buffer-mark-dedicated 'soft))
     (switch-to-buffer-other-window
@@ -2641,10 +1822,10 @@ Argument is a character, naming the register."
           (jump-tree-visualizer-calculate-spacing))
     (make-local-variable 'jump-tree-visualizer-timestamps)
     (make-local-variable 'jump-tree-visualizer-diff)
-    (setq jump-tree-global-tree jump-tree)
+    (setq jump-tree-pos-tree jump-tree)
     (jump-tree-visualizer-mode)
     ;; FIXME; don't know why `jump-tree-visualizer-mode' clears this
-    (setq jump-tree-global-tree jump-tree)
+    (setq jump-tree-pos-tree jump-tree)
     (set (make-local-variable 'jump-tree-visualizer-lazy-drawing)
          (or (eq jump-tree-visualizer-lazy-drawing t)
              (and (numberp jump-tree-visualizer-lazy-drawing)
@@ -2858,7 +2039,7 @@ Argument is a character, naming the register."
                'jump-tree-visualizer-active-branch-face))
           (jump-tree-highlight-active-branch
            (or jump-tree-visualizer-needs-extending-up
-               (jump-tree-root jump-tree-global-tree))
+               (jump-tree-root jump-tree-pos-tree))
            from))))))
 
 (defun jump-tree-highlight-active-branch (node &optional end)
@@ -2885,10 +2066,6 @@ Argument is a character, naming the register."
                                               jump-tree-insert-face)
                                          (list jump-tree-insert-face))))
          (register (jump-tree-node-register node))
-         (unmodified (if jump-tree-visualizer-parent-mtime
-                         (jump-tree-node-unmodified-p
-                          node jump-tree-visualizer-parent-mtime)
-                       (jump-tree-node-unmodified-p node)))
          node-string)
     ;; check node's register (if any) still stores appropriate jump-tree state
     (unless (and register
@@ -2898,7 +2075,7 @@ Argument is a character, naming the register."
                            (registerv-data (get-register register)))))
       (setq register nil))
     ;; represent node by different symbols, depending on whether it's the
-    ;; current node, is saved in a register, or corresponds to an unmodified
+    ;; current node, is saved in a register
     ;; buffer
     (setq node-string
           (cond
@@ -2908,14 +2085,12 @@ Argument is a character, naming the register."
              jump-tree-visualizer-relative-timestamps
              current register))
            (register (char-to-string register))
-           (unmodified "s")
            (current "x")
            (t "o"))
           jump-tree-insert-face
           (nconc
            (cond
             (current    '(jump-tree-visualizer-current-face))
-            (unmodified '(jump-tree-visualizer-unmodified-face))
             (register   '(jump-tree-visualizer-register-face)))
            jump-tree-insert-face))
     ;; draw node and link it to its representation in visualizer
@@ -3251,7 +2426,7 @@ Within the jump-tree visualizer, the following keys are available:
   (interactive "p")
   (unless (eq major-mode 'jump-tree-visualizer-mode)
     (user-error "jump-tree mode not enabled in buffer"))
-  (let ((old (jump-tree-current jump-tree-global-tree))
+  (let ((old (jump-tree-current jump-tree-pos-tree))
         current)
     ;; unhighlight old current node
     (let ((jump-tree-insert-face 'jump-tree-visualizer-active-branch-face)
@@ -3262,7 +2437,7 @@ Within the jump-tree visualizer, the following keys are available:
     (deactivate-mark)
     (unwind-protect
         (let ((jump-tree-inhibit-kill-visualizer t)) (jump-tree-jump-prev-1 arg))
-      (setq current (jump-tree-current jump-tree-global-tree))
+      (setq current (jump-tree-current jump-tree-pos-tree))
       (switch-to-buffer-other-window jump-tree-visualizer-buffer-name)
       ;; when using lazy drawing, extend tree upwards as required
       (when jump-tree-visualizer-lazy-drawing
@@ -3277,18 +2452,18 @@ Within the jump-tree visualizer, the following keys are available:
   (interactive "p")
   (unless (eq major-mode 'jump-tree-visualizer-mode)
     (user-error "jump-tree mode not enabled in buffer"))
-  (let ((old (jump-tree-current jump-tree-global-tree))
+  (let ((old (jump-tree-current jump-tree-pos-tree))
         current)
     ;; unhighlight old current node
     (let ((jump-tree-insert-face 'jump-tree-visualizer-active-branch-face)
           (inhibit-read-only t))
-      (jump-tree-draw-node (jump-tree-current jump-tree-global-tree)))
+      (jump-tree-draw-node (jump-tree-current jump-tree-pos-tree)))
     ;; jump-next in parent buffer
     (switch-to-buffer-other-window jump-tree-visualizer-parent-buffer)
     (deactivate-mark)
     (unwind-protect
         (let ((jump-tree-inhibit-kill-visualizer t)) (jump-tree-jump-next-1 arg))
-      (setq current (jump-tree-current jump-tree-global-tree))
+      (setq current (jump-tree-current jump-tree-pos-tree))
       (switch-to-buffer-other-window jump-tree-visualizer-buffer-name)
       ;; when using lazy drawing, extend tree downwards as required
       (when jump-tree-visualizer-lazy-drawing
@@ -3306,13 +2481,13 @@ using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
   (unless (eq major-mode 'jump-tree-visualizer-mode)
     (user-error "jump-tree mode not enabled in buffer"))
   ;; un-highlight old active branch below current node
-  (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-global-tree)))
+  (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-pos-tree)))
   (let ((jump-tree-insert-face 'jump-tree-visualizer-default-face)
         (inhibit-read-only t))
-    (jump-tree-highlight-active-branch (jump-tree-current jump-tree-global-tree)))
+    (jump-tree-highlight-active-branch (jump-tree-current jump-tree-pos-tree)))
   ;; increment branch
-  (let ((branch (jump-tree-node-branch (jump-tree-current jump-tree-global-tree))))
-    (setf (jump-tree-node-branch (jump-tree-current jump-tree-global-tree))
+  (let ((branch (jump-tree-node-branch (jump-tree-current jump-tree-pos-tree))))
+    (setf (jump-tree-node-branch (jump-tree-current jump-tree-pos-tree))
           (cond
            ((>= (+ branch arg) (jump-tree-num-branches))
             (1- (jump-tree-num-branches)))
@@ -3320,11 +2495,11 @@ using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
            (t (+ branch arg))))
     (let ((inhibit-read-only t))
       ;; highlight new active branch below current node
-      (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-global-tree)))
+      (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-pos-tree)))
       (let ((jump-tree-insert-face 'jump-tree-visualizer-active-branch-face))
-        (jump-tree-highlight-active-branch (jump-tree-current jump-tree-global-tree)))
+        (jump-tree-highlight-active-branch (jump-tree-current jump-tree-pos-tree)))
       ;; re-highlight current node
-      (jump-tree-draw-node (jump-tree-current jump-tree-global-tree) 'current))))
+      (jump-tree-draw-node (jump-tree-current jump-tree-pos-tree) 'current))))
 
 (defun jump-tree-visualize-switch-branch-left (arg)
   "Switch to previous branch of the jump-prev tree.
@@ -3338,7 +2513,7 @@ using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
   (interactive)
   (unless (eq major-mode 'jump-tree-visualizer-mode)
     (user-error "jump-tree mode not enabled in buffer"))
-  (jump-tree-clear-visualizer-data jump-tree-global-tree)
+  (jump-tree-clear-visualizer-data jump-tree-pos-tree)
   ;; remove kill visualizer hook from parent buffer
   (unwind-protect
       (with-current-buffer jump-tree-visualizer-parent-buffer
@@ -3378,7 +2553,7 @@ at POS, or point if POS is nil."
       (let ((jump-tree-inhibit-kill-visualizer t)) (jump-tree-set node))
       (switch-to-buffer-other-window jump-tree-visualizer-buffer-name)
       ;; re-draw jump-prev tree
-      (let ((inhibit-read-only t)) (jump-tree-draw-tree jump-tree-global-tree))
+      (let ((inhibit-read-only t)) (jump-tree-draw-tree jump-tree-pos-tree))
       (when jump-tree-visualizer-diff (jump-tree-visualizer-update-diff)))))
 
 (defun jump-tree-visualizer-mouse-set (pos)
@@ -3410,9 +2585,9 @@ specifies `saved', and a negative prefix argument specifies
              (t        'saved))))
   (let ((current (if jump-tree-visualizer-selection-mode
                      jump-tree-visualizer-selected-node
-                   (jump-tree-current jump-tree-global-tree)))
+                   (jump-tree-current jump-tree-pos-tree)))
         (diff jump-tree-visualizer-diff)
-        r)
+        pos)
     (jump-tree-visualizer-hide-diff)
     (while (and (jump-tree-node-previous current)
                 (or (if jump-tree-visualizer-selection-mode
@@ -3420,20 +2595,19 @@ specifies `saved', and a negative prefix argument specifies
                           (jump-tree-visualizer-select-previous)
                           (setq current jump-tree-visualizer-selected-node))
                       (jump-tree-visualize-jump-prev)
-                      (setq current (jump-tree-current jump-tree-global-tree)))
+                      (setq current (jump-tree-current jump-tree-pos-tree)))
                     t)
                 ;; branch point
                 (not (or (and (or (null x) (eq x 'branch))
                               (> (jump-tree-num-branches) 1))
                          ;; register
                          (and (or (null x) (eq x 'register))
-                              (setq r (jump-tree-node-register current))
+                              (setq pos (jump-tree-node-register current))
                               (jump-tree-register-data-p
-                               (setq r (registerv-data (get-register r))))
-                              (eq current (jump-tree-register-data-node r)))
+                               (setq pos (registerv-data (get-register pos))))
+                              (eq current (jump-tree-register-data-node pos)))
                          ;; saved state
-                         (and (or (null x) (eq x 'saved))
-                              (jump-tree-node-unmodified-p current))
+                         (and (or (null x) (eq x 'saved)))
                          ))))
     ;; update diff display, if any
     (when diff
@@ -3462,9 +2636,9 @@ specifies `saved', and a negative prefix argument specifies
              (t        'saved))))
   (let ((current (if jump-tree-visualizer-selection-mode
                      jump-tree-visualizer-selected-node
-                   (jump-tree-current jump-tree-global-tree)))
+                   (jump-tree-current jump-tree-pos-tree)))
         (diff jump-tree-visualizer-diff)
-        r)
+        pos)
     (jump-tree-visualizer-hide-diff)
     (while (and (jump-tree-node-next current)
                 (or (if jump-tree-visualizer-selection-mode
@@ -3472,20 +2646,19 @@ specifies `saved', and a negative prefix argument specifies
                           (jump-tree-visualizer-select-next)
                           (setq current jump-tree-visualizer-selected-node))
                       (jump-tree-visualize-jump-next)
-                      (setq current (jump-tree-current jump-tree-global-tree)))
+                      (setq current (jump-tree-current jump-tree-pos-tree)))
                     t)
                 ;; branch point
                 (not (or (and (or (null x) (eq x 'branch))
                               (> (jump-tree-num-branches) 1))
                          ;; register
                          (and (or (null x) (eq x 'register))
-                              (setq r (jump-tree-node-register current))
+                              (setq pos (jump-tree-node-register current))
                               (jump-tree-register-data-p
-                               (setq r (registerv-data (get-register r))))
-                              (eq current (jump-tree-register-data-node r)))
+                               (setq pos (registerv-data (get-register pos))))
+                              (eq current (jump-tree-register-data-node pos)))
                          ;; saved state
-                         (and (or (null x) (eq x 'saved))
-                              (jump-tree-node-unmodified-p current))
+                         (and (or (null x) (eq x 'saved)))
                          ))))
     ;; update diff display, if any
     (when diff
@@ -3501,7 +2674,7 @@ specifies `saved', and a negative prefix argument specifies
   (setq jump-tree-visualizer-timestamps (not jump-tree-visualizer-timestamps))
   (setq jump-tree-visualizer-spacing (jump-tree-visualizer-calculate-spacing))
   ;; redraw tree
-  (let ((inhibit-read-only t)) (jump-tree-draw-tree jump-tree-global-tree)))
+  (let ((inhibit-read-only t)) (jump-tree-draw-tree jump-tree-pos-tree)))
 
 (defun jump-tree-visualizer-scroll-left (&optional arg)
   (interactive "p")
@@ -3525,8 +2698,8 @@ specifies `saved', and a negative prefix argument specifies
     (unwind-protect
         (scroll-up-command arg)
       (jump-tree-expand-down
-       (nth (jump-tree-node-branch (jump-tree-current jump-tree-global-tree))
-            (jump-tree-node-next (jump-tree-current jump-tree-global-tree)))))
+       (nth (jump-tree-node-branch (jump-tree-current jump-tree-pos-tree))
+            (jump-tree-node-next (jump-tree-current jump-tree-pos-tree)))))
     ;; signal error if at eob
     (when (and (not jump-tree-visualizer-needs-extending-down) (eobp))
       (scroll-up))))
@@ -3550,7 +2723,7 @@ specifies `saved', and a negative prefix argument specifies
     (unwind-protect
         (scroll-down-command arg)
       (jump-tree-expand-up
-       (jump-tree-node-previous (jump-tree-current jump-tree-global-tree))))
+       (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree))))
     ;; signal error if at bob
     (when (and (not jump-tree-visualizer-needs-extending-down) (bobp))
       (scroll-down))))
@@ -3568,7 +2741,7 @@ specifies `saved', and a negative prefix argument specifies
    (jump-tree-visualizer-selection-mode
     (setq cursor-type 'box)
     (setq jump-tree-visualizer-selected-node
-          (jump-tree-current jump-tree-global-tree))
+          (jump-tree-current jump-tree-pos-tree))
     ;; erase diff (if any), as initially selected node is identical to current
     (when jump-tree-visualizer-diff
       (let ((buff (get-buffer jump-tree-diff-buffer-name))
@@ -3577,7 +2750,7 @@ specifies `saved', and a negative prefix argument specifies
    (t ;; disable selection mode
     (setq cursor-type nil)
     (setq jump-tree-visualizer-selected-node nil)
-    (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-global-tree)))
+    (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-pos-tree)))
     (when jump-tree-visualizer-diff (jump-tree-visualizer-update-diff)))
    ))
 
@@ -3694,122 +2867,57 @@ specifies `saved', and a negative prefix argument specifies
   (jump-tree-visualizer-select (event-start (nth 1 pos))))
 
 
-(defcustom jump-tree-global-list-max-length 100
-  "Max length of jump-tree-global-list."
+(defcustom jump-tree-pos-list-limit 100
+  "Max length of jump-tree-pos-list."
   :type 'integer
   :group 'jump-tree)
 
-(defcustom jump-tree-global-list-ex-mode 'nil
-  "Original vim like jump-tree-global-list or not."
-  :type 'boolean
-  :group 'jump-tree)
-
-(defcustom jump-tree-global-list-hook-commands '(end-of-buffer beginning-of-buffer find-file)
+(defcustom jump-tree-pos-list-hook-commands '(end-of-buffer beginning-of-buffer next-line previous-line)
   "Commands to hook."
   :type 'list
   :group 'jump-tree)
 
-(defvar jump-tree-global-list--idx 0
-  "Index of jump-tree-global-list.")
+(defvar jump-tree-in-progress nil
+  "Jump-Tree-Pos-List state.")
 
-(defvar jump-tree-global-list--jumping nil
-  "Jump-Tree-Global-List state.")
-
-(defun jump-tree-global-list--do-jump (buff)
+(defun jump-tree-pos-list--do-jump (position)
   "Do jump to target file and point from BUFF."
-  (find-file (car buff))
-  (goto-char (cdr buff)))
+  (find-file (car position))
+  (goto-char (cdr position)))
 
-(defun jump-tree-global-list--reset-idx ()
-  "Reset `jump-tree-global-list--idx'."
-  (setq jump-tree-global-list--idx 0))
+(defun jump-tree-pos-list--push (position)
+  "Push POSITION to `jump-tree-pos-list'."
+  (while (> (length jump-tree-pos-list) jump-tree-pos-list-limit)
+    (setq jump-tree-pos-list (cdr jump-tree-pos-list)))
+  (push position jump-tree-pos-list))
 
-(defun jump-tree-global-list--last? ()
-  "Check `jump-tree-global-list--idx' is last of list."
-  (= jump-tree-global-list--idx (- (length jump-tree-global-list) 1)))
-
-(defun jump-tree-global-list--first? ()
-  "Check `jump-tree-global-list--idx' is first of list."
-  (= jump-tree-global-list--idx 0))
-
-(defun jump-tree-global-list--dec-idx ()
-  "Descrement `jump-tree-global-list--idx'."
-  (setq jump-tree-global-list--idx (- jump-tree-global-list--idx 1)))
-
-(defun jump-tree-global-list--inc-idx ()
-  "Increment `jump-tree-global-list--idx'."
-  (setq jump-tree-global-list--idx (+ jump-tree-global-list--idx 1)))
-
-(defun jump-tree-global-list--drop! (idx)
-  "Drop item form list of IDX."
-  (setq jump-tree-global-list (nthcdr jump-tree-global-list--idx jump-tree-global-list)))
-
-(defun jump-tree-global-list--push (pointer)
-  "Push POINTER to `jump-tree-global-list'."
-  (while (> (length jump-tree-global-list) jump-tree-global-list-max-length)
-    (nbutlast jump-tree-global-list 1))
-  (push pointer jump-tree-global-list))
-
-(defun jump-tree-global-list--same-position? (pointer)
-  (let ((new-point (cdr pointer))
-        (top-point (cdar jump-tree-global-list)))
+(defun jump-tree-pos-list--same-position? (position)
+  (let ((new-point (cdr position))
+        (top-point (cdar jump-tree-pos-list)))
     (cond ((not new-point) nil)
           ((not top-point) nil)
           ((eq (marker-position new-point) (marker-position top-point)) 't))))
 
-(defun jump-tree-global-list--set ()
-  "The record data structure is (file-name . pointer)."
+(defun jump-tree-pos-list--set ()
+  "The record data structure is (file-name . position)."
   (interactive)
   (if (buffer-file-name)
-      (let ((pointer (cons (buffer-file-name) (point-marker))))
-        (unless (jump-tree-global-list--same-position? pointer)
-          (when (and jump-tree-global-list-ex-mode jump-tree-global-list--jumping)
-            (jump-tree-global-list--drop! jump-tree-global-list--idx)
-            (setq jump-tree-global-list--jumping nil)
-            (jump-tree-global-list--reset-idx))
-          (unless (jump-tree-global-list--same-position? pointer)
-            (jump-tree-global-list--push pointer))))))
+      (let ((position (cons (buffer-file-name) (point-marker))))
+        (unless (jump-tree-pos-list--same-position? position)
+          (jump-tree-pos-list--push position)))))
 
-(defun jump-tree-global-list--do-command? (command do-hook-command-list)
+(defun jump-tree-pos-list--do-command? (command do-hook-command-list)
   (if do-hook-command-list
       (or
        (eq command (car do-hook-command-list))
-       (jump-tree-global-list--do-command? command (cdr do-hook-command-list)))))
+       (jump-tree-pos-list--do-command? command (cdr do-hook-command-list)))))
 
-(defun jump-tree-global-list--command-hook ()
-  "Pre command hook that call `jump-tree-global-list--set' when registerd command hook called."
-  (cond
-   ((jump-tree-global-list--do-command? this-command jump-tree-global-list-hook-commands) (jump-tree-global-list--set))
-   ((and jump-tree-global-list--jumping               ; when jump and move
-         (not (memq this-command '(jump-tree-global-list-previous jump-tree-global-list-next))))
-    (jump-tree-global-list--set))))
-(add-hook 'pre-command-hook 'jump-tree-global-list--command-hook)
-
-(defun jump-tree-global-list-previous ()
-  (if (or (not jump-tree-global-list)
-          (and (not (jump-tree-global-list--first?))
-               (jump-tree-global-list--last?)))
-      (message "No further undo point.")
-    (if jump-tree-global-list-ex-mode
-        (unless jump-tree-global-list--jumping
-          (jump-tree-global-list--set)
-          (setq jump-tree-global-list--jumping 't)))
-    (jump-tree-global-list--inc-idx)
-    (let ((buff (nth jump-tree-global-list--idx jump-tree-global-list)))
-      (jump-tree-global-list--do-jump buff))))
-
-(defun jump-tree-global-list-next ()
-  "Jump forward."
-  (if (or (not jump-tree-global-list)
-          (jump-tree-global-list--first?))
-      (message "No further redo point.")
-    (if jump-tree-global-list-ex-mode
-        (unless jump-tree-global-list--jumping
-          (jump-tree-global-list--set)
-          (setq jump-tree-global-list--jumping 't)))
-    (jump-tree-global-list--dec-idx)
-    (let ((buff (nth jump-tree-global-list--idx jump-tree-global-list)))
-      (jump-tree-global-list--do-jump buff))))
+(defun jump-tree-pos-list--command-hook ()
+  "Pre command hook that call `jump-tree-pos-list--set' when registerd command hook called."
+  (when (and (not jump-tree-in-progress)
+             (jump-tree-pos-list--do-command? this-command jump-tree-pos-list-hook-commands))
+    (jump-tree-pos-list--set)))
+(add-hook 'pre-command-hook 'jump-tree-pos-list--command-hook)
 
 (provide 'jump-tree)
 ;;; jump-tree.el ends here
