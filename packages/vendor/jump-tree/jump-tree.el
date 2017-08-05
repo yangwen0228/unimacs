@@ -1,4 +1,4 @@
-;;; jump-tree.el --- Treat jump-prev history as a tree  -*- lexical-binding: t; -*-
+;;; jump-tree.el --- Treat position history as a tree  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2014  Free Software Foundation, Inc
 
@@ -28,27 +28,20 @@
 
 ;;; Commentary:
 ;;
-;; Emacs has a powerful jump-prev system. Unlike the standard jump-prev/jump-next system in
-;; most software, it allows you to recover *any* past state of a buffer
-;; (whereas the standard jump-prev/jump-next system can lose past states as soon as you
-;; jump-next). However, this power comes at a price: many people find Emacs' jump-prev
-;; system confusing and difficult to use, spawning a number of packages that
-;; replace it with the less powerful but more intuitive jump-prev/jump-next system.
+;; Emacs has a powerful position system. Unlike the standard jump-prev/jump-next
+;; system in most software, it allows you to jump to the position of anywhere
+;; you have gone.
 ;;
-;; Both the loss of data with standard jump-prev/jump-next, and the confusion of Emacs'
-;; jump-prev, stem from trying to treat jump-prev history as a linear sequence of
-;; changes. It's not. The `jump-tree-mode' provided by this package replaces
-;; Emacs' jump-prev system with a system that treats jump-prev history as what it is: a
-;; branching tree of changes. This simple idea allows the more intuitive
-;; behaviour of the standard jump-prev/jump-next system to be combined with the power of
-;; never losing any history. An added side bonus is that jump-prev history can in
-;; some cases be stored more efficiently, allowing more changes to accumulate
-;; before Emacs starts discarding history.
+;; Both the loss of data with standard jump-prev/jump-next, and the confusion of
+;; Emacs' position, stem from trying to treat position history as a linear
+;; sequence of changes. It's not. The `jump-tree-mode' provided by this package
+;; replaces Emacs' position system with a system that treats position history as
+;; what it is: a branching tree of changes. This simple idea allows the more
+;; intuitive behaviour of the standard jump-prev/jump-next system to be combined
+;; with the power of never losing any history.
 ;;
-;; The only downside to this more advanced yet simpler jump-prev system is that it
-;; was inspired by Vim. But, after all, most successful religions steal the
-;; best ideas from their competitors!
-;;
+;; This package is inspired by undo-tree and jumplist, and copy a lot of codes
+;; from them.
 ;;
 ;; Installation
 ;; ============
@@ -65,7 +58,7 @@
 ;; to your .emacs file. Byte-compiling jump-tree.el is recommended (e.g. using
 ;; "M-x byte-compile-file" from within emacs).
 ;;
-;; If you want to replace the standard Emacs' jump-prev system with the
+;; If you want to replace the standard Emacs' position system with the
 ;; `jump-tree-mode' system in all buffers, you can enable it globally by
 ;; adding:
 ;;
@@ -85,10 +78,10 @@
 ;; `jump-tree-mode' and `global-jump-tree-mode'
 ;;   Enable jump-tree mode (either in the current buffer or globally).
 ;;
-;; C-_  C-/  (`jump-tree-jump-prev')
+;; M-, (`jump-tree-jump-prev')
 ;;   Jump-Prev changes.
 ;;
-;; M-_  C-?  (`jump-tree-jump-next')
+;; C-? (`jump-tree-jump-next')
 ;;   Jump-Next changes.
 ;;
 ;; `jump-tree-switch-branch'
@@ -96,7 +89,7 @@
 ;;   (What does this mean? Better press the button and see!)
 ;;
 ;; C-x u  (`jump-tree-visualize')
-;;   Visualize the jump-prev tree.
+;;   Visualize the position tree.
 ;;   (Better try pressing this button too!)
 ;;
 ;; C-x r u  (`jump-tree-save-state-to-register')
@@ -123,9 +116,6 @@
 ;;
 ;; C-<up>  M-{  (`jump-tree-visualize-jump-prev-to-x')
 ;;   Jump-Prev changes up to last branch point.
-;;
-;; C-<down>  M-}  (`jump-tree-visualize-jump-next-to-x')
-;;   Jump-Next changes down to next branch point.
 ;;
 ;; <down>  n  C-n  (`jump-tree-visualize-jump-next')
 ;;   Jump-Next changes.
@@ -191,9 +181,6 @@
 ;; t  (`jump-tree-visualizer-toggle-timestamps')
 ;;   Toggle display of time-stamps.
 ;;
-;; d  (`jump-tree-visualizer-toggle-diff')
-;;   Toggle diff display.
-;;
 ;; q  (`jump-tree-visualizer-quit')
 ;;   Quit jump-tree-visualizer.
 ;;
@@ -208,41 +195,14 @@
 ;;
 ;;
 ;;
-;; Persistent jump-prev history:
+;; Persistent position history:
 ;;
 ;; Note: Requires Emacs version 24.3 or higher.
-;;
-;; `jump-tree-auto-save-history' (variable)
-;;    automatically save and restore jump-tree history along with buffer
-;;    (disabled by default)
-;;
-;; `jump-tree-save-history' (command)
-;;    manually save jump-prev history to file
-;;
-;; `jump-tree-load-history' (command)
-;;    manually load jump-prev history from file
-;;
-;;
-;;
-;; Compressing jump-prev history:
-;;
-;;   Jump-Prev history files cannot grow beyond the maximum jump-prev tree size, which
-;;   is limited by `jump-tree-pos-list-limit'. Nevertheless, jump-prev history files can grow quite
-;;   large. If you want to automatically compress jump-prev history, add the
-;;   following advice to your .emacs file (replacing ".gz" with the filename
-;;   extension of your favourite compression algorithm):
-;;
-;;   (defadvice jump-tree-make-history-save-file-name
-;;     (after jump-tree activate)
-;;     (setq ad-return-value (concat ad-return-value ".gz")))
-;;
-;;
-;;
 ;;
 ;; Jump-Prev Systems
 ;; ============
 ;;
-;; To understand the different jump-prev systems, it's easiest to consider an
+;; To understand the different position systems, it's easiest to consider an
 ;; example. Imagine you make a few edits in a buffer. As you edit, you
 ;; accumulate a history of changes, which we might visualize as a string of
 ;; past buffer states, growing downwards:
@@ -259,7 +219,7 @@
 ;;                                x  (current buffer state)
 ;;
 ;;
-;; Now imagine that you jump-prev the last two changes. We can visualize this as
+;; Now imagine that you position the last two changes. We can visualize this as
 ;; rewinding the current state back two steps:
 ;;
 ;;                                o  (initial buffer state)
@@ -274,7 +234,7 @@
 ;;                                o
 ;;
 ;;
-;; However, this isn't a good representation of what Emacs' jump-prev system
+;; However, this isn't a good representation of what Emacs' position system
 ;; does. Instead, it treats the jump-prevs as *new* changes to the buffer, and adds
 ;; them to the history:
 ;;
@@ -287,29 +247,29 @@
 ;;                                o  (second edit)
 ;;                                |
 ;;                                |
-;;                                x  (buffer state before jump-prev)
+;;                                x  (buffer state before position)
 ;;                                |
 ;;                                |
-;;                                o  (first jump-prev)
+;;                                o  (first position)
 ;;                                |
 ;;                                |
-;;                                x  (second jump-prev)
+;;                                x  (second position)
 ;;
 ;;
-;; Actually, since the buffer returns to a previous state after an jump-prev,
+;; Actually, since the buffer returns to a previous state after an position,
 ;; perhaps a better way to visualize it is to imagine the string of changes
 ;; turning back on itself:
 ;;
 ;;        (initial buffer state)  o
 ;;                                |
 ;;                                |
-;;                  (first edit)  o  x  (second jump-prev)
+;;                  (first edit)  o  x  (second position)
 ;;                                |  |
 ;;                                |  |
-;;                 (second edit)  o  o  (first jump-prev)
+;;                 (second edit)  o  o  (first position)
 ;;                                | /
 ;;                                |/
-;;                                o  (buffer state before jump-prev)
+;;                                o  (buffer state before position)
 ;;
 ;; Treating jump-prevs as new changes might seem a strange thing to do. But the
 ;; advantage becomes clear as soon as we imagine what happens when you edit
@@ -330,10 +290,10 @@
 ;;
 ;; The standard jump-prev/jump-next system only lets you go backwards and forwards
 ;; linearly. So as soon as you make that new edit, it discards the old
-;; branch. Emacs' jump-prev just keeps adding changes to the end of the string. So
-;; the jump-prev history in the two systems now looks like this:
+;; branch. Emacs' position just keeps adding changes to the end of the string. So
+;; the position history in the two systems now looks like this:
 ;;
-;;            Jump-Prev/Jump-Next:                      Emacs' jump-prev
+;;            Jump-Prev/Jump-Next:                      Emacs' position
 ;;
 ;;               o                                o
 ;;               |                                |
@@ -354,8 +314,8 @@
 ;; system, you're lost. There's no way to recover them, because that branch
 ;; was discarded when you made the new edit.
 ;;
-;; However, in Emacs' jump-prev system, those old buffer states are still there in
-;; the jump-prev history. You just have to rewind back through the new edit, and
+;; However, in Emacs' position system, those old buffer states are still there in
+;; the position history. You just have to rewind back through the new edit, and
 ;; back through the changes made by the jump-prevs, until you reach them. Of
 ;; course, since Emacs treats jump-prevs (even jump-prevs of jump-prevs!) as new changes,
 ;; you're really weaving backwards and forwards through the history, all the
@@ -364,13 +324,13 @@
 ;;                       o
 ;;                       |
 ;;                       |
-;;                       o  o     o  (jump-prev new edit)
+;;                       o  o     o  (position new edit)
 ;;                       |  |\    |\
 ;;                       |  | \   | \
-;;                       o  o  |  |  o  (jump-prev the jump-prev)
+;;                       o  o  |  |  o  (position the position)
 ;;                       | /   |  |  |
 ;;                       |/    |  |  |
-;;      (trying to get   o     |  |  x  (jump-prev the jump-prev)
+;;      (trying to get   o     |  |  x  (position the position)
 ;;       to this state)        | /
 ;;                             |/
 ;;                             o
@@ -381,7 +341,7 @@
 ;;
 ;; However, imagine that after jump-preving as just described, you decide you
 ;; actually want to rewind right back to the initial state. If you're lucky,
-;; and haven't invoked any command since the last jump-prev, you can just keep on
+;; and haven't invoked any command since the last position, you can just keep on
 ;; jump-preving until you get back to the start:
 ;;
 ;;      (trying to get   o              x  (got there!)
@@ -399,9 +359,9 @@
 ;;                             o
 ;;
 ;; But if you're unlucky, and you happen to have moved the point (say) after
-;; getting to the state labelled "got this far", then you've "broken the jump-prev
+;; getting to the state labelled "got this far", then you've "broken the position
 ;; chain". Hold on to something solid, because things are about to get
-;; hairy. If you try to jump-prev now, Emacs thinks you're trying to jump-prev the
+;; hairy. If you try to position now, Emacs thinks you're trying to position the
 ;; jump-prevs! So to get back to the initial state you now have to rewind through
 ;; *all* the changes, including the jump-prevs you just did:
 ;;
@@ -420,22 +380,22 @@
 ;;                             o       :   o
 ;;                                     :
 ;;                             (got this far, but
-;;                              broke the jump-prev chain)
+;;                              broke the position chain)
 ;;
 ;; Confused?
 ;;
-;; In practice you can just hold down the jump-prev key until you reach the buffer
+;; In practice you can just hold down the position key until you reach the buffer
 ;; state that you want. But whatever you do, don't move around in the buffer
 ;; to *check* that you've got back to where you want! Because you'll break the
-;; jump-prev chain, and then you'll have to traverse the entire string of jump-prevs
+;; position chain, and then you'll have to traverse the entire string of jump-prevs
 ;; again, just to get back to the point at which you broke the
 ;; chain.
 ;;
 ;;
 ;; So what does `jump-tree-mode' do? Remember the diagram we drew to represent
-;; the history we've been discussing (make a few edits, jump-prev a couple of them,
-;; and edit again)? The diagram that conceptually represented our jump-prev
-;; history, before we started discussing specific jump-prev systems? It looked like
+;; the history we've been discussing (make a few edits, position a couple of them,
+;; and edit again)? The diagram that conceptually represented our position
+;; history, before we started discussing specific position systems? It looked like
 ;; this:
 ;;
 ;;                                o  (initial buffer state)
@@ -449,19 +409,19 @@
 ;;                                |
 ;;                                o
 ;;
-;; Well, that's *exactly* what the jump-prev history looks like to
+;; Well, that's *exactly* what the position history looks like to
 ;; `jump-tree-mode'.  It doesn't discard the old branch (as standard jump-prev/jump-next
 ;; does), nor does it treat jump-prevs as new changes to be added to the end of a
-;; linear string of buffer states (as Emacs' jump-prev does). It just keeps track
-;; of the tree of branching changes that make up the entire jump-prev history.
+;; linear string of buffer states (as Emacs' position does). It just keeps track
+;; of the tree of branching changes that make up the entire position history.
 ;;
-;; If you jump-prev from this point, you'll rewind back up the tree to the previous
+;; If you position from this point, you'll rewind back up the tree to the previous
 ;; state:
 ;;
 ;;                                o
 ;;                                |
 ;;                                |
-;;                                x  (jump-prev)
+;;                                x  (position)
 ;;                                |\
 ;;                                | \
 ;;                                o  o
@@ -469,11 +429,11 @@
 ;;                                |
 ;;                                o
 ;;
-;; If you were to jump-prev again, you'd rewind back to the initial state. If on
+;; If you were to position again, you'd rewind back to the initial state. If on
 ;; the other hand you jump-next the change, you'll end up back at the bottom of the
 ;; most recent branch:
 ;;
-;;                                o  (jump-prev takes you here)
+;;                                o  (position takes you here)
 ;;                                |
 ;;                                |
 ;;                                o  (start here)
@@ -501,11 +461,11 @@
 ;;                                |
 ;;                        (jump-next)  x
 ;;
-;; Now you're on the other branch, if you jump-prev and jump-next changes you'll stay on
+;; Now you're on the other branch, if you position and jump-next changes you'll stay on
 ;; that branch, moving up and down through the buffer states located on that
 ;; branch. Until you decide to switch branches again, of course.
 ;;
-;; Real jump-prev trees might have multiple branches and sub-branches:
+;; Real position trees might have multiple branches and sub-branches:
 ;;
 ;;                                o
 ;;                            ____|______
@@ -518,13 +478,13 @@
 ;;                   / \             / \
 ;;                  o   o           o   o
 ;;
-;; Trying to imagine what Emacs' jump-prev would do as you move about such a tree
+;; Trying to imagine what Emacs' position would do as you move about such a tree
 ;; will likely frazzle your brain circuits! But in `jump-tree-mode', you're
-;; just moving around this jump-prev history tree. Most of the time, you'll
+;; just moving around this position history tree. Most of the time, you'll
 ;; probably only need to stay on the most recent branch, in which case it
 ;; behaves like standard jump-prev/jump-next, and is just as simple to understand. But
 ;; if you ever need to recover a buffer state on a different branch, the
-;; possibility of switching between branches and accessing the full jump-prev
+;; possibility of switching between branches and accessing the full position
 ;; history is still there.
 ;;
 ;;
@@ -537,16 +497,16 @@
 ;; draws them for you! In fact, it draws even better diagrams: it highlights
 ;; the node representing the current buffer state, it highlights the current
 ;; branch, and you can toggle the display of time-stamps (by hitting "t") and
-;; a diff of the jump-prev changes (by hitting "d"). (There's one other tiny
+;; a diff of the position changes (by hitting "d"). (There's one other tiny
 ;; difference: the visualizer puts the most recent branch on the left rather
 ;; than the right.)
 ;;
-;; Bring up the jump-prev tree visualizer whenever you want by hitting "C-x u".
+;; Bring up the position tree visualizer whenever you want by hitting "C-x u".
 ;;
 ;; In the visualizer, the usual keys for moving up and down a buffer instead
-;; move up and down the jump-prev history tree (e.g. the up and down arrow keys, or
-;; "C-n" and "C-p"). The state of the "parent" buffer (the buffer whose jump-prev
-;; history you are visualizing) is updated as you move around the jump-prev tree in
+;; move up and down the position history tree (e.g. the up and down arrow keys, or
+;; "C-n" and "C-p"). The state of the "parent" buffer (the buffer whose position
+;; history you are visualizing) is updated as you move around the position tree in
 ;; the visualizer. If you reach a branch point in the visualizer, the usual
 ;; keys for moving forward and backward in a buffer instead switch branch
 ;; (e.g. the left and right arrow keys, or "C-f" and "C-b").
@@ -571,7 +531,6 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-(require 'diff)
 
 
 ;;; =====================================================================
@@ -580,10 +539,6 @@
 ;; `characterp' isn't defined in Emacs versions < 23
 (unless (fboundp 'characterp)
   (defalias 'characterp 'char-valid-p))
-
-;; `region-active-p' isn't defined in Emacs versions < 23
-(unless (fboundp 'region-active-p)
-  (defun region-active-p () (and transient-mark-mode mark-active)))
 
 ;; `registerv' defstruct isn't defined in Emacs versions < 24
 (unless (fboundp 'registerv-make)
@@ -596,7 +551,7 @@
 (unless (fboundp 'user-error)
   (defalias 'user-error 'error)
   ;; prevent debugger being called on user errors
-  (add-to-list 'debug-ignored-errors "^No further jump-prev information")
+  (add-to-list 'debug-ignored-errors "^No further position information")
   (add-to-list 'debug-ignored-errors "^No further jump-next information")
   (add-to-list 'debug-ignored-errors "^No further jump-next information for region"))
 
@@ -606,73 +561,32 @@
 
 (defgroup jump-tree nil
   "Tree jump-prev/jump-next."
-  :group 'jump-prev)
+  :group 'position)
 
 (defvar jump-tree-pos-tree nil
-  "Tree of jump-prev entries globally.")
+  "Tree of position entries globally.")
 
 (defvar jump-tree-pos-list '()
-  "Jump history list, contain entries '(file-name . pointer).")
+  "Jump history list, contain POSITION entries '(file-name . pointer).")
+
+(defvar jump-tree-in-progress nil
+  "Jump-Tree-Pos-List state.")
+
+(defcustom jump-tree-pos-list-limit 100
+  "Max length of jump-tree-pos-list."
+  :type 'integer
+  :group 'jump-tree)
+
+(defcustom jump-tree-pos-list-hook-commands '(end-of-buffer beginning-of-buffer)
+  "Commands to hook."
+  :type 'list
+  :group 'jump-tree)
 
 (defcustom jump-tree-mode-lighter " Jump-Tree"
   "Lighter displayed in mode line
 when `jump-tree-mode' is enabled."
   :group 'jump-tree
   :type 'string)
-
-(defcustom jump-tree-incompatible-major-modes '(term-mode)
-  "List of major-modes in which `jump-tree-mode' should not be enabled.
-\(See `turn-on-jump-tree-mode'.\)"
-  :group 'jump-tree
-  :type '(repeat symbol))
-
-(defcustom jump-tree-auto-save-history nil
-  "When non-nil, `jump-tree-mode' will save jump-prev history to file
-when a buffer is saved to file.
-
-It will automatically load jump-prev history when a buffer is loaded
-from file, if an jump-prev save file exists.
-
-By default, jump-tree history is saved to a file called
-\".<buffer-file-name>.~jump-tree~\" in the same directory as the
-file itself. To save under a different directory, customize
-`jump-tree-history-directory-alist' (see the documentation for
-that variable for details).
-
-WARNING! `jump-tree-auto-save-history' will not work properly in
-Emacs versions prior to 24.3, so it cannot be enabled via
-the customization interface in versions earlier than that one. To
-ignore this warning and enable it regardless, set
-`jump-tree-auto-save-history' to a non-nil value outside of
-customize."
-  :group 'jump-tree
-  :type (if (version-list-< (version-to-list emacs-version) '(24 3))
-            '(choice (const :tag "<disabled>" nil))
-          'boolean))
-
-(defcustom jump-tree-history-directory-alist nil
-  "Alist of filename patterns and jump-prev history directory names.
-Each element looks like (REGEXP . DIRECTORY).  Jump-Prev history for
-files with names matching REGEXP will be saved in DIRECTORY.
-DIRECTORY may be relative or absolute.  If it is absolute, so
-that all matching files are backed up into the same directory,
-the file names in this directory will be the full name of the
-file backed up with all directory separators changed to `!' to
-prevent clashes.  This will not work correctly if your filesystem
-truncates the resulting name.
-
-For the common case of all backups going into one directory, the
-alist should contain a single element pairing \".\" with the
-appropriate directory name.
-
-If this variable is nil, or it fails to match a filename, the
-backup is made in the original file's directory.
-
-On MS-DOS filesystems without long names this variable is always
-ignored."
-  :group 'jump-tree
-  :type '(repeat (cons (regexp :tag "Regexp matching filename")
-                       (directory :tag "Jump-Prev history directory name"))))
 
 (defcustom jump-tree-visualizer-relative-timestamps t
   "When non-nil, display times relative to current time
@@ -688,15 +602,6 @@ in jump-tree visualizer.
 
 \\<jump-tree-visualizer-mode-map>You can always toggle time-stamps on and off \
 using \\[jump-tree-visualizer-toggle-timestamps], regardless of the
-setting of this variable."
-  :group 'jump-tree
-  :type 'boolean)
-
-(defcustom jump-tree-visualizer-diff nil
-  "When non-nil, display diff by default in jump-tree visualizer.
-
-\\<jump-tree-visualizer-mode-map>You can always toggle the diff display \
-using \\[jump-tree-visualizer-toggle-diff], regardless of the
 setting of this variable."
   :group 'jump-tree
   :type 'boolean)
@@ -798,7 +703,6 @@ in visualizer."
 
 ;; visualizer buffer names
 (defconst jump-tree-visualizer-buffer-name " *jump-tree*")
-(defconst jump-tree-diff-buffer-name "*jump-tree Diff*")
 
 
 ;;; =================================================================
@@ -815,7 +719,6 @@ in visualizer."
     (define-key map (kbd "\C-x j") 'jump-tree-visualize)
     ;; set keymap
     (setq jump-tree-map map)))
-
 
 (defvar jump-tree-visualizer-mode-map nil
   "Keymap used in jump-tree visualizer.")
@@ -844,11 +747,8 @@ in visualizer."
     (define-key map "\C-b" 'jump-tree-visualize-switch-branch-left)
     ;; paragraph motion keys jump-prev/jump-next to significant points in tree
     (define-key map [remap backward-paragraph] 'jump-tree-visualize-jump-prev-to-x)
-    (define-key map [remap forward-paragraph] 'jump-tree-visualize-jump-next-to-x)
     (define-key map "\M-{" 'jump-tree-visualize-jump-prev-to-x)
-    (define-key map "\M-}" 'jump-tree-visualize-jump-next-to-x)
     (define-key map [C-up] 'jump-tree-visualize-jump-prev-to-x)
-    (define-key map [C-down] 'jump-tree-visualize-jump-next-to-x)
     ;; mouse sets buffer state to node at click
     (define-key map [mouse-1] 'jump-tree-visualizer-mouse-set)
     ;; toggle selection mode
@@ -861,6 +761,8 @@ in visualizer."
     ;; vertical scrolling may be needed if the tree is very tall
     (define-key map [next] 'jump-tree-visualizer-scroll-up)
     (define-key map [prior] 'jump-tree-visualizer-scroll-down)
+    ;; toggle timestamp
+    (define-key map "t" 'jump-tree-visualizer-toggle-timestamps)
     ;; quit/abort visualizer
     (define-key map "q" 'jump-tree-visualizer-quit)
     (define-key map "\C-q" 'jump-tree-visualizer-abort)
@@ -910,8 +812,8 @@ in visualizer."
     (define-key map "\r" 'jump-tree-visualizer-set)
     ;; mouse selects node at click
     (define-key map [mouse-1] 'jump-tree-visualizer-mouse-select)
-    ;; toggle diff
-    (define-key map "d" 'jump-tree-visualizer-selection-toggle-diff)
+    ;; toggle timestamp
+    (define-key map "t" 'jump-tree-visualizer-toggle-timestamps)
     ;; set keymap
     (setq jump-tree-visualizer-selection-mode-map map)))
 
@@ -942,12 +844,6 @@ in visualizer."
                              &aux
                              (timestamp (current-time))
                              (branch 0)))
-     (:constructor jump-tree-make-node-backwards
-                   (next-node position
-                              &aux
-                              (next (list next-node))
-                              (timestamp (current-time))
-                              (branch 0)))
      (:copier nil))
   previous next position timestamp branch meta-data)
 
@@ -1094,29 +990,18 @@ in visualizer."
 ;;; =====================================================================
 ;;;              Basic jump-tree data structure functions
 
-(defun jump-tree-grow (position)
-  "Add an JUMP-PREV node to current branch of `jump-tree-pos-tree'."
-  (let* ((current (jump-tree-current jump-tree-pos-tree))
-         (new (jump-tree-make-node current position)))
-    (push new (jump-tree-node-next current))
-    (setf (jump-tree-current jump-tree-pos-tree) new)))
-
 (defun jump-tree-grow-backwards (node position)
   "Add new node *above* jump-tree NODE, and return new node.
 Note that this will overwrite NODE's \"previous\" link, so should
 only be used on a detached NODE, never on nodes that are already
 part of `jump-tree-pos-tree'."
-  ;; (let ((new (jump-tree-make-node-backwards node position)))
-  ;;   (setf (jump-tree-node-previous node) new)
-  ;;   new)
   (let ((new (jump-tree-make-node nil position)))
     (setf (jump-tree-node-next new) (list node))
     (setf (jump-tree-node-previous node) new)
-    new)
-  )
+    new))
 
 (defun jump-tree-splice-node (node splice)
-  "Splice NODE into jump-prev tree, below node SPLICE.
+  "Splice NODE into position tree, below node SPLICE.
 Note that this will overwrite NODE's \"next\" and \"previous\"
 links, so should only be used on a detached NODE, never on nodes
 that are already part of `jump-tree-pos-tree'."
@@ -1129,51 +1014,51 @@ that are already part of `jump-tree-pos-tree'."
     (setf (jump-tree-node-previous n) node)))
 
 (defun jump-tree-snip-node (node)
-  "Snip NODE out of jump-prev tree."
+  "Snip NODE out of position tree."
   (let* ((parent (jump-tree-node-previous node))
-         position p)
+         index i)
     ;; if NODE is only child, replace parent's next links with NODE's
     (if (= (length (jump-tree-node-next parent)) 0)
         (setf (jump-tree-node-next parent) (jump-tree-node-next node)
               (jump-tree-node-branch parent) (jump-tree-node-branch node))
       ;; otherwise...
-      (setq position (jump-tree-position node (jump-tree-node-next parent)))
+      (setq index (jump-tree-index node (jump-tree-node-next parent)))
       (cond
        ;; if active branch used do go via NODE, set parent's branch to active
        ;; branch of NODE
-       ((= (jump-tree-node-branch parent) position)
+       ((= (jump-tree-node-branch parent) index)
         (setf (jump-tree-node-branch parent)
-              (+ position (jump-tree-node-branch node))))
+              (+ index (jump-tree-node-branch node))))
        ;; if active branch didn't go via NODE, update parent's branch to point
        ;; to same node as before
-       ((> (jump-tree-node-branch parent) position)
+       ((> (jump-tree-node-branch parent) index)
         (incf (jump-tree-node-branch parent)
               (1- (length (jump-tree-node-next node))))))
       ;; replace NODE in parent's next list with NODE's entire next list
-      (if (= position 0)
+      (if (= index 0)
           (setf (jump-tree-node-next parent)
                 (nconc (jump-tree-node-next node)
                        (cdr (jump-tree-node-next parent))))
-        (setq p (nthcdr (1- position) (jump-tree-node-next parent)))
-        (setcdr p (nconc (jump-tree-node-next node) (cddr p)))))
+        (setq i (nthcdr (1- index) (jump-tree-node-next parent)))
+        (setcdr i (nconc (jump-tree-node-next node) (cddr i)))))
     ;; update previous links of NODE's children
     (dolist (n (jump-tree-node-next node))
       (setf (jump-tree-node-previous n) parent))))
 
-(defun jump-tree-mapc (--jump-tree-mapc-function-- node)
-  ;; Apply FUNCTION to NODE and to each node below it.
+(defun jump-tree-mapc (func node)
+  ;; Apply FUNC to NODE and to each node below it.
   (let ((stack (list node))
         n)
     (while stack
       (setq n (pop stack))
-      (funcall --jump-tree-mapc-function-- n)
+      (funcall func n)
       (setq stack (append (jump-tree-node-next n) stack)))))
 
 (defmacro jump-tree-num-branches ()
-  "Return number of branches at current jump-prev tree node."
+  "Return number of branches at current position tree node."
   '(length (jump-tree-node-next (jump-tree-current jump-tree-pos-tree))))
 
-(defun jump-tree-position (node list)
+(defun jump-tree-index (node list)
   "Find the first occurrence of NODE in LIST.
 Return the index of the matching item, or nil of not found.
 Comparison is done with `eq'."
@@ -1185,52 +1070,20 @@ Comparison is done with `eq'."
                (setq list (cdr list))))
       nil)))
 
-(defvar *jump-tree-id-counter* 0)
-
-(defmacro jump-tree-generate-id ()
-  ;; Generate a new, unique id (uninterned symbol).
-  ;; The name is made by appending a number to "jump-tree-id".
-  ;; (Copied from CL package `gensym'.)
-  `(let ((num (prog1 *jump-tree-id-counter* (incf *jump-tree-id-counter*))))
-     (make-symbol (format "jump-tree-id%d" num))))
-
-(defun jump-tree-decircle (jump-tree)
-  ;; Nullify PREVIOUS links of JUMP-TREE nodes, to make JUMP-TREE data
-  ;; structure non-circular.
-  (jump-tree-mapc
-   (lambda (node)
-     (dolist (n (jump-tree-node-next node))
-       (setf (jump-tree-node-previous n) nil)))
-   (jump-tree-root jump-tree)))
-
-(defun jump-tree-recircle (jump-tree)
-  ;; Recreate PREVIOUS links of JUMP-TREE nodes, to restore circular JUMP-TREE
-  ;; data structure.
-  (jump-tree-mapc
-   (lambda (node)
-     (dolist (n (jump-tree-node-next node))
-       (setf (jump-tree-node-previous n) node)))
-   (jump-tree-root jump-tree)))
-
 
 ;;; =====================================================================
-;;;             Jump-Prev list and jump-prev changeset utility functions
-(defun jump-tree-pos-list-pop-changeset (&optional discard-pos)
-  ;; Pop changeset from `jump-tree-pos-list'.
-
-  ;; (let* ((changeset (list (pop jump-tree-pos-list)))
-  ;;        (p changeset))
-  ;;   (while jump-tree-pos-list
-  ;;     (setcdr p (list (pop jump-tree-pos-list)))
-  ;;     (setq p (cdr p)))
-  ;;   changeset)
-  (pop jump-tree-pos-list)
-  )
+;;;             position list utility functions
+(defun jump-tree-pos-list-remove-empty ()
+  "If the file or buffer is closed, then the marker is invalid. This function will
+remove these invalid entries."
+  (let (empty-marker (make-marker))
+    (remove-if (lambda (position) (eq empty-marker (cdr position)))
+               jump-tree-pos-list)))
 
 (defun jump-tree-pos-list-transfer-to-tree ()
   ;; Transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'.
 
-  ;; `jump-tree-pos-list-transfer-to-tree' should never be called when jump-prev is disabled
+  ;; `jump-tree-pos-list-transfer-to-tree' should never be called when position is disabled
   ;; (i.e. `jump-tree-pos-tree' is t)
   (assert (not (eq jump-tree-pos-tree t)))
 
@@ -1238,18 +1091,19 @@ Comparison is done with `eq'."
   (when (null jump-tree-pos-tree) (setq jump-tree-pos-tree (make-jump-tree)))
 
   (when jump-tree-pos-list
+    (jump-tree-pos-list-remove-empty)
     ;; create new node from first changeset in `jump-tree-pos-list', save old
     ;; `jump-tree-pos-tree' current node, and make new node the current node
-    (let* ((node (jump-tree-make-node nil (jump-tree-pos-list-pop-changeset)))
+    (let* ((node (jump-tree-make-node nil (pop jump-tree-pos-list)))
            (splice (jump-tree-current jump-tree-pos-tree))
-           (size (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
+           (size (jump-tree-pos-byte-size (jump-tree-node-position node)))
            (count 1))
       (setf (jump-tree-current jump-tree-pos-tree) node)
       ;; grow tree fragment backwards using `jump-tree-pos-list' changesets
       (while jump-tree-pos-list
         (setq node
-              (jump-tree-grow-backwards node (jump-tree-pos-list-pop-changeset)))
-        (incf size (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
+              (jump-tree-grow-backwards node (pop jump-tree-pos-list)))
+        (incf size (jump-tree-pos-byte-size (jump-tree-node-position node)))
         (incf count))
       (setf (jump-tree-node-previous node) splice)
       (push node (jump-tree-node-next splice))
@@ -1257,20 +1111,15 @@ Comparison is done with `eq'."
       (incf (jump-tree-size jump-tree-pos-tree) size)
       (incf (jump-tree-count jump-tree-pos-tree) count)
       )
-    ;; discard jump-prev history if necessary
+    ;; discard position history if necessary
     (jump-tree-discard-history)))
 
-(defun jump-tree-pos-list-byte-size (position-list)
-  ;; Return size (in bytes) of POSITION-LIST
-  ;; (let ((size 0) (p position-list))
-  ;;   (while p
-  ;;     (incf size 8)  ; cons cells use up 8 bytes
-  ;;     (when (and (consp (car p)) (stringp (caar p)))
-  ;;       (incf size (string-bytes (caar p))))
-  ;;     (setq p (cdr p)))
-  ;;   size)
-  8
-  )
+(defun jump-tree-pos-byte-size (position)
+  ;; Return size (in bytes) of POSITION
+  (let ((size 0) (p position))
+    (incf size 8)  ; cons cells use up 8 bytes
+    (incf size (+ (string-bytes (car p)) 4))
+    size))
 
 (defun jump-tree-pos-list-rebuild-from-tree ()
   "Rebuild `jump-tree-pos-list' from information in `jump-tree-pos-tree'."
@@ -1284,7 +1133,7 @@ Comparison is done with `eq'."
                       (time-less-p (jump-tree-node-timestamp a)
                                    (jump-tree-node-timestamp b))))
               stack)
-        ;; Traverse tree in depth-and-oldest-first order, but add jump-prev records
+        ;; Traverse tree in depth-and-oldest-first order, but add position records
         ;; on the way down, and jump-next records on the way up.
         (while (or (car stack)
                    (not (eq (car (nth 1 stack))
@@ -1346,9 +1195,9 @@ Comparison is done with `eq'."
                            (car (jump-tree-node-next node))))
           ;; update jump-tree size
           (decf (jump-tree-size jump-tree-pos-tree)
-                (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
+                (jump-tree-pos-byte-size (jump-tree-node-position node)))
           (decf (jump-tree-count jump-tree-pos-tree))
-          ;; discard new root's jump-prev data and PREVIOUS link
+          ;; discard new root's position data and PREVIOUS link
           (setf (jump-tree-node-position node) nil
                 (jump-tree-node-previous node) nil)
           ;; if new root has branches, or new root is current node, next node
@@ -1369,13 +1218,13 @@ Comparison is done with `eq'."
             (set-register pos nil)))
         ;; update jump-tree size
         (decf (jump-tree-size jump-tree-pos-tree)
-              (jump-tree-pos-list-byte-size (jump-tree-node-position node)))
+              (jump-tree-pos-byte-size (jump-tree-node-position node)))
         (decf (jump-tree-count jump-tree-pos-tree))
         ;; discard leaf
         (setf (jump-tree-node-next parent)
               (delq node (jump-tree-node-next parent))
               (jump-tree-node-branch parent)
-              (jump-tree-position current (jump-tree-node-next parent)))
+              (jump-tree-index current (jump-tree-node-next parent)))
         ;; if parent has branches, or parent is current node, next node to
         ;; discard is oldest leaf, otherwise it's the parent itself
         (if (or (eq parent (jump-tree-current jump-tree-pos-tree))
@@ -1386,7 +1235,7 @@ Comparison is done with `eq'."
           parent)))))
 
 (defun jump-tree-discard-history ()
-  "Discard jump-prev history until we're within memory usage limits
+  "Discard position history until we're within memory usage limits
 set by `jump-tree-pos-list-limit'."
 
   (when (> (jump-tree-size jump-tree-pos-tree) jump-tree-pos-list-limit)
@@ -1406,12 +1255,12 @@ set by `jump-tree-pos-list-limit'."
                         ;; free-up comes from discarding changesets from its
                         ;; only child...
                         (if (eq node (jump-tree-root jump-tree-pos-tree))
-                            (jump-tree-pos-list-byte-size
+                            (jump-tree-pos-byte-size
                              (jump-tree-node-position
                               (car (jump-tree-node-next node))))
                           ;; ...otherwise, it comes from discarding changesets
                           ;; from along with the node itself
-                          (jump-tree-pos-list-byte-size (jump-tree-node-position node))
+                          (jump-tree-pos-byte-size (jump-tree-node-position node))
                           ))
                      jump-tree-pos-list-limit))
         (setq node (jump-tree-discard-node node))))))
@@ -1521,8 +1370,8 @@ set by `jump-tree-pos-list-limit'."
 With no argument, this command toggles the mode.
 A positive prefix argument turns the mode on.
 A negative prefix argument turns it off.
-jump-tree-mode replaces Emacs' standard jump-prev feature with a more
-powerful yet easier to use version, that treats the jump-prev history
+jump-tree-mode replaces Emacs' standard position feature with a more
+powerful yet easier to use version, that treats the position history
 as what it is: a tree.
 The following keys are available in `jump-tree-mode':
   \\{jump-tree-map}
@@ -1536,45 +1385,15 @@ Within the jump-tree visualizer, the following keys are available:
     (setq jump-tree-pos-tree nil)))
 
 (defun turn-on-jump-tree-mode (&optional print-message)
-  "Enable `jump-tree-mode' in the current buffer, when appropriate.
-Some major modes implement their own jump-prev system, which should
-not normally be overridden by `jump-tree-mode'. This command does
-not enable `jump-tree-mode' in such buffers. If you want to force
-`jump-tree-mode' to be enabled regardless, use (jump-tree-mode 1)
-instead.
-The heuristic used to detect major modes in which
-`jump-tree-mode' should not be used is to check whether either
-the `jump-prev' command has been remapped, or the default jump-prev
-keybindings (M-, and M-.) have been overridden somewhere other
-than in the global map. In addition, `jump-tree-mode' will not be
-enabled if the buffer's `major-mode' appears in
-`jump-tree-incompatible-major-modes'."
+  "Enable `jump-tree-mode' in the current buffer, set the keybindings in  global map."
   (interactive "p")
-  (if (or (key-binding [remap jump-prev])
-          (jump-tree-overridden-jump-prev-bindings-p)
-          (memq major-mode jump-tree-incompatible-major-modes))
-      (when print-message
-        (message "Buffer does not support jump-tree-mode;\
- jump-tree-mode NOT enabled"))
-    (jump-tree-mode 1)))
+  (jump-tree-mode 1)
+  (jump-tree-overridden-jump-bindings-p))
 
-(defun jump-tree-overridden-jump-prev-bindings-p ()
-  "Returns t if default jump-prev bindings are overridden, nil otherwise.
-Checks if either of the default jump-prev key bindings (\"C-/\" or
-\"C-_\") are overridden in the current buffer by any keymap other
-than the global one. (So global redefinitions of the default jump-prev
-key bindings do not count.)"
-  (let ((binding1 (lookup-key (current-global-map) [?\C-/]))
-        (binding2 (lookup-key (current-global-map) [?\C-_])))
-    (global-set-key [?\C-/] 'jump-prev)
-    (global-set-key [?\C-_] 'jump-prev)
-    (unwind-protect
-        (or (and (key-binding [?\C-/])
-                 (not (eq (key-binding [?\C-/]) 'jump-prev)))
-            (and (key-binding [?\C-_])
-                 (not (eq (key-binding [?\C-_]) 'jump-prev))))
-      (global-set-key [?\C-/] binding1)
-      (global-set-key [?\C-_] binding2))))
+(defun jump-tree-overridden-jump-bindings-p ()
+  (global-set-key (kbd "C-x j") 'jump-tree-visualize)
+  (global-set-key [?\M-,] 'jump-tree-jump-prev)
+  (global-set-key [?\M-.] 'jump-tree-jump-next))
 
 ;;;###autoload
 (define-globalized-minor-mode global-jump-tree-mode
@@ -1582,30 +1401,24 @@ key bindings do not count.)"
 
 (defun jump-tree-jump-prev (&optional arg)
   "Jump-Prev changes.
-Repeat this command to jump-prev more changes.
+Repeat this command to position more changes.
 A numeric ARG serves as a repeat count.
-In Transient Mark mode when the mark is active, only jump-prev changes
+In Transient Mark mode when the mark is active, only position changes
 within the current region. Similarly, when not in Transient Mark
-mode, just \\[universal-argument] as an argument limits jump-prev to
+mode, just \\[universal-argument] as an argument limits position to
 changes within the current region."
   (interactive "*P")
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
-  ;; throw error if jump-prev is disabled in buffer
+  ;; throw error if position is disabled in buffer
   (when (eq jump-tree-pos-list t)
-    (user-error "No jump-prev information in this buffer"))
+    (user-error "No position information in this buffer"))
   (jump-tree-jump-prev-1 arg)
   ;; inform user if at branch point
   (when (> (jump-tree-num-branches) 1) (message "Jump-Prev branch point!")))
 
 (defun jump-tree-jump-prev-1 (&optional arg)
-  ;; Internal jump-prev function. Non-nil PRESERVE-JUMP-NEXT
-  ;; causes the existing jump-next record to be preserved, rather than replacing it
-  ;; with the new one generated by jump-preving. Non-nil PRESERVE-TIMESTAMPS
-  ;; disables updating of timestamps in visited jump-tree nodes. (This latter
-  ;; should *only* be used when temporarily visiting another jump-prev state and
-  ;; immediately returning to the original state afterwards. Otherwise, it
-  ;; could cause history-discarding errors.)
+  ;; Internal position function.
   (setq deactivate-mark t)
   (let ((jump-tree-in-progress t)
         pos current)
@@ -1613,12 +1426,12 @@ changes within the current region."
     ;; `jump-tree-pos-tree'
     (jump-tree-pos-list-transfer-to-tree)
     (dotimes (i (or (and (numberp arg) (prefix-numeric-value arg)) 1))
-      ;; check if at top of jump-prev tree
+      ;; check if at top of position tree
       (unless (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree))
-        (user-error "No further jump-prev information"))
+        (user-error "No further position information"))
       (setq current (jump-tree-current jump-tree-pos-tree))
       (decf (jump-tree-size jump-tree-pos-tree)
-            (jump-tree-pos-list-byte-size (jump-tree-node-position current)))
+            (jump-tree-pos-byte-size (jump-tree-node-position current)))
 
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       ;; (print (jump-tree-node-position current))
@@ -1626,8 +1439,7 @@ changes within the current region."
 
       ;; rewind current node and update timestamp
       (setf (jump-tree-current jump-tree-pos-tree)
-            (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree)))
-      )))
+            (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree))))))
 
 (defun jump-tree-jump-next (&optional arg)
   "Jump-Next changes. A numeric ARG serves as a repeat count.
@@ -1638,22 +1450,15 @@ changes within the current region."
   (interactive "*P")
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
-  ;; throw error if jump-prev is disabled in buffer
+  ;; throw error if position is disabled in buffer
   (when (eq jump-tree-pos-list t)
-    (user-error "No jump-prev information in this buffer"))
+    (user-error "No position information in this buffer"))
   (jump-tree-jump-next-1 arg)
   ;; inform user if at branch point
   (when (> (jump-tree-num-branches) 1) (message "Jump-Prev branch point!")))
 
 (defun jump-tree-jump-next-1 (&optional arg)
-  ;; Internal jump-next function. An active mark in `transient-mark-mode', or
-  ;; non-nil ARG otherwise, enables jump-prev-in-region. Non-nil PRESERVE-JUMP-PREV
-  ;; causes the existing jump-next record to be preserved, rather than replacing it
-  ;; with the new one generated by jump-preving. Non-nil PRESERVE-TIMESTAMPS
-  ;; disables updating of timestamps in visited jump-tree nodes. (This latter
-  ;; should *only* be used when temporarily visiting another jump-prev state and
-  ;; immediately returning to the original state afterwards. Otherwise, it
-  ;; could cause history-discarding errors.)
+  ;; Internal jump-next function.
   (setq deactivate-mark t)
   (let ((jump-tree-in-progress t)
         pos current)
@@ -1661,7 +1466,7 @@ changes within the current region."
     ;; `jump-tree-pos-tree'
     (jump-tree-pos-list-transfer-to-tree)
     (dotimes (i (or (and (numberp arg) (prefix-numeric-value arg)) 1))
-      ;; check if at bottom of jump-prev tree
+      ;; check if at bottom of position tree
       (when (null (jump-tree-node-next (jump-tree-current jump-tree-pos-tree)))
         (user-error "No further jump-next information"))
       ;; get next node (but DON'T advance current node in tree yet, in case
@@ -1670,7 +1475,7 @@ changes within the current region."
             current (nth (jump-tree-node-branch current)
                          (jump-tree-node-next current)))
       (decf (jump-tree-size jump-tree-pos-tree)
-            (jump-tree-pos-list-byte-size (jump-tree-node-position current)))
+            (jump-tree-pos-byte-size (jump-tree-node-position current)))
 
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (jump-tree-global-list--do-jump (jump-tree-node-position current))
@@ -1679,7 +1484,7 @@ changes within the current region."
       (setf (jump-tree-current jump-tree-pos-tree) current))))
 
 (defun jump-tree-switch-branch (branch)
-  "Switch to a different BRANCH of the jump-prev tree.
+  "Switch to a different BRANCH of the position tree.
 This will affect which branch to descend when *jump-nexting* changes
 using `jump-tree-jump-next'."
   (interactive (list (or (and prefix-arg (prefix-numeric-value prefix-arg))
@@ -1699,12 +1504,12 @@ using `jump-tree-jump-next'."
                                  ))))))
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
-  ;; throw error if jump-prev is disabled in buffer
+  ;; throw error if position is disabled in buffer
   (when (eq jump-tree-pos-list t)
-    (user-error "No jump-prev information in this buffer"))
+    (user-error "No position information in this buffer"))
   ;; sanity check branch number
   (when (<= (jump-tree-num-branches) 1)
-    (user-error "Not at jump-prev branch point"))
+    (user-error "Not at position branch point"))
   (when (or (< branch 0) (> branch (1- (jump-tree-num-branches))))
     (user-error "Invalid branch number"))
   ;; transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'
@@ -1714,13 +1519,9 @@ using `jump-tree-jump-next'."
         branch)
   (message "Switched to branch %d" branch))
 
-(defun jump-tree-set (node &optional preserve-timestamps)
+(defun jump-tree-set (node)
   ;; Set buffer to state corresponding to NODE. Returns intersection point
   ;; between path back from current node and path back from selected NODE.
-  ;; Non-nil PRESERVE-TIMESTAMPS disables updating of timestamps in visited
-  ;; jump-tree nodes. (This should *only* be used when temporarily visiting
-  ;; another jump-prev state and immediately returning to the original state
-  ;; afterwards. Otherwise, it could cause history-discarding errors.)
   (let ((path (make-hash-table :test 'eq))
         (n node))
     (puthash (jump-tree-root jump-tree-pos-tree) t path)
@@ -1730,7 +1531,7 @@ using `jump-tree-jump-next'."
              (puthash n t path)
              (when (jump-tree-node-previous n)
                (setf (jump-tree-node-branch (jump-tree-node-previous n))
-                     (jump-tree-position
+                     (jump-tree-index
                       n (jump-tree-node-next (jump-tree-node-previous n))))
                (setq n (jump-tree-node-previous n)))))
     ;; work backwards from current node until we intersect path back from
@@ -1740,10 +1541,10 @@ using `jump-tree-jump-next'."
       (setq n (jump-tree-node-previous n)))
     ;; ascend tree until intersection node
     (while (not (eq (jump-tree-current jump-tree-pos-tree) n))
-      (jump-tree-jump-prev-1 nil nil preserve-timestamps))
+      (jump-tree-jump-prev-1 nil nil))
     ;; descend tree until selected node
     (while (not (eq (jump-tree-current jump-tree-pos-tree) node))
-      (jump-tree-jump-next-1 nil nil preserve-timestamps))
+      (jump-tree-jump-next-1 nil nil))
     n))  ; return intersection node
 
 (defun jump-tree-save-state-to-register (register)
@@ -1754,9 +1555,9 @@ Argument is a character, naming the register."
   (interactive "cjump-tree state to register: ")
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
-  ;; throw error if jump-prev is disabled in buffer
+  ;; throw error if position is disabled in buffer
   (when (eq jump-tree-pos-list t)
-    (user-error "No jump-prev information in this buffer"))
+    (user-error "No position information in this buffer"))
   ;; transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'
   (jump-tree-pos-list-transfer-to-tree)
   ;; save current node to REGISTER
@@ -1776,12 +1577,12 @@ Argument is a character, naming the register."
   (interactive "*cRestore jump-tree state from register: ")
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
-  ;; throw error if jump-prev is disabled in buffer, or if register doesn't contain
+  ;; throw error if position is disabled in buffer, or if register doesn't contain
   ;; an jump-tree node
   (let ((data (registerv-data (get-register register))))
     (cond
      ((eq jump-tree-pos-list t)
-      (user-error "No jump-prev information in this buffer"))
+      (user-error "No position information in this buffer"))
      ((not (jump-tree-register-data-p data))
       (user-error "Register doesn't contain jump-tree state"))
      ((not (eq (current-buffer) (jump-tree-register-data-buffer data)))
@@ -1795,14 +1596,14 @@ Argument is a character, naming the register."
 ;;; =====================================================================
 ;;;                    Visualizer drawing functions
 (defun jump-tree-visualize ()
-  "Visualize the current buffer's jump-prev tree."
+  "Visualize the current buffer's position tree."
   (interactive "*")
   (unless jump-tree-mode
     (user-error "jump-tree mode not enabled in buffer"))
   (deactivate-mark)
-  ;; throw error if jump-prev is disabled in buffer
+  ;; throw error if position is disabled in buffer
   (when (eq jump-tree-pos-list t)
-    (user-error "No jump-prev information in this buffer"))
+    (user-error "No position information in this buffer"))
   ;; transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'
   (jump-tree-pos-list-transfer-to-tree)
   ;; add hook to kill visualizer buffer if original buffer is changed
@@ -1821,7 +1622,6 @@ Argument is a character, naming the register."
     (setq jump-tree-visualizer-spacing
           (jump-tree-visualizer-calculate-spacing))
     (make-local-variable 'jump-tree-visualizer-timestamps)
-    (make-local-variable 'jump-tree-visualizer-diff)
     (setq jump-tree-pos-tree jump-tree)
     (jump-tree-visualizer-mode)
     ;; FIXME; don't know why `jump-tree-visualizer-mode' clears this
@@ -1831,7 +1631,6 @@ Argument is a character, naming the register."
              (and (numberp jump-tree-visualizer-lazy-drawing)
                   (>= (jump-tree-count jump-tree)
                       jump-tree-visualizer-lazy-drawing))))
-    (when jump-tree-visualizer-diff (jump-tree-visualizer-show-diff))
     (let ((inhibit-read-only t)) (jump-tree-draw-tree jump-tree))))
 
 (defun jump-tree-kill-visualizer (&rest _dummy)
@@ -2319,7 +2118,7 @@ Argument is a character, naming the register."
     (goto-char (jump-tree-node-marker node))
     (unless (= l 1)
       ;; move horizontally
-      (setq p (jump-tree-position node n))
+      (setq p (jump-tree-index node n))
       (cond
        ;; node in centre subtree: no horizontal movement
        ((and (= (mod l 2) 1) (= p (/ l 2))))
@@ -2410,8 +2209,8 @@ Argument is a character, naming the register."
   "Major mode used in jump-tree visualizer.
 The jump-tree visualizer can only be invoked from a buffer in
 which `jump-tree-mode' is enabled. The visualizer displays the
-jump-prev history tree graphically, and allows you to browse around
-the jump-prev history, jump-preving or jump-nexting the corresponding changes in
+position history tree graphically, and allows you to browse around
+the position history, jump-preving or jump-nexting the corresponding changes in
 the parent buffer.
 Within the jump-tree visualizer, the following keys are available:
   \\{jump-tree-visualizer-mode-map}"
@@ -2432,7 +2231,7 @@ Within the jump-tree visualizer, the following keys are available:
     (let ((jump-tree-insert-face 'jump-tree-visualizer-active-branch-face)
           (inhibit-read-only t))
       (jump-tree-draw-node old))
-    ;; jump-prev in parent buffer
+    ;; position in parent buffer
     (switch-to-buffer-other-window jump-tree-visualizer-parent-buffer)
     (deactivate-mark)
     (unwind-protect
@@ -2443,9 +2242,7 @@ Within the jump-tree visualizer, the following keys are available:
       (when jump-tree-visualizer-lazy-drawing
         (jump-tree-expand-up old current))
       ;; highlight new current node
-      (let ((inhibit-read-only t)) (jump-tree-draw-node current 'current))
-      ;; update diff display, if any
-      (when jump-tree-visualizer-diff (jump-tree-visualizer-update-diff)))))
+      (let ((inhibit-read-only t)) (jump-tree-draw-node current 'current)))))
 
 (defun jump-tree-visualize-jump-next (&optional arg)
   "Jump-Next changes. A numeric ARG serves as a repeat count."
@@ -2469,12 +2266,10 @@ Within the jump-tree visualizer, the following keys are available:
       (when jump-tree-visualizer-lazy-drawing
         (jump-tree-expand-down old current))
       ;; highlight new current node
-      (let ((inhibit-read-only t)) (jump-tree-draw-node current 'current))
-      ;; update diff display, if any
-      (when jump-tree-visualizer-diff (jump-tree-visualizer-update-diff)))))
+      (let ((inhibit-read-only t)) (jump-tree-draw-node current 'current)))))
 
 (defun jump-tree-visualize-switch-branch-right (arg)
-  "Switch to next branch of the jump-prev tree.
+  "Switch to next branch of the position tree.
 This will affect which branch to descend when *jump-nexting* changes
 using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
   (interactive "p")
@@ -2502,7 +2297,7 @@ using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
       (jump-tree-draw-node (jump-tree-current jump-tree-pos-tree) 'current))))
 
 (defun jump-tree-visualize-switch-branch-left (arg)
-  "Switch to previous branch of the jump-prev tree.
+  "Switch to previous branch of the position tree.
 This will affect which branch to descend when *jump-nexting* changes
 using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
   (interactive "p")
@@ -2518,8 +2313,6 @@ using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
   (unwind-protect
       (with-current-buffer jump-tree-visualizer-parent-buffer
         (remove-hook 'before-change-functions 'jump-tree-kill-visualizer t))
-    ;; kill diff buffer, if any
-    (when jump-tree-visualizer-diff (jump-tree-visualizer-hide-diff))
     (let ((parent jump-tree-visualizer-parent-buffer)
           window)
       ;; kill visualizer buffer
@@ -2540,7 +2333,7 @@ using `jump-tree-jump-next' or `jump-tree-visualizer-jump-next'."
     (jump-tree-set node)))
 
 (defun jump-tree-visualizer-set (&optional pos)
-  "Set buffer to state corresponding to jump-prev tree node
+  "Set buffer to state corresponding to position tree node
 at POS, or point if POS is nil."
   (interactive)
   (unless (eq major-mode 'jump-tree-visualizer-mode)
@@ -2552,12 +2345,11 @@ at POS, or point if POS is nil."
       (switch-to-buffer-other-window jump-tree-visualizer-parent-buffer)
       (let ((jump-tree-inhibit-kill-visualizer t)) (jump-tree-set node))
       (switch-to-buffer-other-window jump-tree-visualizer-buffer-name)
-      ;; re-draw jump-prev tree
-      (let ((inhibit-read-only t)) (jump-tree-draw-tree jump-tree-pos-tree))
-      (when jump-tree-visualizer-diff (jump-tree-visualizer-update-diff)))))
+      ;; re-draw position tree
+      (let ((inhibit-read-only t)) (jump-tree-draw-tree jump-tree-pos-tree)))))
 
 (defun jump-tree-visualizer-mouse-set (pos)
-  "Set buffer to state corresponding to jump-prev tree node
+  "Set buffer to state corresponding to position tree node
 at mouse event POS."
   (interactive "@e")
   (unless (eq major-mode 'jump-tree-visualizer-mode)
@@ -2566,9 +2358,9 @@ at mouse event POS."
 
 (defun jump-tree-visualize-jump-prev-to-x (&optional x)
   "Jump-Prev to last branch point, register, or saved state.
-If X is the symbol `branch', jump-prev to last branch point. If X is
-the symbol `register', jump-prev to last register. If X is the sumbol
-`saved', jump-prev to last saved state. If X is null, jump-prev to first of
+If X is the symbol `branch', position to last branch point. If X is
+the symbol `register', position to last register. If X is the sumbol
+`saved', position to last saved state. If X is null, position to first of
 these that's encountered.
 Interactively, a single \\[universal-argument] specifies
 `branch', a double \\[universal-argument] \\[universal-argument]
@@ -2585,86 +2377,11 @@ specifies `saved', and a negative prefix argument specifies
              (t        'saved))))
   (let ((current (if jump-tree-visualizer-selection-mode
                      jump-tree-visualizer-selected-node
-                   (jump-tree-current jump-tree-pos-tree)))
-        (diff jump-tree-visualizer-diff)
-        pos)
-    (jump-tree-visualizer-hide-diff)
-    (while (and (jump-tree-node-previous current)
-                (or (if jump-tree-visualizer-selection-mode
-                        (progn
-                          (jump-tree-visualizer-select-previous)
-                          (setq current jump-tree-visualizer-selected-node))
-                      (jump-tree-visualize-jump-prev)
-                      (setq current (jump-tree-current jump-tree-pos-tree)))
-                    t)
-                ;; branch point
-                (not (or (and (or (null x) (eq x 'branch))
-                              (> (jump-tree-num-branches) 1))
-                         ;; register
-                         (and (or (null x) (eq x 'register))
-                              (setq pos (jump-tree-node-register current))
-                              (jump-tree-register-data-p
-                               (setq pos (registerv-data (get-register pos))))
-                              (eq current (jump-tree-register-data-node pos)))
-                         ;; saved state
-                         (and (or (null x) (eq x 'saved)))
-                         ))))
-    ;; update diff display, if any
-    (when diff
-      (jump-tree-visualizer-show-diff
-       (when jump-tree-visualizer-selection-mode
-         jump-tree-visualizer-selected-node)))))
-
-(defun jump-tree-visualize-jump-next-to-x (&optional x)
-  "Jump-Next to last branch point, register, or saved state.
-If X is the symbol `branch', jump-next to last branch point. If X is
-the symbol `register', jump-next to last register. If X is the sumbol
-`saved', jump-next to last saved state. If X is null, jump-next to first of
-these that's encountered.
-Interactively, a single \\[universal-argument] specifies
-`branch', a double \\[universal-argument] \\[universal-argument]
-specifies `saved', and a negative prefix argument specifies
-`register'."
-  (interactive "P")
-  (unless (eq major-mode 'jump-tree-visualizer-mode)
-    (user-error "jump-tree mode not enabled in buffer"))
-  (when (and (called-interactively-p 'any) x)
-    (setq x (prefix-numeric-value x)
-          x (cond
-             ((< x 0)  'register)
-             ((<= x 4) 'branch)
-             (t        'saved))))
-  (let ((current (if jump-tree-visualizer-selection-mode
-                     jump-tree-visualizer-selected-node
-                   (jump-tree-current jump-tree-pos-tree)))
-        (diff jump-tree-visualizer-diff)
-        pos)
-    (jump-tree-visualizer-hide-diff)
-    (while (and (jump-tree-node-next current)
-                (or (if jump-tree-visualizer-selection-mode
-                        (progn
-                          (jump-tree-visualizer-select-next)
-                          (setq current jump-tree-visualizer-selected-node))
-                      (jump-tree-visualize-jump-next)
-                      (setq current (jump-tree-current jump-tree-pos-tree)))
-                    t)
-                ;; branch point
-                (not (or (and (or (null x) (eq x 'branch))
-                              (> (jump-tree-num-branches) 1))
-                         ;; register
-                         (and (or (null x) (eq x 'register))
-                              (setq pos (jump-tree-node-register current))
-                              (jump-tree-register-data-p
-                               (setq pos (registerv-data (get-register pos))))
-                              (eq current (jump-tree-register-data-node pos)))
-                         ;; saved state
-                         (and (or (null x) (eq x 'saved)))
-                         ))))
-    ;; update diff display, if any
-    (when diff
-      (jump-tree-visualizer-show-diff
-       (when jump-tree-visualizer-selection-mode
-         jump-tree-visualizer-selected-node)))))
+                   (jump-tree-current jump-tree-pos-tree))))
+    (unwind-protect
+        (jump-tree-expand-up
+         (jump-tree-node-previous current)))
+    ))
 
 (defun jump-tree-visualizer-toggle-timestamps ()
   "Toggle display of time-stamps."
@@ -2741,18 +2458,11 @@ specifies `saved', and a negative prefix argument specifies
    (jump-tree-visualizer-selection-mode
     (setq cursor-type 'box)
     (setq jump-tree-visualizer-selected-node
-          (jump-tree-current jump-tree-pos-tree))
-    ;; erase diff (if any), as initially selected node is identical to current
-    (when jump-tree-visualizer-diff
-      (let ((buff (get-buffer jump-tree-diff-buffer-name))
-            (inhibit-read-only t))
-        (when buff (with-current-buffer buff (erase-buffer))))))
+          (jump-tree-current jump-tree-pos-tree)))
    (t ;; disable selection mode
     (setq cursor-type nil)
     (setq jump-tree-visualizer-selected-node nil)
-    (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-pos-tree)))
-    (when jump-tree-visualizer-diff (jump-tree-visualizer-update-diff)))
-   ))
+    (goto-char (jump-tree-node-marker (jump-tree-current jump-tree-pos-tree))))))
 
 (defun jump-tree-visualizer-select-previous (&optional arg)
   "Move to previous node."
@@ -2767,10 +2477,6 @@ specifies `saved', and a negative prefix argument specifies
     ;; when using lazy drawing, extend tree upwards as required
     (when jump-tree-visualizer-lazy-drawing
       (jump-tree-expand-up jump-tree-visualizer-selected-node node))
-    ;; update diff display, if any
-    (when (and jump-tree-visualizer-diff
-               (not (eq node jump-tree-visualizer-selected-node)))
-      (jump-tree-visualizer-update-diff node))
     ;; move to selected node
     (goto-char (jump-tree-node-marker node))
     (setq jump-tree-visualizer-selected-node node)))
@@ -2790,10 +2496,6 @@ specifies `saved', and a negative prefix argument specifies
     ;; when using lazy drawing, extend tree downwards as required
     (when jump-tree-visualizer-lazy-drawing
       (jump-tree-expand-down jump-tree-visualizer-selected-node node))
-    ;; update diff display, if any
-    (when (and jump-tree-visualizer-diff
-               (not (eq node jump-tree-visualizer-selected-node)))
-      (jump-tree-visualizer-update-diff node))
     ;; move to selected node
     (goto-char (jump-tree-node-marker node))
     (setq jump-tree-visualizer-selected-node node)))
@@ -2815,9 +2517,6 @@ specifies `saved', and a negative prefix argument specifies
           (when (= (point) end) (throw 'end t)))))
     (goto-char (jump-tree-node-marker
                 (or node jump-tree-visualizer-selected-node)))
-    (when (and jump-tree-visualizer-diff node
-               (not (eq node jump-tree-visualizer-selected-node)))
-      (jump-tree-visualizer-update-diff node))
     (when node (setq jump-tree-visualizer-selected-node node))))
 
 (defun jump-tree-visualizer-select-left (&optional arg)
@@ -2837,9 +2536,6 @@ specifies `saved', and a negative prefix argument specifies
           (when (= (point) beg) (throw 'beg t)))))
     (goto-char (jump-tree-node-marker
                 (or node jump-tree-visualizer-selected-node)))
-    (when (and jump-tree-visualizer-diff node
-               (not (eq node jump-tree-visualizer-selected-node)))
-      (jump-tree-visualizer-update-diff node))
     (when node (setq jump-tree-visualizer-selected-node node))))
 
 (defun jump-tree-visualizer-select (pos)
@@ -2851,34 +2547,18 @@ specifies `saved', and a negative prefix argument specifies
       (when jump-tree-visualizer-lazy-drawing
         (jump-tree-expand-up jump-tree-visualizer-selected-node node)
         (jump-tree-expand-down jump-tree-visualizer-selected-node node))
-      ;; update diff display, if any
-      (when (and jump-tree-visualizer-diff
-                 (not (eq node jump-tree-visualizer-selected-node)))
-        (jump-tree-visualizer-update-diff node))
       ;; update selected node
       (setq jump-tree-visualizer-selected-node node)
       )))
 
 (defun jump-tree-visualizer-mouse-select (pos)
-  "Select jump-prev tree node at mouse event POS."
+  "Select position tree node at mouse event POS."
   (interactive "@e")
   (unless (eq major-mode 'jump-tree-visualizer-mode)
     (user-error "jump-tree mode not enabled in buffer"))
   (jump-tree-visualizer-select (event-start (nth 1 pos))))
 
 
-(defcustom jump-tree-pos-list-limit 100
-  "Max length of jump-tree-pos-list."
-  :type 'integer
-  :group 'jump-tree)
-
-(defcustom jump-tree-pos-list-hook-commands '(end-of-buffer beginning-of-buffer next-line previous-line)
-  "Commands to hook."
-  :type 'list
-  :group 'jump-tree)
-
-(defvar jump-tree-in-progress nil
-  "Jump-Tree-Pos-List state.")
 
 (defun jump-tree-pos-list--do-jump (position)
   "Do jump to target file and point from BUFF."
