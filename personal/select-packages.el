@@ -51,7 +51,8 @@
         init-keyfreq
         init-avy
         init-string-edit
-        init-jumplist
+        init-jump-tree
+        ;; init-jumplist
         init-multiple-cursors
         init-undo-tree
         init-smartparens
