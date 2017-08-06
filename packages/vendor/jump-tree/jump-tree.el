@@ -1,6 +1,6 @@
 ;;; jump-tree.el --- Treat position history as a tree  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2009-2014  Free Software Foundation, Inc
+;; Copyright (C) 2009-2017  Free Software Foundation, Inc
 
 ;; Author: Wen Yang <yangwen0228@foxmail.com>
 ;; Maintainer: Wen Yang <yangwen0228@foxmail.com>
@@ -561,7 +561,7 @@
 
 (defgroup jump-tree nil
   "Tree jump-prev/jump-next."
-  :group 'position)
+  :group 'jump-tree)
 
 (defvar jump-tree-pos-tree nil
   "Tree of position entries globally.")
@@ -572,8 +572,13 @@
 (defvar jump-tree-in-progress nil
   "Jump-Tree-Pos-List state.")
 
-(defcustom jump-tree-pos-list-limit 100
+(defcustom jump-tree-pos-list-limit 40
   "Max length of jump-tree-pos-list."
+  :type 'integer
+  :group 'jump-tree)
+
+(defcustom jump-tree-pos-tree-limit 100
+  "Max count of jump-tree-tree-list."
   :type 'integer
   :group 'jump-tree)
 
@@ -628,7 +633,7 @@ enabled. However, this effect is quite rare in practice."
   :group 'jump-tree
   :type '(choice (const :tag "never" nil)
                  (const :tag "always" t)
-                 (integer :tag "> size")))
+                 (integer :tag "> count")))
 
 (defface jump-tree-visualizer-default-face
   '((((class color)) :foreground "gray"))
@@ -829,11 +834,10 @@ in visualizer."
                    (&aux
                     (root (jump-tree-make-node nil nil))
                     (current root)
-                    (size 0)
                     (count 0)))
      ;;(:copier nil)
      )
-  root current size count)
+  root current count)
 
 (defstruct
     (jump-tree-node
@@ -1073,56 +1077,94 @@ Comparison is done with `eq'."
 
 ;;; =====================================================================
 ;;;             position list utility functions
-(defun jump-tree-pos-list-remove-empty ()
+(defun jump-tree-pos-list-discard-invalid ()
   "If the file or buffer is closed, then the marker is invalid. This function will
 remove these invalid entries."
-  (let (empty-marker (make-marker))
-    (remove-if (lambda (position) (eq empty-marker (cdr position)))
-               jump-tree-pos-list)))
+  (let ((empty-marker (make-marker)))
+    (setq jump-tree-pos-list
+          (remove-if (lambda (position) (equal empty-marker (cdr position)))
+                     jump-tree-pos-list))))
+
+(defun jump-tree-pos-tree-reset-when-empty-node (node)
+  "If the file or buffer is closed, then the marker is invalid. This function will
+remove these invalid entries in tree."
+  (let ((empty-marker (make-marker))
+        (current node)
+        oldcurrent next)
+    (when (equal empty-marker (cdr (jump-tree-node-position current)))
+      (setq jump-tree-pos-tree nil))))
+
+(defun jump-tree-pos-tree-remove-prev-empty (node)
+  "If the file or buffer is closed, then the marker is invalid. This function will
+remove these invalid entries in tree."
+  (let ((empty-marker (make-marker))
+        (current node)
+        oldcurrent next)
+    (while (and (jump-tree-node-previous current)
+                (equal empty-marker (cdr (jump-tree-node-position current))))
+      (setq oldcurrent current)
+      (setq next (nth (jump-tree-node-branch current)
+                      (jump-tree-node-next current)))
+      (setf (jump-tree-current jump-tree-pos-tree) (jump-tree-node-previous current))
+      (setq current (jump-tree-current jump-tree-pos-tree))
+      (setf (jump-tree-node-next current) (list next))
+      (setf (jump-tree-node-previous oldcurrent) nil)
+      (setf (jump-tree-node-next oldcurrent) nil))
+    current))
+
+(defun jump-tree-pos-tree-remove-next-empty (node)
+  "If the file or buffer is closed, then the marker is invalid. This function will
+remove these invalid entries in tree."
+  (let ((empty-marker (make-marker))
+        (current node)
+        oldcurrent prev)
+    (while (and (null (jump-tree-node-next current))
+                (equal empty-marker (cdr (jump-tree-node-position current))))
+      (setq oldcurrent current)
+      (setq prev (jump-tree-node-previous current))
+      (setq current (nth (jump-tree-node-branch current)
+                         (jump-tree-node-next current)))
+      (setf (jump-tree-current jump-tree-pos-tree) current)
+      (setf (jump-tree-node-next prev) current)
+      (setf (jump-tree-node-previous oldcurrent) nil)
+      (setf (jump-tree-node-next oldcurrent) nil))
+    current))
 
 (defun jump-tree-pos-list-transfer-to-tree ()
   ;; Transfer entries accumulated in `jump-tree-pos-list' to `jump-tree-pos-tree'.
 
-  ;; `jump-tree-pos-list-transfer-to-tree' should never be called when position is disabled
+  ;; `jump-tree-pos-list-transfer-to-tree' should never be called when jump is disabled
   ;; (i.e. `jump-tree-pos-tree' is t)
   (assert (not (eq jump-tree-pos-tree t)))
 
   ;; if `jump-tree-pos-tree' is empty, create initial jump-tree
   (when (null jump-tree-pos-tree) (setq jump-tree-pos-tree (make-jump-tree)))
 
+  (jump-tree-pos-list-discard-invalid)
+
   (when jump-tree-pos-list
-    (jump-tree-pos-list-remove-empty)
     ;; create new node from first changeset in `jump-tree-pos-list', save old
     ;; `jump-tree-pos-tree' current node, and make new node the current node
     (let* ((node (jump-tree-make-node nil (pop jump-tree-pos-list)))
            (splice (jump-tree-current jump-tree-pos-tree))
-           (size (jump-tree-pos-byte-size (jump-tree-node-position node)))
            (count 1))
       (setf (jump-tree-current jump-tree-pos-tree) node)
-      ;; grow tree fragment backwards using `jump-tree-pos-list' changesets
+      ;; grow tree fragment backwards
       (while jump-tree-pos-list
         (setq node
               (jump-tree-grow-backwards node (pop jump-tree-pos-list)))
-        (incf size (jump-tree-pos-byte-size (jump-tree-node-position node)))
         (incf count))
+      ;; build a new branch, number 0.
       (setf (jump-tree-node-previous node) splice)
       (push node (jump-tree-node-next splice))
       (setf (jump-tree-node-branch splice) 0)
-      (incf (jump-tree-size jump-tree-pos-tree) size)
-      (incf (jump-tree-count jump-tree-pos-tree) count)
-      )
+      (incf (jump-tree-count jump-tree-pos-tree) count))
     ;; discard position history if necessary
     (jump-tree-discard-history)))
 
-(defun jump-tree-pos-byte-size (position)
-  ;; Return size (in bytes) of POSITION
-  (let ((size 0) (p position))
-    (incf size 8)  ; cons cells use up 8 bytes
-    (incf size (+ (string-bytes (car p)) 4))
-    size))
-
 (defun jump-tree-pos-list-rebuild-from-tree ()
-  "Rebuild `jump-tree-pos-list' from information in `jump-tree-pos-tree'."
+  "Rebuild `jump-tree-pos-list' from information in `jump-tree-pos-tree', when some
+buffers are closed, and the markers become invalid."
   (unless (eq jump-tree-pos-list t)
     (jump-tree-pos-list-transfer-to-tree)
     (setq jump-tree-pos-list nil)
@@ -1193,9 +1235,6 @@ remove these invalid entries."
           ;; make child of root into new root
           (setq node (setf (jump-tree-root jump-tree-pos-tree)
                            (car (jump-tree-node-next node))))
-          ;; update jump-tree size
-          (decf (jump-tree-size jump-tree-pos-tree)
-                (jump-tree-pos-byte-size (jump-tree-node-position node)))
           (decf (jump-tree-count jump-tree-pos-tree))
           ;; discard new root's position data and PREVIOUS link
           (setf (jump-tree-node-position node) nil
@@ -1216,9 +1255,6 @@ remove these invalid entries."
         (let ((pos (jump-tree-node-register node)))
           (when (and pos (eq (get-register pos) node))
             (set-register pos nil)))
-        ;; update jump-tree size
-        (decf (jump-tree-size jump-tree-pos-tree)
-              (jump-tree-pos-byte-size (jump-tree-node-position node)))
         (decf (jump-tree-count jump-tree-pos-tree))
         ;; discard leaf
         (setf (jump-tree-node-next parent)
@@ -1236,9 +1272,9 @@ remove these invalid entries."
 
 (defun jump-tree-discard-history ()
   "Discard position history until we're within memory usage limits
-set by `jump-tree-pos-list-limit'."
+set by `jump-tree-pos-tree-limit'."
 
-  (when (> (jump-tree-size jump-tree-pos-tree) jump-tree-pos-list-limit)
+  (when (> (jump-tree-count jump-tree-pos-tree) jump-tree-pos-tree-limit)
     ;; if there are no branches off root, first node to discard is root;
     ;; otherwise it's leaf node at botom of oldest branch
     (let ((node (if (> (length (jump-tree-node-next
@@ -1247,22 +1283,9 @@ set by `jump-tree-pos-list-limit'."
                   (jump-tree-root jump-tree-pos-tree))))
 
       ;; discard nodes until next node to discard would bring memory use
-      ;; within `jump-tree-pos-list-limit'
+      ;; within `jump-tree-pos-tree-limit'
       (while (and node
-                  (> (jump-tree-size jump-tree-pos-tree) jump-tree-pos-list-limit)
-                  (> (- (jump-tree-size jump-tree-pos-tree)
-                        ;; if next node to discard is root, the memory we
-                        ;; free-up comes from discarding changesets from its
-                        ;; only child...
-                        (if (eq node (jump-tree-root jump-tree-pos-tree))
-                            (jump-tree-pos-byte-size
-                             (jump-tree-node-position
-                              (car (jump-tree-node-next node))))
-                          ;; ...otherwise, it comes from discarding changesets
-                          ;; from along with the node itself
-                          (jump-tree-pos-byte-size (jump-tree-node-position node))
-                          ))
-                     jump-tree-pos-list-limit))
+                  (> (jump-tree-count jump-tree-pos-tree) jump-tree-pos-tree-limit))
         (setq node (jump-tree-discard-node node))))))
 
 
@@ -1427,19 +1450,15 @@ changes within the current region."
     (jump-tree-pos-list-transfer-to-tree)
     (dotimes (i (or (and (numberp arg) (prefix-numeric-value arg)) 1))
       ;; check if at top of position tree
-      (unless (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree))
-        (user-error "No further position information"))
       (setq current (jump-tree-current jump-tree-pos-tree))
-      (decf (jump-tree-size jump-tree-pos-tree)
-            (jump-tree-pos-byte-size (jump-tree-node-position current)))
+      (unless (jump-tree-node-previous current)
+        (user-error "No further position information"))
+      (setq current (jump-tree-node-previous current))
+      (setf (jump-tree-current jump-tree-pos-tree) current)
 
-      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      ;; (print (jump-tree-node-position current))
-      (jump-tree-pos-list--do-jump (jump-tree-node-position current))
+      (print (cdr (jump-tree-node-position current)))
 
-      ;; rewind current node and update timestamp
-      (setf (jump-tree-current jump-tree-pos-tree)
-            (jump-tree-node-previous (jump-tree-current jump-tree-pos-tree))))))
+      (jump-tree-pos-list--do-jump (jump-tree-node-position current)))))
 
 (defun jump-tree-jump-next (&optional arg)
   "Jump-Next changes. A numeric ARG serves as a repeat count.
@@ -1467,21 +1486,16 @@ changes within the current region."
     (jump-tree-pos-list-transfer-to-tree)
     (dotimes (i (or (and (numberp arg) (prefix-numeric-value arg)) 1))
       ;; check if at bottom of position tree
-      (when (null (jump-tree-node-next (jump-tree-current jump-tree-pos-tree)))
+      (setq current (jump-tree-current jump-tree-pos-tree))
+      (when (null (jump-tree-node-next current))
         (user-error "No further jump-next information"))
-      ;; get next node (but DON'T advance current node in tree yet, in case
-      ;; jump-nexting fails)
-      (setq current (jump-tree-current jump-tree-pos-tree)
-            current (nth (jump-tree-node-branch current)
+      (setq current (nth (jump-tree-node-branch current)
                          (jump-tree-node-next current)))
-      (decf (jump-tree-size jump-tree-pos-tree)
-            (jump-tree-pos-byte-size (jump-tree-node-position current)))
+      (setf (jump-tree-current jump-tree-pos-tree) current)
 
-      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      (jump-tree-global-list--do-jump (jump-tree-node-position current))
+      (print (cdr (jump-tree-node-position current)))
 
-      ;; advance current node in tree
-      (setf (jump-tree-current jump-tree-pos-tree) current))))
+      (jump-tree-pos-list--do-jump (jump-tree-node-position current)))))
 
 (defun jump-tree-switch-branch (branch)
   "Switch to a different BRANCH of the position tree.
@@ -2562,8 +2576,11 @@ specifies `saved', and a negative prefix argument specifies
 
 (defun jump-tree-pos-list--do-jump (position)
   "Do jump to target file and point from BUFF."
-  (find-file (car position))
-  (goto-char (cdr position)))
+  (let ((file-path (car position))
+        (marker (cdr position)))
+    (when (and (markerp marker) (marker-buffer marker))
+      (find-file file-path)
+      (goto-char marker))))
 
 (defun jump-tree-pos-list--push (position)
   "Push POSITION to `jump-tree-pos-list'."
