@@ -5,7 +5,6 @@
 ;;; Code:
 (use-package jump-tree :ensure nil
   :config
-  (require 'jump-tree-visualizer)
   (global-jump-tree-mode 1)
   ;; The keybind C-, and C-. conflict with InputMethod.
   (global-set-key (kbd "M-,") 'jump-tree-jump-prev)
