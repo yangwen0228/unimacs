@@ -1072,6 +1072,9 @@ changes within the current region."
         pos current)
     ;; transfer entries accumulated in `jump-tree-pos-list' to
     ;; `jump-tree-pos-tree'
+    (when jump-tree-pos-list
+      (jump-tree-pos-list-set))
+
     (jump-tree-pos-list-transfer-to-tree)
     (dotimes (i (or (and (numberp arg) (prefix-numeric-value arg)) 1))
       ;; check if at top of position tree
@@ -1080,8 +1083,6 @@ changes within the current region."
         (user-error "No further jump-prev information"))
       (setq current (jump-tree-node-previous current))
       (setf (jump-tree-current jump-tree-pos-tree) current)
-
-      (print (cdr (jump-tree-node-position current)))
 
       (jump-tree-pos-list-jump (jump-tree-node-position current)))))
 
@@ -1117,8 +1118,6 @@ changes within the current region."
       (setq current (nth (jump-tree-node-branch current)
                          (jump-tree-node-next current)))
       (setf (jump-tree-current jump-tree-pos-tree) current)
-
-      (print (cdr (jump-tree-node-position current)))
 
       (jump-tree-pos-list-jump (jump-tree-node-position current)))))
 
