@@ -81,7 +81,7 @@
 (bind-key "C-x M-S-k"       'unimacs-delete-file-and-buffer)
 (bind-key "C-x M-S-r"       'unimacs-rename-file-and-buffer)
 (bind-key "C-x M-S-c"       'unimacs-copy-file-and-rename-buffer)
-(bind-key "C-x M-p"         'unimacs-copy-file-name-to-clipboard)
+(bind-key "C-x M-p"         'unimacs-copy-file-path-to-clipboard)
 (bind-key "C-S-M-h"         'unimacs-copy-func)
 (bind-key "C-x H"           'unimacs-copy-whole-buffer)
 
