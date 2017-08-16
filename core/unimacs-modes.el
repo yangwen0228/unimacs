@@ -173,7 +173,7 @@
   :config
   (midnight-mode t)
   (midnight-delay-set 'midnight-delay "9:00") ; start time or seconds to 24:00
-  (setq clean-buffer-list-delay-general 1)    ; clean buffers exceeding 1 day.
+  (setq clean-buffer-list-delay-general 3)    ; clean buffers exceeding 3 day.
 
   (add-to-list 'clean-buffer-list-kill-buffer-names "*vc-dir*")
   (add-to-list 'clean-buffer-list-kill-regexps "\\*helm")
