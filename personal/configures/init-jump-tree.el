@@ -3,7 +3,7 @@
 ;; comments
 
 ;;; Code:
-(use-package jump-tree :ensure nil
+(use-package jump-tree
   :config
   (global-jump-tree-mode 1)
   ;; The keybind C-, and C-. conflict with InputMethod.
@@ -11,8 +11,9 @@
   (global-set-key (kbd "M-.") 'jump-tree-jump-next)
   (global-set-key (kbd "C-x j") 'jump-tree-visualize)
 
-  (setq jump-tree-pos-list-hook-commands
-        '(beginning-of-buffer
+  (setq jump-tree-pos-list-record-commands
+        '(save-buffer
+          beginning-of-buffer
           end-of-buffer backward-up-list
           beginning-of-defun end-of-defun
           unimacs-move-beginning-of-line unimacs-move-end-of-line
