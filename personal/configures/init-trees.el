@@ -13,7 +13,8 @@
   :commands neotree neotree-toggle
   :init
   (global-set-key [f8] 'neotree-toggle)
-  (global-set-key [f5] 'neotree-projectile-action))
+  (global-set-key [f5] 'neotree-projectile-action)
+  (global-set-key [f6] 'neotree-dir))
 
 (provide 'init-trees)
 ;;; init-trees.el ends here

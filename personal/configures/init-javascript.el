@@ -54,6 +54,11 @@
                 js2-enter-indents-newline nil
                 js2-bounce-indent-p t)
 
+  ;; turn off semicolon check
+  ;; how to disable js2-mode syntax checking globally in spacemacs
+  ;; http://stackoverflow.com/questions/35162106/how-to-disable-js2-mode-syntax-checking-globally-in-spacemacs/35181037
+  (setq js2-strict-missing-semi-warning nil)
+
   (setq javascript-common-imenu-regex-list
         '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
           ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
