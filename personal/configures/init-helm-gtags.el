@@ -223,7 +223,7 @@
                                '(read-only t rear-nonsticky t front-sticky t))
           (let ((inhibit-read-only t))
             (setq header-line-format
-                  (format "[%s] C-x C-c: Commit, C-c C-k: Abort"
+                  (format "[%s] C-c C-c: Commit, C-c C-k: Abort"
                           (abbreviate-file-name default-directory)))
             (goto-char (point-min))
             (while (re-search-forward "^\\(\\(?:[^:]+:\\)\\{1,2\\}\\)\\(.*\\)$" nil t)
