@@ -1,4 +1,4 @@
-;;; init-jumplist.el --- Summary
+;;; init-jump-tree.el --- Summary
 ;;; Commentary:
 ;; comments
 
@@ -29,5 +29,5 @@
           ensime-edit-definition-with-fallback
           isearch-forward)))
 
-(provide 'init-jumplist)
-;;; init-jumplist.el ends here
+(provide 'init-jump-tree)
+;;; init-jump-tree.el ends here
