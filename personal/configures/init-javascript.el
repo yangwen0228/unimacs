@@ -300,7 +300,7 @@ If HARDCODED-ARRAY-INDEX provided, array index in JSON path is replaced with it.
     (setenv "NODE_NO_READLINE" "1")
     (js2-imenu-extras-mode)
     (setq mode-name "JS2")
-    (require 'js2-refactor)
+    (use-package js2-refactor)
     (js2-refactor-mode t)
     (js2r-add-keybindings-with-prefix "C-c C-m")
 
