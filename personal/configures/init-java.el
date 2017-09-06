@@ -59,16 +59,26 @@
 
 (use-package ensime
   :init
+  (add-hook 'java-mode-hook (lambda () (ensime-mode +1)))
   (put 'ensime-auto-generate-config 'safe-local-variable #'booleanp)
   (setq
    ensime-use-helm t
    ensime-startup-notification nil
    ensime-startup-snapshot-notification nil)
+  (add-hook 'ensime-mode-hook (lambda ()
+                                (unbind-key "M-n" ensime-mode-map)
+                                (unbind-key "M-p" ensime-mode-map)
+                                (unbind-key "M-," ensime-mode-map)
+                                (unbind-key "M-." ensime-mode-map)
+                                (bind-key "M-t" 'ensime-edit-definition-with-fallback ensime-mode-map)
+                                ))
   :config
-  (unbind-key "M-n" ensime-mode-map)
-  (unbind-key "M-p" ensime-mode-map)
-  (unbind-key "M-," ensime-mode-map)
-  (unbind-key "M-." ensime-mode-map)
+  (defun ensime-edit-definition-with-fallback (arg)
+    "Variant of `ensime-edit-definition' with gtags if ENSIME is not available."
+    (interactive "P")
+    (unless (and (ensime-connection-or-nil)
+                 (ensime-edit-definition arg))
+      (call-interactively 'helm-gtags-find-tag)))
   ;; already PR
   (defun ensime-get-completions-async
       (max-results case-sense callback)
@@ -82,31 +92,31 @@
                              '(lambda (candidate)
                                 (setq name (getf candidate :name))
                                 (or (string-match "\\$" name)
-                                    (not (string-match prefix name))))
+                                    (not (string-prefix-p prefix name))))
                              (plist-get info :completions)))
                 (candidates (ensime--annotate-completions candidates)))
            (funcall continuation candidates))))))
 
-  (defun ensime-computed-point ()
-    "Subtract one to convert to 0-indexed buffer offsets.
- Additionally, in buffers with windows-encoded line-endings,
- add the appropriate number of CRs to compensate for characters
- that are hidden by Emacs."
-    (let ((utf8-count 0)
-          (pos (point)))
-      (goto-char (point-min))
-      (while (not (= (point) pos))
-        (unless (string= "ascii" (char-charset (char-after)))
-          (setq utf8-count (1+ utf8-count)))
-        (goto-char (1+ (point))))
-      (ensime-externalize-offset (+ (point) (/ (1+ utf8-count) 2)))))
+  ;;  (defun ensime-computed-point ()
+  ;;    "Subtract one to convert to 0-indexed buffer offsets.
+  ;; Additionally, in buffers with windows-encoded line-endings,
+  ;; add the appropriate number of CRs to compensate for characters
+  ;; that are hidden by Emacs."
+  ;;    (let ((utf8-count 0)
+  ;;          (pos (point)))
+  ;;      (goto-char (point-min))
+  ;;      (while (not (= (point) pos))
+  ;;        (unless (string= "ascii" (char-charset (char-after)))
+  ;;          (setq utf8-count (1+ utf8-count)))
+  ;;        (goto-char (1+ (point))))
+  ;;      (ensime-externalize-offset (+ (point) (/ (1+ utf8-count) 2)))))
 
   ;; company: If ensime is on, use ensime and yasnippet. Otherwise, use dabbrev and yasnippet.
   (setq ensime-company-case-sensitive t)
   (unimacs-company-define-backends
-   '((ensime-mode) . ((ensime-company :with company-yasnippet)
-                      (company-dabbrev-code :with company-dabbrev company-yasnippet)
-                      company-files)))
+   '((ensime-mode) . ((ensime-company :with company-yasnippet company-files)
+                      (company-dabbrev-code :with company-dabbrev company-yasnippet company-files)
+                      )))
 
   (bind-key "C-<tab>" 'company-dabbrev-code ensime-mode-map)
   (bind-key "." 'ensime-completing-dot ensime-mode-map)
@@ -133,40 +143,18 @@
            )))
 
   ;; eldoc
-  (add-hook 'ensime-mode-hook 'ensime-enable-eldoc)
-  (defun ensime-enable-eldoc ()
-    "Show error message or type name at point by Eldoc."
-    (setq-local eldoc-documentation-function
-                #'(lambda ()
-                    (when (ensime-connected-p)
-                      (let ((msgs (append (ensime-errors-at (point))
-                                          (ensime-implicit-notes-at (point)))))
-                        (if msgs
-                            (let ((msg (mapconcat 'identity msgs "\n")))
-                              (message "%s" msg))
-                          (ensime-print-type-at-point)))
-                      )))
-    (eldoc-mode +1))
+  (setq ensime-eldoc-hints 'error
+        ensime-search-interface 'helm)
 
   (require 'ensime-expand-region)
   (add-hook 'git-timemachine-mode-hook (lambda () (ensime-mode 0)))
 
   (bind-key "s-n" 'ensime-search ensime-mode-map)
-  (bind-key "s-t" 'ensime-print-type-at-point ensime-mode-map)
-
-  (defun ensime-edit-definition-with-fallback (arg)
-    "Variant of `ensime-edit-definition' with ctags if ENSIME is not available."
-    (interactive "P")
-    (unless (and (ensime-connection-or-nil)
-                 (ensime-edit-definition arg))
-      (projectile-find-tag)))
-  (bind-key "M-." 'ensime-edit-definition-with-fallback ensime-mode-map))
+  (bind-key "s-t" 'ensime-print-type-at-point ensime-mode-map))
 
 ;; java-mode is inside cc-mode, must use cc-mode
 (use-package cc-mode :ensure nil
   :mode ("\\.java\\'" . java-mode)
-  :init
-  (add-hook 'java-mode-hook (lambda () (ensime-mode +1)))
   :config
   (when (require 'cc-mode nil t)
     (defun c-mode-newline-comments ()
@@ -180,7 +168,8 @@
                      (concat
                       "\\s-+class\\s-+" ; definition
                       "\\([-A-Za-z0-9_:+*]+\\)" ; class name
-                      ) 1))
+                      )
+                     1))
 
   (bind-key "C-c c" 'sbt-command java-mode-map)
   (bind-key "C-c e" 'next-error java-mode-map))

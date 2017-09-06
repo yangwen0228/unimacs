@@ -94,7 +94,7 @@
         ;; init-lua-mode
         ;; init-erlang
 
-        ;; init-cc-mode
+        init-cc-mode
         ;; init-irony
         ;; init-irony-eldoc
         ;; init-cpputils-cmake

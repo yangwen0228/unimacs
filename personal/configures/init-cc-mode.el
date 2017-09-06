@@ -54,12 +54,13 @@
                          defun-close-semi
                          list-close-comma
                          scope-operator))
-      (c-offsets-alist . ((arglist-intro google-c-lineup-expression-plus-4)
+      (c-offsets-alist . ((arglist-intro ++)
+                          (arglist-close . c-lineup-arglist)
+                          (brace-list-intro . +)
                           (func-decl-cont . ++)
                           (member-init-intro . ++)
                           (inher-intro . ++)
                           (comment-intro . 0)
-                          (arglist-close . c-lineup-arglist)
                           (topmost-intro . 0)
                           (block-open . 0)
                           (inline-open . 0)
@@ -86,70 +87,15 @@
     (setq c-tab-always-indent t)
     (c-add-style "my-c-style" my-c-style t))
 
-  ;; C/C++ SECTION
-  (defun my-c-mode-hook ()
-    ;; @see http://stackoverflow.com/questions/3509919/ \
-    ;; emacs-c-opening-corresponding-header-file
-    (setq c-basic-offset 4)
-    (setq c-style-variables-are-local-p nil)
-    ;; give me NO newline automatically after electric expressions are entered
-    (setq c-auto-newline nil)
-
-
-    ;;if (0)          becomes        if (0)
-    ;;    {                          {
-    ;;       ;                           ;
-    ;;    }                          }
-    (c-set-offset 'substatement-open 0)
-
-    ;; first arg of arglist to functions: tabbed in once
-    ;; (default was c-lineup-arglist-intro-after-paren)
-    (c-set-offset 'arglist-intro '+)
-
-    ;; second line of arglist to functions: tabbed in once
-    ;; (default was c-lineup-arglist)
-    (c-set-offset 'arglist-cont-nonempty '+)
-
-    ;; switch/case:  make each case line indent from switch
-    (c-set-offset 'case-label '+)
-
-    ;; make the ENTER key indent next line properly
-    (local-set-key "\C-m" 'newline-and-indent)
-
-    ;; make DEL take all previous whitespace with it
-    (c-toggle-hungry-state 1)
-
-    ;; make open-braces after a case: statement indent to 0 (default was '+)
-    (c-set-offset 'statement-case-open 0)
-
-    ;; make a #define be left-aligned
-    (setq c-electric-pound-behavior (quote (alignleft)))
-
-    ;; wxwdigets stuff
-    (c-set-offset 'topmost-intro-cont 'c-wx-lineup-topmost-intro-cont)
-
-    ;; do not impose restriction that all lines not top-level be indented at least
-    ;; 1 (was imposed by gnu style by default)
-    (setq c-label-minimum-indentation 0)
-
-    (my-set-c-style)
-    (c-set-style "my-c-style")
-
-    (require 'fic-mode)
-    (add-hook 'c++-mode-hook 'turn-on-fic-mode)
-
-    ;; (cppcm-reload-all)
-    )
   :config
   ;; donot use c-mode-common-hook or cc-mode-hook because many major-modes use this hook
   (add-hook 'c-mode-common-hook
             (lambda ()
               (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-                (modify-syntax-entry ?_ "w"))
-              (when (derived-mode-p 'c-mode 'c++-mode)
-                (my-c-mode-hook))))
+                (modify-syntax-entry ?_ "w")
+                (my-set-c-style))))
 
-  (require 'google-c-style)
+  ;; (use-package google-c-style)
   ;; (add-hook 'c-mode-common-hook 'google-set-c-style)
   ;; (add-hook 'c-mode-common-hook 'google-make-newline-indent)
   )
