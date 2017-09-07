@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: all getter setter
+# --
+$0`(progn
+  (re-search-backward "\\<class \\(\\sw+\\)" nil t)
+  (string-join
+    (cl-loop
+    while
+     (re-search-forward (concat "^\\s-*private\\s-+.*?\\([^ \t]+\\)\\s-+\\(\\w+\\)\\s-*;") nil t)
+    collect
+     (let* ((type (match-string-no-properties 1))
+            (name (match-string-no-properties 2))
+            (upper-name (s-upper-camel-case name))
+            (lower-name (s-lower-camel-case name)))
+          (concat
+          "public " type " get" upper-name "() {\n"
+          "return " name ";\n"
+          "}\n"
+          "public void set" upper-name "(" type " " lower-name ") {\n"
+          "this." name " = " lower-name ";\n"
+          "}"
+          )))
+          "\n"))`
