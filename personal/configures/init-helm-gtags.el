@@ -17,6 +17,22 @@
          ("C-c g d" . helm-gtags-delete-tags)
          ("C-c g u" . helm-gtags-update-entire-tags))
   :preface
+  (defun helm-gtags-create-tags-of-projectile (dir label)
+    "Create tags for files defined by projectile."
+    (interactive
+     (list (read-directory-name "Root Directory: ")
+           (helm-gtags--read-gtagslabel)))
+    (let ((default-directory dir)
+          (proc-buf (get-buffer-create " *helm-gtags-create*")))
+      (projectile-invalidate-cache nil)
+      (with-temp-file (expand-file-name "gtags.files" dir)
+        (mapcar
+         (lambda (file) (insert (concat file "\n")))
+         (projectile-dir-files dir)))
+      (let ((proc (start-file-process "helm-gtags-create" proc-buf
+                                      "gtags" "-q" (helm-gtags--label-option label))))
+        (set-process-sentinel proc (helm-gtags--make-gtags-sentinel 'create)))))
+
   (defun helm-gtags-update-entire-tags ()
     "Update entire project tags."
     (interactive)

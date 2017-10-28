@@ -11,26 +11,46 @@
   :preface
   (defun helm-projectile-create-project (dir)
     (interactive "D")
-    (let ((file (expand-file-name ".projectile" dir)))
-      (with-temp-file file
-        (erase-buffer)
-        (insert ";; projectile configure file
-;; - means ignore this pattern, must has a leading \"/\", using the regexp rule.
-;; + means add this subdir, it will block the root dir.
--/GTAGS$
--/GPATH$
--/GRTAGS$
--/.*.svn
--/.*.git
--/icons
--/.*images/
--/.*imgs/
--/.*image/
--/libs/encoding
--/.*.dll$
-")))
     ;; Add to the know projects.
-    (projectile-add-known-project dir))
+    (projectile-add-known-project dir)
+    (with-temp-file (expand-file-name ".projectile" dir)
+      (insert ";; projectile configure file\n")
+      (insert ";; - means ignore this pattern, must has a leading \\\"/\\\", using the regexp rule.\n")
+      (insert ";; + means add this subdir, it will block the root dir.\n")
+      (insert "-/GTAGS$\n")
+      (insert "-/GPATH$\n")
+      (insert "-/GRTAGS$\n")
+      (insert "-/.*.svn\n")
+      (insert "-/.*.git\n")
+      (insert "-/.*.idea\n")
+      (insert "-/.*.settings\n")
+      (insert "-/.*.ensime-cache\n")
+      (insert "-/icons\n")
+      (insert "-/.*images/\n")
+      (insert "-/.*imgs/\n")
+      (insert "-/.*image/\n")
+      (insert "-/build/\n")
+      (insert "-/target/\n")
+      (insert "-/out/\n")
+      (insert "-/logs/\n")
+      (insert "-/libs/encoding\n")
+      (insert "-/.*.dll$\n"))
+    (with-temp-file (expand-file-name ".gitignore" dir)
+      (insert "/GTAGS\n")
+      (insert "/GPATH\n")
+      (insert "/GRTAGS\n")
+      (insert ".gradle/\n")
+      (insert ".svn/\n")
+      (insert ".git/\n")
+      (insert ".idea/\n")
+      (insert ".settings/\n")
+      (insert "bin/\n")
+      (insert "gen/\n")
+      (insert "out/\n")
+      (insert "build/\n")
+      (insert "*.log\n")
+      (insert "*.iml\n")
+      ))
   :config
   (helm-projectile-on)
   (projectile-mode t))
