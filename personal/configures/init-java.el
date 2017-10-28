@@ -73,6 +73,7 @@
                                 (bind-key "M-t" 'ensime-edit-definition-with-fallback ensime-mode-map)
                                 ))
   :config
+  (require 'ensime-generate)
   (defun ensime-edit-definition-with-fallback (arg)
     "Variant of `ensime-edit-definition' with gtags if ENSIME is not available."
     (interactive "P")
