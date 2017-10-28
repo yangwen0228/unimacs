@@ -6,7 +6,7 @@
 (use-package ztree
   :commands (ztree-diff ztree-dir))
 
-(use-package neotree
+(use-package neotree :disabled
   ;; TODO:
   ;; use the auto update projectile dir from projectile-speedbar
   ;; use search recursive from project-explorer
