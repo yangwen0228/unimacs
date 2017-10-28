@@ -10,6 +10,8 @@
   (global-set-key (kbd "M-,") 'jump-tree-jump-prev)
   (global-set-key (kbd "M-.") 'jump-tree-jump-next)
   (global-set-key (kbd "C-x j") 'jump-tree-visualize)
+  (global-set-key (kbd "C-M-,") 'previous-buffer)
+  (global-set-key (kbd "C-M-.") 'next-buffer)
 
   (setq jump-tree-pos-list-record-commands
         '(save-buffer
