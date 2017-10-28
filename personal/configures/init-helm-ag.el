@@ -27,7 +27,8 @@ If not in a project, then use file directory. Otherwise, with an optional arg `C
   :config
   (custom-set-variables
    '(helm-ag-base-command "ag --nocolor --nogroup --ignore-case")
-   '(helm-ag-command-option "--all-text")
+   ;; '(helm-ag-command-option "--all-text")
+   '(helm-ag-command-option "")
    '(helm-ag-insert-at-point 'symbol))
 
   (defun helm-ag--marked-input (escape)
