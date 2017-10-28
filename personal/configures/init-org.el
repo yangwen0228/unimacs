@@ -601,6 +601,19 @@ background of code to whatever theme I'm using's background"
                               (find-file-noselect
                                (concat org-odt-zip-dir "content.xml") t)))))
              (with-current-buffer out-buf (erase-buffer) (insert output))))))))
+  (use-package org-bullets
+    :init
+    (setq org-bullets-bullet-list
+          '(;;; Large
+            "✸"
+            "◉"
+            "○"
+            "▶"
+            "✿"
+            ;; ♥ ● ◇ ✚ ✜ ☯ ◆ ♠ ♣ ♦ ☢ ❀ ◆ ◖ ▶
+    ;;; Small
+            ;; ► • ★ ▸
+            )))
   )
 
 (provide 'init-org)
