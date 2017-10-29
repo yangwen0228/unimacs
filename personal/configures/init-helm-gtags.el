@@ -13,7 +13,7 @@
          ("M-r"     . helm-gtags-find-rtag-adapter)
          ("C-c M-g" . helm-gtags-find-pattern)
          :map helm-gtags-mode-map
-         ("C-c g c" . helm-gtags-create-tags)
+         ("C-c g c" . helm-gtags-create-tags-of-projectile)
          ("C-c g d" . helm-gtags-delete-tags)
          ("C-c g u" . helm-gtags-update-entire-tags))
   :preface
