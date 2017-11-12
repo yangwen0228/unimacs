@@ -175,6 +175,14 @@
   (bind-key "C-c c" 'sbt-command java-mode-map)
   (bind-key "C-c e" 'next-error java-mode-map))
 
+(use-package jdecomp
+  :commands jdecomp-mode
+  :config
+  (customize-set-variable 'jdecomp-decompiler-type 'cfr)
+  (customize-set-variable 'jdecomp-decompiler-paths
+                          '((cfr . "~/Downloads/cfr_0_123.jar")
+                            (fernflower . "/Applications/IntelliJ IDEA.app/Contents/plugins/java-decompiler/lib/java-decompiler.jar"))))
+
 (use-package scala-mode
   :mode ("\\.scala\\'" . scala-mode)
   :init
