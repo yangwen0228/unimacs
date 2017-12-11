@@ -27,6 +27,9 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
+(use-package use-package-chords
+  :config (key-chord-mode 1))
+
 (use-package anzu
   :diminish anzu-mode
   :defer 0

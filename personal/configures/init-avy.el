@@ -4,9 +4,8 @@
 
 ;;; Code:
 (use-package ace-pinyin
-  :bind (("M-g j"   . ace-pinyin-jump-char)
-         ("M-g M-g" . ace-pinyin-jump-char-2)
-         ("M-g s"   . avy-goto-word-or-subword-1))
+  :chords (("jj" . ace-pinyin-jump-char)
+           ("jk" . ace-pinyin-jump-char-2))
   :config
   (use-package avy)
   (setq ace-pinyin-use-avy t)
