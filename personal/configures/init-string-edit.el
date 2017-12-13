@@ -6,6 +6,10 @@
 (use-package string-edit
   :bind ("C-c C-e" . string-edit-at-point)
   :config
+  (defun se/find-original ()
+    (if (derived-mode-p 'js2-mode 'js-mode 'java-mode)
+        (se/js-strings-at-point)
+      (se/string-at-point)))
   ;; override
   ;; make it can choose major-mode for string
   (defun string-edit-at-point ()
@@ -16,7 +20,7 @@ This saves you from needing to manually escape characters."
                                 (mapcar '(lambda (mode) (concat mode "-mode"))
                                         (scratch-list-modes))
                                 :exec-when-only-one t
-                                :default "fundamental-mode")))
+                                :default (symbol-name major-mode))))
       (when (se/point-inside-string-p)
         (let* ((p (point))
                (original-buffer (current-buffer))
