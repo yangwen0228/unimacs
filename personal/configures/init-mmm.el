@@ -9,8 +9,7 @@
   :config
   (defun mmm-indent-line-web-sql-submode ()
     (web-mode-propertize)
-    (let (cur-type
-          prev-type)
+    (let (cur-type prev-type)
       (save-excursion
         (back-to-indentation)
         (setq cur-type (get-text-property (point) 'tag-type)))
@@ -18,12 +17,12 @@
         (previous-line)
         (back-to-indentation)
         (setq prev-type (get-text-property (point) 'tag-type)))
-      (if (eq cur-type 'end)
-          (web-mode-indent-line)
-        (if (member prev-type '(start comment))
-            (web-mode-indent-line)
-          (sql-indent-line)))
-      ))
+      (if (or
+           (not prev-type cur-type)                   ; both lines sql
+           (and (not prev-type) (eq cur-type 'start)) ; sql -> xml
+           )
+          (sql-indent-line)
+        (web-mode-indent-line))))
 
   (defun mmm-indent-line-web-sql ()
     (interactive)
