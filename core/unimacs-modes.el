@@ -138,7 +138,11 @@
 (use-package font-lock+
   :init
   ;; turn on syntax highlighting for all buffers
-  (global-font-lock-mode t))
+  (global-font-lock-mode 1))
+
+(use-package hl-line :ensure nil
+  :init
+  (global-hl-line-mode 1))
 
 (use-package help+)
 (use-package help-fns+)
