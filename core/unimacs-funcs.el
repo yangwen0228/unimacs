@@ -580,5 +580,28 @@ The numth of occurences is determined by ARG."
                    (not (= file1-size file2-size)))
           (copy-file file2 file1 t))))))
 
+(defun unimacs-camelcase-to-underscore (keyword)
+  "Convert KEYWORD from camel case to underscore style.
+
+like: userName -> user_name."
+  (let (case-fold-search)
+    (downcase
+     (replace-regexp-in-string "\\([a-z]\\)\\([A-Z]\\)" "\\1\_\\2" keyword))))
+
+(defun unimacs-underscore-to-camelcase (keyword &optional upper)
+  "Convert KEYWORD from underscore to camelcase style.
+
+like: user_name -> userName.
+Optional UPPER: user_name -> UserName."
+  (let (result)
+    (setq result (mapconcat
+                  (lambda (s) (capitalize s))
+                  (split-string keyword "_")
+                  ""))
+    (let ((first-char (substring result 0 1)))
+      (concat
+       (if upper (upcase first-char) (downcase first-char))
+       (substring result 1)))))
+
 (provide 'unimacs-funcs)
 ;;; unimacs-funcs.el ends here
