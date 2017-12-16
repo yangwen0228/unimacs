@@ -4,7 +4,7 @@
 
 ;;; Code:
 (use-package pomodoro
-  :init
+  :config
   (setq pomodoro-play-sounds nil)
   (pomodoro-add-to-mode-line))
 
