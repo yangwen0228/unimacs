@@ -18,7 +18,7 @@
         (back-to-indentation)
         (setq prev-type (get-text-property (point) 'tag-type)))
       (if (or
-           (not prev-type cur-type)                   ; both lines sql
+           (not (or prev-type cur-type))                   ; both lines sql
            (and (not prev-type) (eq cur-type 'start)) ; sql -> xml
            )
           (sql-indent-line)
