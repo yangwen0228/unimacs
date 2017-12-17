@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name : <if> in <trim> like: user_id,
+# key: if
+# --
+<if test="${1:var} != null and $1.trim() != ''">
+${1:$(unimacs-camelcase-to-underscore yas-text)}
+</if>

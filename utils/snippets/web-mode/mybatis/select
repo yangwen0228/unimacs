@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name : <select>
+# key: select
+# --
+<select id="${1:query}" parameterType="${2:int}" ${3:$$(yas-choose-value '(\"resultType\" \"resultMap\"))}="${4:User}">
+select $0
+</select>

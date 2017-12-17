@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name : <update>
+# key: update
+# --
+<update id="${1:update}" parameterType="${2:User}">
+update $0
+<set>
+</set>
+where id = #{id}
+</update>

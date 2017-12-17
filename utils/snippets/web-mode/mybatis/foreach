@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name : <foreach>
+# key: fore
+# --
+<foreach item="${1:item}" collection="${2:array}" open="(" separator="," close=")">
+#{item}
+</foreach>

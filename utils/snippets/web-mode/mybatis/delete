@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name : <delete>
+# key: delete
+# --
+<delete id="${1:delete}" parameterType="${2:int[]}">
+delete from $0
+where id in
+</delete>

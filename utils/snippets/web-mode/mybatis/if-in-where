@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name : <if> in <where> test not empty
+# key: if
+# --
+<if test="${1:var} != null and $1.trim() != ''">
+and ${1:$(unimacs-camelcase-to-underscore yas-text)} = #{$1}
+</if>

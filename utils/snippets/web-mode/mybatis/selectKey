@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name : selectKey
+# key: selectKey
+# --
+<selectKey keyProperty="${1:id}" resultType="Integer" order="BEFORE">
+select ${2:seq}.nextval from dual
+</selectKey>

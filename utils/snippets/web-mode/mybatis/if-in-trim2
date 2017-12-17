@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name : <if> in <trim> like: #{userId},
+# key: if
+# --
+<if test="${1:var} != null and $1.trim() != ''">
+#{$1},
+</if>

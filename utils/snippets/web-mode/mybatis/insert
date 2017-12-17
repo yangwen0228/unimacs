@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name : <insert>
+# key: insert
+# --
+<insert id="${1:insert}" parameterType="${2:User}">
+<selectKey keyProperty="${3:id}" resultType="${4:int}" order="BEFORE">
+select ${5:seq}.nextval from dual
+</selectKey>
+insert into $0
+</insert>

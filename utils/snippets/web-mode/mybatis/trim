@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name : <trim> to (a,b,c)
+# key: trim
+# --
+<trim prefix="(" suffix=")" suffixOverrides=",">
+</trim>
