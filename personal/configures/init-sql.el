@@ -8,6 +8,18 @@
   :commands (sql-mode sql-mysql)
   :init (add-hook 'sql-mode-hook 'sqlup-mode)
   :config
+  (setq sql-indent-first-column-regexp
+        (concat
+         "\\(^\\s-*"
+         (regexp-opt
+          '(
+            "select" "update" "insert" "delete"
+            "union" "intersect"
+            "from" "where" "into" "group" "having" "order"
+            "set"
+            "create" "drop" "truncate"
+            "--") t) "\\($\\|\\s-\\)\\)\\|\\(^```$\\)"))
+
   (defun company-sql (command &optional arg &rest ignored)
     "A `company-mode' completion back-end for interactive sql."
     (interactive (list 'interactive))
