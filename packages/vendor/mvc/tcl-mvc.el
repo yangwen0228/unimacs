@@ -1,22 +1,22 @@
-;;; mvc.el --- Summary
+;;; tcl-mvc.el --- Summary
 ;;; Commentary:
 ;; comments
 
 ;;; Code:
 (require 'projectile)
 (require 'f)
-(defconst mvc-version "1.0")
+(defconst tcl-mvc-version "1.0")
 
-(defgroup mvc nil
-  "Create mvc files for tcl-mode."
+(defgroup tcl-mvc nil
+  "Create tcl-mvc files for tcl-mode."
   :group 'convenience)
 
-(defcustom mvc-test t
+(defcustom tcl-mvc-test t
   "Create test files."
   :type 'boolean
-  :group 'mvc)
+  :group 'tcl-mvc)
 
-(defun mvc-create-module-oo (dir name)
+(defun tcl-mvc-create-module-oo (dir name)
   (interactive
    (list
     (file-name-as-directory
@@ -107,7 +107,7 @@
        'utf-8 locale)
       (find-file view))))
 
-(defun mvc-create-module-proc (dir name)
+(defun tcl-mvc-create-module-proc (dir name)
   (interactive
    (list
     (file-name-as-directory
@@ -194,5 +194,5 @@
        'utf-8 locale)
       (find-file view))))
 
-(provide 'mvc)
-;;; mvc.el ends here
+(provide 'tcl-mvc)
+;;; tcl-mvc.el ends here
