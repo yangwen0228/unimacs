@@ -127,9 +127,10 @@
   :diminish (eldoc-mode))
 
 (use-package expand-region
+  :commands (er/expand-region er/mark-symbol)
   :bind ("C-=" . er/expand-region))
 
-(use-package fancy-narrow
+(use-package fancy-narrow :disabled
   :bind (("C-x n n" . fancy-narrow-to-region)
          ("C-x n w" . fancy-widen)
          ("C-x n d" . fancy-narrow-to-defun)
@@ -258,7 +259,7 @@
   :config
   (unless (file-exists-p server-auth-dir)
     (make-directory server-auth-dir))
-  (unless (file-exists-p server-socket-dir)
+  (unless (or (not server-socket-dir) (file-exists-p server-socket-dir))
     (make-directory server-socket-dir))
   (defun server-ensure-safe-dir (dir) "Noop" t)
   (server-start))

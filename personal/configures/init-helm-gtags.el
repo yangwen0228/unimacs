@@ -120,7 +120,7 @@
     (cond
      ((equal major-mode 'tcl-mode)
       (helm-gtags-find-rtag-for-tcl tag))
-     (t (helm-gtags-find-tag tag))))
+     (t (helm-gtags-find-rtag tag))))
 
   (defun helm-gtags-find-rtag-for-tcl (tag)
     "TODO: Workaround for ctags rtags: Use TAG to find all matches, then filter procs."

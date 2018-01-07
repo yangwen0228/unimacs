@@ -88,6 +88,9 @@
 (bind-key "C-M-v"           '(lambda () (interactive) (scroll-other-window 1)))
 (bind-key "C-M-S-v"         '(lambda () (interactive) (scroll-other-window-down 1)))
 
+(bind-key "C-M-w"           '(lambda () (interactive) (save-excursion (er/mark-symbol) (call-interactively 'copy-region-as-kill))))
+(bind-key "C-M-y"           '(lambda () (interactive) (er/mark-symbol) (call-interactively 'delete-region) (yank)))
+
 (bind-key "<wheel-down>"        'unimacs-scroll-up-line)
 (bind-key "<wheel-up>"          'unimacs-scroll-down-line)
 (bind-key "<double-wheel-down>" '(lambda () (interactive) (unimacs-scroll-up-line 2)))

@@ -6,12 +6,13 @@
 (use-package jump-tree
   :config
   (global-jump-tree-mode 1)
-  ;; The keybind C-, and C-. conflict with InputMethod.
-  (global-set-key (kbd "M-,") 'jump-tree-jump-prev)
-  (global-set-key (kbd "M-.") 'jump-tree-jump-next)
   (global-set-key (kbd "C-x j") 'jump-tree-visualize)
-  (global-set-key (kbd "C-M-,") 'previous-buffer)
-  (global-set-key (kbd "C-M-.") 'next-buffer)
+  ;; The keybind M-, and M-. conflict with other modes.
+  ;; Use <left> and <right>, same as intellij.
+  (global-set-key (kbd "C-M-<left>") 'jump-tree-jump-prev)
+  (global-set-key (kbd "C-M-<right>") 'jump-tree-jump-next)
+  (global-set-key (kbd "C-M-<up>") 'previous-buffer)
+  (global-set-key (kbd "C-M-<down>") 'next-buffer)
 
   (setq jump-tree-pos-list-record-commands
         '(save-buffer

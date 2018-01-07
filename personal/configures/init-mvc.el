@@ -3,7 +3,7 @@
 ;; comments
 
 ;;; Code:
-(require 'mvc)
+(require 'tcl-mvc)
 
 (provide 'init-mvc)
 ;;; init-mvc.el ends here
