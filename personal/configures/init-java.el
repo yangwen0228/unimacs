@@ -3,63 +3,73 @@
 ;; Java development.
 
 ;;; Code:
-(use-package eclim :disabled
-  :mode ("\\.java$" . eclim-mode)
-  :commands (start-eclimd)
+(use-package meghanada
+  :defer t
+  :init
+  (add-hook 'java-mode-hook
+            (lambda ()
+              (meghanada-mode t)
+              ;; (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)
+              ))
+
   :config
-  (require 'eclimd)
-  (setq eclimd-autostart t)
-  (global-eclim-mode)
-  ;; (custom-set-variables
-  ;;  '(eclim-eclipse-dirs '("C:/Program Files (x86)/eclipse"))
-  ;;  '(eclim-executable "\"C:/Program Files (x86)/eclipse/eclim.bat\"")
-  ;;  '(eclimd-executable "C:/Program Files (x86)/eclipse/eclimd.bat"))
-  (custom-set-variables
-   '(eclim-eclipse-dirs '("D:/portable/eclipse"))
-   '(eclim-executable "\"D:/portable/eclipse/eclim.bat\"")
-   '(eclimd-executable "D:/portable/eclipse/eclimd.bat"))
-  (setq eclimd-wait-for-process nil
-        eclimd-default-workspace "c:/Users/yangwen/workspace/"
-        help-at-pt-display-when-idle t
-        help-at-pt-timer-delay 0.1)
+  ;; (use-package realgud)
+  (setq indent-tabs-mode nil)
+  ;; (setq tab-width 4)
+  ;; (setq c-basic-offset 4)
+  (setq meghanada-debug t)
+  (setq meghanada-server-remote-debug t)
+  (setq meghanada-javac-xlint "-Xlint:all,-processing")
+  :bind
+  (:map meghanada-mode-map
+        ("C-S-t" . meghanada-switch-testcase)
+        ("M-RET" . meghanada-local-variable)
+        ("C-M-." . helm-imenu)
+        ("M-r" . meghanada-reference)
+        ("M-t" . meghanada-typeinfo)
+        ("C-z" . hydra-meghanada/body))
+  :commands
+  (meghanada-mode))
 
-  (help-at-pt-set-timer)
+(defhydra hydra-meghanada (:hint nil :exit t)
+  "
+^Edit^                           ^Tast or Task^
+^^^^^^-------------------------------------------------------
+_f_: meghanada-compile-file      _m_: meghanada-restart
+_c_: meghanada-compile-project   _t_: meghanada-run-task
+_o_: meghanada-optimize-import   _j_: meghanada-run-junit-test-case
+_s_: meghanada-switch-test-case  _J_: meghanada-run-junit-class
+_v_: meghanada-local-variable    _R_: meghanada-run-junit-recent
+_i_: meghanada-import-all        _r_: meghanada-reference
+_g_: magit-status                _T_: meghanada-typeinfo
+_l_: helm-ls-git-ls
+_q_: exit
+"
+  ("f" meghanada-compile-file)
+  ("m" meghanada-restart)
 
-  (use-package company-emacs-eclim
-    :init
-    (company-emacs-eclim-setup)
-    (unimacs-company-define-backends
-     '((java-mode) . (company-emacs-eclim company-dabbrev-code)))
-    (add-to-list 'eclim--file-coding-system-mapping '("chinese-iso-8bit-dos" . "gb2312"))))
+  ("c" meghanada-compile-project)
+  ("o" meghanada-optimize-import)
+  ("s" meghanada-switch-test-case)
+  ("v" meghanada-local-variable)
+  ("i" meghanada-import-all)
 
-(use-package jdee :disabled
-  :mode ("\\.java\\'" . jdee-mode)
-  :commands jdee-mode
-  :config
-  (use-package jdee-gradle :ensure nil)
+  ("g" magit-status)
+  ("l" helm-ls-git-ls)
 
-  ;; company
-  (unimacs-company-define-backends
-   '((jdee-mode) . ((company-dabbrev-code :with company-dabbrev company-yasnippet) company-files)))
+  ("t" meghanada-run-task)
+  ("T" meghanada-typeinfo)
+  ("j" meghanada-run-junit-test-case)
+  ("J" meghanada-run-junit-class)
+  ("R" meghanada-run-junit-recent)
+  ("r" meghanada-reference)
 
-  (defun jdee-completing-dot ()
-    "Insert a period and show jdee completions."
-    (interactive "*")
-    (unless (= (char-before) ?.)
-      (when (s-matches? (rx (+ (not space)))
-                        (buffer-substring (line-beginning-position) (point)))
-        (delete-horizontal-space t))
-      (insert ".")
-      (cond (t (jdee-complete-minibuf)))))
-
-  (bind-key "C-<tab>" 'jdee-complete-minibuf jdee-mode-map)
-  ;; (bind-key "." 'jdee-completing-dot jdee-mode-map)
-  (setq jdee-server-dir (expand-file-name "jars" unimacs-utils-dir)
-        jdee-complete-function 'jdee-complete-minibuf))
+  ("q" exit)
+  ("z" nil "leave"))
 
 (use-package ensime
   :init
-  (add-hook 'java-mode-hook (lambda () (ensime-mode +1)))
+  ;; (add-hook 'java-mode-hook (lambda () (ensime-mode 1)))
   (put 'ensime-auto-generate-config 'safe-local-variable #'booleanp)
   (setq
    ensime-use-helm t

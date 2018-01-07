@@ -285,6 +285,11 @@
             (unless (yas-expand)
               (call-interactively 'company-yasnippet)))))))
 
+(use-package so-long :ensure nil
+  :init
+  (setq so-long-threshold 500)
+  (so-long-enable))
+
 (use-package subword
   :diminish subword-mode
   ;; M-f better jump between camel words. C-M-f whole word.
