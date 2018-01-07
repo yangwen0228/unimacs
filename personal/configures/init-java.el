@@ -4,30 +4,129 @@
 
 ;;; Code:
 (use-package meghanada
-  :defer t
   :init
   (add-hook 'java-mode-hook
             (lambda ()
               (meghanada-mode t)
+              (bind-key "C-<tab>" 'company-gtags java-mode-map)
+              (unimacs-company-define-backends
+               '((meghanada-mode) . ((company-meghanada :with company-gtags company-yasnippet company-files)
+                                  (company-dabbrev-code :with company-dabbrev company-yasnippet company-files)
+                                  )))
               ;; (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)
               ))
 
   :config
-  (use-package realgud)
+  (use-package realgud
+    ;; jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=5005
+    )
   (setq indent-tabs-mode nil)
+  (setq meghanada-version "0.9.0")
+  (setq meghanada-server-remote-debug t)
+  (setq meghanada-debug t)
+  (setq meghanada-javac-xlint "-Xlint:all,-processing")
+
+  (cond
+   ((eq system-type 'windows-nt)
+    (setq meghanada-java-path (expand-file-name "bin/java.exe" (getenv "JAVA_HOME")))
+    (setq meghanada-maven-path "mvn.cmd"))
+   (t
+    (setq meghanada-java-path "java")
+    (setq meghanada-maven-path "mvn")))
+
+  (defun meghanada-idea-debug ()
+    (setq meghanada--client-process (meghanada--start-client-process))
+    (setq meghanada--server-process meghanada--client-process))
+  ;; (meghanada-idea-debug)
+
+  (defun meghanada--start-server-process ()
+    "TODO: FIX DOC ."
+    (let ((jar (meghanada--locate-server-jar)))
+      (if (file-exists-p jar)
+          (let ((process-connection-type nil)
+                (process-adaptive-read-buffering nil)
+                (cmd (format "%s %s %s -Dfile.encoding=UTF-8 -jar %s -p %d %s"
+                             (shell-quote-argument meghanada-java-path)
+                             (meghanada--server-options)
+                             meghanada-server-jvm-option
+                             (shell-quote-argument jar)
+                             meghanada-port
+                             (if meghanada-debug "-v" "")))
+                process)
+            (message (format "launch server cmd:%s" cmd))
+            (setq process
+                  (start-process-shell-command
+                   "meghanada-server"
+                   meghanada--server-buffer
+                   cmd))
+            (buffer-disable-undo meghanada--server-buffer)
+            (set-process-query-on-exit-flag process nil)
+            (set-process-sentinel process 'meghanada--server-process-sentinel)
+            (set-process-filter process 'meghanada--server-process-filter)
+            (message "Meghanada-Server Starting ...")
+            process)
+        (message "%s"
+                 (substitute-command-keys
+                  "Missing server module. Type `\\[meghanada-install-server]' to install meghanada-server")))))
+
+  (defun meghanada--process-client-response (process response)
+    "TODO: FIX DOC PROCESS RESPONSE ."
+    (let* ((output (read (meghanada-normalize-repsonse-file-path (meghanada--remove-eot response))))
+           (callback (meghanada--process-pop-callback process))
+           (status (car output))
+           (res (car (cdr output))))
+      (pcase status
+        (`success
+         (when callback
+           (with-demoted-errors "Warning: %S"
+             (apply (car callback) res (cdr callback)))))
+        (`error
+         (ignore-errors
+           (progn
+             (message (format "Error:%s . Please check *meghanada-server-log*" res))
+             (apply (car callback) nil (cdr callback))))))))
+
+  (defun meghanada--send-request (request callback &rest args)
+    "TODO: FIX DOC REQUEST CALLBACK ARGS."
+    (let* ((process (meghanada--get-client-process-create))
+           (argv (cons request args))
+           (callback (if (listp callback) callback (list callback)))
+           (send-str (meghanada-normalize-request-file-path (format "%s" argv))))
+      (when (and process (process-live-p process))
+        (meghanada--process-push-callback process callback)
+        (meghanada--without-narrowing
+          (process-send-string process
+                               (format "%s\n" send-str))))))
+
+  (defun meghanada-normalize-repsonse-file-path (response)
+    (let (diver-char downcase-char)
+      (setq response (replace-regexp-in-string "\\\\" "/" response))
+      (when (string-match "\\([A-Z]\\):/" response)
+        (setq diver-char (match-string 1 response))
+        (setq downcase-char (downcase diver-char))
+        (setq response (replace-regexp-in-string (concat diver-char ":/") (concat downcase-char ":/") response)))
+      response))
+
+  (defun meghanada-normalize-request-file-path (request)
+    (let (diver-char upcase-char)
+      (when (string-match "\\([a-z]\\):/" request)
+        (setq diver-char (match-string 1 request))
+        (setq upcase-char (upcase diver-char))
+        (setq request (replace-regexp-in-string (concat diver-char ":/") (concat upcase-char ":/") request)))
+      (setq request (replace-regexp-in-string "/" "\\\\" request))
+      request))
+
   ;; (setq tab-width 4)
   ;; (setq c-basic-offset 4)
-  (setq meghanada-debug t)
-  (setq meghanada-server-remote-debug t)
-  (setq meghanada-javac-xlint "-Xlint:all,-processing")
   :bind
   (:map meghanada-mode-map
         ("C-S-t" . meghanada-switch-testcase)
         ("M-RET" . meghanada-local-variable)
-        ("C-M-." . helm-imenu)
-        ("M-r" . meghanada-reference)
-        ("M-t" . meghanada-typeinfo)
-        ("C-z" . hydra-meghanada/body))
+        ;; ("C-M-." . helm-imenu)
+        ;; ("M-r" . meghanada-reference)
+        ;; ("M-t" . meghanada-typeinfo)
+        ;; ("C-z" . hydra-meghanada/body)
+        )
   :commands
   (meghanada-mode))
 
