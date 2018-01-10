@@ -76,7 +76,7 @@
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
 
 (use-package dizzee
-  :init
+  :config
   (dz-defservice gifcap "licecap.exe")
   (dz-defservice keycastow "keycastow.exe")
   (dz-defservice-group unimacs-gifcap-keycastow
@@ -87,7 +87,6 @@
     ;; keycastow position is in utils/extra-bins/gifcap/keycastow.ini
     (set-frame-position nil 300 100)
     (set-frame-size     nil 622 500 t))
-  :config
   (defun dz-comint-pop (name command &optional args dont-pop)
     "Make a comint buffer for process `name', executing `command' with
 `args' and then pop to that buffer."
@@ -289,6 +288,7 @@
 (use-package so-long :ensure nil
   :init
   (setq so-long-threshold 500)
+  :config
   (so-long-enable))
 
 (use-package subword

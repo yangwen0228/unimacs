@@ -4,13 +4,13 @@
 
 ;;; Code:
 (use-package helm-projectile
-  :bind (("C-c p C" . helm-projectile-create-project)
-         ("C-c p f" . helm-projectile-find-file)
-         ("C-c p b" . helm-projectile-switch-to-buffer)
-         ("C-c p p" . helm-projectile-switch-project))
+  :bind* (("C-c p C" . helm-projectile-create-project)
+          ("C-c p f" . helm-projectile-find-file)
+          ("C-c p b" . helm-projectile-switch-to-buffer)
+          ("C-c p p" . helm-projectile-switch-project))
   :preface
   (defun helm-projectile-create-project (dir)
-    (interactive "D")
+    (interactive "Dproject root:")
     ;; Add to the know projects.
     (projectile-add-known-project dir)
     (with-temp-file (expand-file-name ".projectile" dir)
