@@ -97,7 +97,7 @@
 (unless (file-exists-p unimacs-personal-postload-dir)
   (make-directory unimacs-personal-postload-dir t))
 
-(defun unimacs-add-subfolders-to-load-path (parent-dir)
+(defun unimacs-add-subfolders-to-load-path (parent-dir &optional recursive)
  "Add all level PARENT-DIR subdirs to the `load-path'."
  (dolist (f (directory-files parent-dir))
    (let ((name (expand-file-name f parent-dir)))
@@ -105,9 +105,8 @@
                 (not (equal f ".."))
                 (not (equal f ".")))
        (add-to-list 'load-path name)
-       (unimacs-add-subfolders-to-load-path name)))))
+       (when recursive (unimacs-add-subfolders-to-load-path name))))))
 
-(require 'info nil t)              ; must require before realgud.
 ;; add Unimacs's directories to Emacs's `load-path'
 (add-to-list 'load-path unimacs-core-dir)
 (add-to-list 'load-path unimacs-configures-dir)
