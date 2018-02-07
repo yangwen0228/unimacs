@@ -4,15 +4,22 @@
 
 ;;; Code:
 (use-package meghanada
+  :bind
+  (:map meghanada-mode-map
+        ("C-S-t" . meghanada-switch-testcase)
+        ("M-RET" . meghanada-local-variable)
+        ;; ("C-M-." . helm-imenu)
+        ;; ("M-r" . meghanada-reference)
+        ;; ("M-t" . meghanada-typeinfo)
+        ;; ("C-z" . hydra-meghanada/body)
+        )
+  :commands
+  (meghanada-mode)
   :init
   (add-hook 'java-mode-hook
             (lambda ()
               (meghanada-mode t)
-              (bind-key "C-<tab>" 'company-gtags java-mode-map)
-              (unimacs-company-define-backends
-               '((meghanada-mode) . ((company-meghanada :with company-gtags company-yasnippet company-files)
-                                  (company-dabbrev-code :with company-dabbrev company-yasnippet company-files)
-                                  )))
+              (flycheck-mode +1)
               ;; (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)
               ))
 
@@ -20,10 +27,12 @@
   (use-package realgud
     ;; jdb -connect com.sun.jdi.SocketAttach:hostname=localhost,port=5005
     )
+  (setq tab-width 4)
+  (setq c-basic-offset 4)
   (setq indent-tabs-mode nil)
   (setq meghanada-version "0.9.0")
   (setq meghanada-server-remote-debug t)
-  (setq meghanada-debug t)
+  (setq meghanada-debug nil)
   (setq meghanada-javac-xlint "-Xlint:all,-processing")
 
   (cond
@@ -35,10 +44,13 @@
     (setq meghanada-maven-path "mvn")))
 
   (defun meghanada-idea-debug ()
+    (interactive)
     (setq meghanada--client-process (meghanada--start-client-process))
     (setq meghanada--server-process meghanada--client-process))
   ;; (meghanada-idea-debug)
+  (setq flycheck-meghanada--java-encoding 'gbk)
 
+  ;; overridden
   (defun meghanada--start-server-process ()
     "TODO: FIX DOC ."
     (let ((jar (meghanada--locate-server-jar)))
@@ -71,7 +83,7 @@
 
   (defun meghanada--process-client-response (process response)
     "TODO: FIX DOC PROCESS RESPONSE ."
-    (let* ((output (read (meghanada-normalize-repsonse-file-path (meghanada--remove-eot response))))
+    (let* ((output (read (meghanada--normalize-repsonse-file-path (meghanada--remove-eot response))))
            (callback (meghanada--process-pop-callback process))
            (status (car output))
            (res (car (cdr output))))
@@ -91,14 +103,45 @@
     (let* ((process (meghanada--get-client-process-create))
            (argv (cons request args))
            (callback (if (listp callback) callback (list callback)))
-           (send-str (meghanada-normalize-request-file-path (format "%s" argv))))
+           (send-str (meghanada--normalize-request-file-path (format "%s" argv))))
       (when (and process (process-live-p process))
         (meghanada--process-push-callback process callback)
         (meghanada--without-narrowing
           (process-send-string process
                                (format "%s\n" send-str))))))
 
-  (defun meghanada-normalize-repsonse-file-path (response)
+
+  (defun flycheck-meghanada--decode-diagnostics (diagnostics)
+    (let (result result-errors file errors err msg)
+      (setq result '())
+      (dolist (buffer-errors diagnostics)
+        (setq file (car buffer-errors))
+        (setq errors (car (cdr buffer-errors)))
+        (setq result-errors '())
+        (dolist (err errors)
+          (setq msg (decode-coding-string
+                     (encode-coding-string (car (last err)) flycheck-meghanada--java-encoding)
+                     'utf-8))
+          (add-to-list 'result-errors (append (subseq err 0 -1) (list msg)) t))
+        (add-to-list 'result (list file result-errors) t))
+      result))
+
+  (defun flycheck-meghanada--callback (result &rest args)
+    (let* ((callback (nth 0 args))
+           (checker (nth 1 args))
+           (buffer (nth 2 args))
+           (type (car result))
+           (diagnostics (car (cdr result))))
+      (pcase type
+        (`fatal  (funcall callback 'errored '("Meghanada diagnostics fatal error")))
+        (`success (funcall callback 'finished nil))
+        (`error (flycheck-meghanada--build-errors buffer (if (eq flycheck-meghanada--java-encoding 'utf-8) diagnostics (flycheck-meghanada--decode-diagnostics diagnostics)) callback checker))
+        (_ (progn
+             (message "WARN not match type")
+             (funcall callback 'finished nil))))))
+
+  ;; new methods
+  (defun meghanada--normalize-repsonse-file-path (response)
     (let (diver-char downcase-char)
       (setq response (replace-regexp-in-string "\\\\" "/" response))
       (when (string-match "\\([A-Z]\\):/" response)
@@ -107,7 +150,7 @@
         (setq response (replace-regexp-in-string (concat diver-char ":/") (concat downcase-char ":/") response)))
       response))
 
-  (defun meghanada-normalize-request-file-path (request)
+  (defun meghanada--normalize-request-file-path (request)
     (let (diver-char upcase-char)
       (when (string-match "\\([a-z]\\):/" request)
         (setq diver-char (match-string 1 request))
@@ -116,19 +159,7 @@
       (setq request (replace-regexp-in-string "/" "\\\\" request))
       request))
 
-  ;; (setq tab-width 4)
-  ;; (setq c-basic-offset 4)
-  :bind
-  (:map meghanada-mode-map
-        ("C-S-t" . meghanada-switch-testcase)
-        ("M-RET" . meghanada-local-variable)
-        ;; ("C-M-." . helm-imenu)
-        ;; ("M-r" . meghanada-reference)
-        ;; ("M-t" . meghanada-typeinfo)
-        ;; ("C-z" . hydra-meghanada/body)
-        )
-  :commands
-  (meghanada-mode))
+  )
 
 (defhydra hydra-meghanada (:hint nil :exit t)
   "
