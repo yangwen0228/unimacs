@@ -38,8 +38,8 @@
   (setq tab-width 4)
   (setq c-basic-offset 4)
   (setq indent-tabs-mode nil)
-  (setq meghanada-version "0.9.0")
-  (setq meghanada-server-remote-debug t)
+  ;; (setq meghanada-version "0.9.0")
+  ;; (setq meghanada-server-remote-debug t)
   (setq meghanada-debug nil)
   (setq meghanada-javac-xlint "-Xlint:all,-processing")
 
