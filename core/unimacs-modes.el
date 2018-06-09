@@ -183,7 +183,7 @@
   :config
   (midnight-mode t)
   (midnight-delay-set 'midnight-delay "9:00") ; start time or seconds to 24:00
-  (setq clean-buffer-list-delay-general 3)    ; clean buffers exceeding 3 day.
+  (setq clean-buffer-list-delay-general 7)    ; clean buffers exceeding 7 day.
 
   (add-to-list 'clean-buffer-list-kill-buffer-names "*vc-dir*")
   (add-to-list 'clean-buffer-list-kill-regexps "\\*helm")
@@ -216,7 +216,7 @@
           (forward-line -1))
         (move-to-column column t))))))
 
-(use-package nlinum
+(use-package nlinum :disabled
   ;; When file is big, linum-mode is very slow.
   ;; So just display line number when goto line.
   :bind (("M-g g" . goto-line)

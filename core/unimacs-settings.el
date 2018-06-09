@@ -41,6 +41,7 @@
 
 ;; buffer local variables:
 (setq-default
+ display-line-numbers           t
  fill-column                    80
  grep-highlight-matches         t
  grep-scroll-output             t
