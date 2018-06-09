@@ -30,34 +30,34 @@
 (require 'package)
 
 (defun unimacs-choose-elpa-source (name)
-  "Choose the right elpa source by NAME : melpa/popkit.
+  "Choose the right elpa source by NAME : melpa/emacs-china.
 
 Because in China mainland, sometimes melpa doesn't work!"
        (interactive
         (list (intern (completing-read "Elpa name (default melpa): "
-                                       '("melpa" "popkit")
+                                       '("melpa" "emacs-china")
                                        nil t nil nil "melpa"))))
        (unimacs-create-package-archives name)
        (package-list-packages))
 
 (defun unimacs-create-package-archives (name)
-  (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")))
+  (setq package-archives '())
   (cl-ecase name
     (melpa
-     (add-to-list 'package-archives
-                  '("melpa" . "http://melpa.milkbox.net/packages/") t)
-     (add-to-list 'package-archives
-                  '("SC"   . "http://joseito.republika.pl/sunrise-commander/") t))
-    (popkit
-     (add-to-list 'package-archives
-                  '("popkit" . "http://elpa.popkit.org/packages/") t)
-     (add-to-list 'package-archives
-                  '("ELPA" . "http://tromey.com/elpa/") t)
-     (add-to-list 'package-archives
-                  '("SC"   . "http://joseito.republika.pl/sunrise-commander/") t)
+     (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
+     (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+     (add-to-list 'package-archives '("SC"   . "http://joseito.republika.pl/sunrise-commander/") t))
+    (emacs-china
+     (add-to-list 'package-archives '("GNU ELPA" . "http://elpa.emacs-china.org/gnu/") t)
+     (add-to-list 'package-archives '("MELPA" . "http://elpa.emacs-china.org/melpa/") t)
+     (add-to-list 'package-archives '("MELPA Stable" . "http://elpa.emacs-china.org/melpa-stable/") t)
+     (add-to-list 'package-archives '("Marmalade" . "http://elpa.emacs-china.org/marmalade/") t)
+     (add-to-list 'package-archives '("Org" . "http://elpa.emacs-china.org/org/") t)
+     (add-to-list 'package-archives '("Sunrise Commander ELPA" . "http://elpa.emacs-china.org/sunrise-commander/") t)
+     (add-to-list 'package-archives '("user42 ELPA" . "http://elpa.emacs-china.org/user42/") t)
      )))
 
-(unimacs-create-package-archives 'melpa)
+(unimacs-create-package-archives 'emacs-china)
 
 ;; ;; set package-user-dir to be relative to Unimacs install path
 (setq package-user-dir unimacs-elpa-dir)
