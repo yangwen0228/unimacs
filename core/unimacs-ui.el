@@ -61,18 +61,12 @@
 ;; buffer name (if the buffer isn't visiting a file)
 (setq frame-title-format
       '(" Unimacs - "
-        (:eval (if (buffer-file-name)
-                   (abbreviate-file-name (buffer-file-name))
-                 "%b"))))
+        (:eval (if (buffer-file-name) (abbreviate-file-name (buffer-file-name)) "%b"))))
 
 ;; font settings:
-(defvar unimacs-font-size
-  (cond
-   (*win32* 11)
-   (*is-a-mac* 14)))
+(defvar unimacs-font-size (cond (*win32* 11) (*is-a-mac* 14)))
 (defun unimacs-make-font-string (font-name font-size)
-  (if (and (stringp font-size)
-           (equal ":" (string (elt font-size 0))))
+  (if (and (stringp font-size) (equal ":" (string (elt font-size 0))))
       (format "%s%s" font-name font-size)
     (format "%s %s" font-name font-size)))
 
@@ -83,18 +77,15 @@ If set/leave chinese-font-size to nil, it will follow english-font-size"
   (require 'cl) ; for find if
   (let* ((english-fonts '("Consolas" "DejaVu Sans Mono" "Monospace" "Courier New"))
          (chinese-fonts '("新宋体" "黑体" "文泉驿等宽微米黑"))
-         (en-font (unimacs-make-font-string (find-if #'x-list-fonts english-fonts)
-                                          font-size))
-         (zh-font (font-spec :family (find-if #'x-list-fonts chinese-fonts)
-                             :size nil)))
+         (en-font (unimacs-make-font-string (find-if #'x-list-fonts english-fonts) font-size))
+         (zh-font (font-spec :family (find-if #'x-list-fonts chinese-fonts) :size nil)))
     ;; Set the default English font
     (set-face-attribute 'default frame :font en-font)
 
     ;; Set Chinese font
     ;; Do not use 'unicode charset, it will cause the English font setting invalid
     (dolist (charset '(kana han symbol cjk-misc bopomofo))
-      (set-fontset-font (frame-parameter nil 'font)
-                        charset zh-font)))
+      (set-fontset-font (frame-parameter nil 'font) charset zh-font)))
   (when (and *is-a-mac* (fboundp 'restore-frame)) (restore-frame))
   (message "default font size is now %d" font-size))
 
@@ -117,21 +108,15 @@ If set/leave chinese-font-size to nil, it will follow english-font-size"
 
 (use-package maxframe
   ;; NOTICE: Must put after font-size setup!
-  :init
-  (maximize-frame))
+  :init (maximize-frame))
 
 ;; set the default theme
 (use-package solarized-theme
   :init
-  (load-theme 'solarized-dark t))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(cursor ((t (:background "RoyalBlue2" :foreground "#002b36" :inverse-video t))))
- '(mc/cursor-face ((t (:background "black" :foreground "light blue" :inverse-video t)))))
+  (load-theme 'solarized-dark t)
+  :custom-face
+  (cursor ((t (:background "RoyalBlue2" :foreground "#002b36" :inverse-video t))))
+  (mc/cursor-face ((t (:background "black" :foreground "light blue" :inverse-video t)))))
 
 (provide 'unimacs-ui)
 ;;; unimacs-ui.el ends here
