@@ -40,8 +40,8 @@
  )
 
 ;; buffer local variables:
+(when (>= emacs-major-version 26) (setq-default display-line-numbers t))
 (setq-default
- display-line-numbers           t
  fill-column                    80
  grep-highlight-matches         t
  grep-scroll-output             t
