@@ -3,8 +3,7 @@
 ;; comments
 
 ;;; Code:
-(use-package dired
-  :ensure nil
+(use-package dired :ensure nil
   :bind ("C-c J" . dired-double-jump)
   :preface
   (defvar mark-files-cache (make-hash-table :test #'equal))
@@ -33,11 +32,7 @@
     (dired-other-window second-dir))
 
   :config
-  (use-package dired-x
-    :ensure nil)
-  (use-package dired+
-    :config
-    (unbind-key "M-s f" dired-mode-map))
+  (use-package dired-x :ensure nil)
 
   (bind-key "l" #'dired-up-directory dired-mode-map)
   (put 'dired-find-alternate-file 'disabled nil)

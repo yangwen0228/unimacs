@@ -24,25 +24,25 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
-(require 'use-package)
 (setq use-package-always-ensure t)
-
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish)
+(require 'bind-key)
 (use-package use-package-chords
   :config (key-chord-mode 1))
 
 (use-package anzu
   :diminish anzu-mode
-  :defer 0
-  :config (global-anzu-mode t)
-  (setq query-replace-skip-read-only t))
+  :init (setq query-replace-skip-read-only t)
+  :config (global-anzu-mode t))
 
 (use-package autorevert
   ;; revert buffers automatically when underlying files are changed externally
-  :commands auto-revert-mode
   :diminish auto-revert-mode
+  :functions auto-revert-mode
+  :hook (find-file . auto-revert-mode)
   :init
-  (add-hook 'find-file-hook #'(lambda () (auto-revert-mode 1)))
-  :config
   (setq global-auto-revert-non-file-buffers t
         auto-revert-verbose nil
         revert-without-query '(".*")))
@@ -50,30 +50,34 @@
 (use-package browse-kill-ring
   :bind ("M-y" . browse-kill-ring)
   :config
+  ;; restore windows: save window configuration before execution
+  (defadvice browse-kill-ring (before browse-kill-ring-fullscreen activate)
+         (window-configuration-to-register :browse-kill-ring-fullscreen))
   ;; override: support multiple-cursors
   (defun browse-kill-ring-insert-and-quit()
     "Insert the selected text at all cursors"
     (interactive)
     (let* ((buf (current-buffer))
            (text (browse-kill-ring-current-string buf (point)))
-           (command (lambda () (interactive) (when text (insert text)))))
-
+           (command (lambda () (interactive) (when text (save-excursion (insert text))))))
       (switch-to-buffer browse-kill-ring-original-buffer)
       (when (and (boundp 'multiple-cursors-mode) multiple-cursors-mode)
         ;; Execute the command for each fake cursor
         (mc/execute-command-for-all-fake-cursors command))
       (switch-to-buffer buf))
-
     ;; Finally execute the command for current cursor
-    (browse-kill-ring-insert t)))
+    (browse-kill-ring-insert t)
+    ;; restore windows
+    (delete-other-windows)
+    (jump-to-register :browse-kill-ring-fullscreen)))
 
 (use-package diff-hl
   :init
   (setq diff-hl-side 'left)
-  (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
-  ;; (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
-  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
+  :hook
+  ((prog-mode magit-mode) . diff-hl-mode)
+  (dired-mode . diff-hl-dired-mode)
+  (magit-post-refresh . diff-hl-magit-post-refresh))
 
 (use-package dizzee
   :config
@@ -111,66 +115,31 @@
     (kill-buffer ediff-buffer-A)
     ;; (kill-buffer ediff-buffer-B)
     (kill-buffer ediff-buffer-C))
-
-  (setq-default
-   ediff-split-window-function 'split-window-horizontally
-   ediff-window-setup-function 'ediff-setup-windows-plain)
-  (add-hook 'ediff-quit-hook 'my-kill-ediff-buffers)
-  (add-hook 'ediff-after-quit-hook-internal 'winner-undo))
+  (setq-default ediff-split-window-function 'split-window-horizontally
+                ediff-window-setup-function 'ediff-setup-windows-plain)
+  :hook (ediff-quit . my-kill-ediff-buffers)
+  :config (add-hook 'ediff-after-quit-hook-internal 'winner-undo))
 
 (use-package eldoc :ensure nil
-  :init
-  (setq eldoc-idle-delay 0.2)
-  (setq eldoc-echo-area-use-multiline-p t)
-  (eldoc-mode t)
+  :init (setq eldoc-idle-delay 0.2 eldoc-echo-area-use-multiline-p t)
+  :config (eldoc-mode t)
   :diminish (eldoc-mode))
 
 (use-package expand-region
   :commands (er/expand-region er/mark-symbol)
   :bind ("C-=" . er/expand-region))
 
-(use-package fancy-narrow :disabled
-  :bind (("C-x n n" . fancy-narrow-to-region)
-         ("C-x n w" . fancy-widen)
-         ("C-x n d" . fancy-narrow-to-defun)
-         ("C-x n p" . fancy-narrow-to-page)))
-
-(use-package font-lock+
-  :init
-  ;; turn on syntax highlighting for all buffers
-  (global-font-lock-mode 1))
-
 (use-package hl-line :ensure nil
-  :init
-  (global-hl-line-mode 1))
-
-(use-package help+)
-(use-package help-fns+)
-(use-package help-mode+)
-
-(use-package hippie-exp :disabled t
-  :bind ("M-/" . hippie-expand)
-  :config
-  (setq hippie-expand-try-functions-list '(try-expand-dabbrev
-                                           try-expand-dabbrev-all-buffers
-                                           try-expand-dabbrev-from-kill
-                                           ;; try-complete-file-name-partially
-                                           ;; try-complete-file-name
-                                           try-expand-all-abbrevs
-                                           ;; try-expand-list
-                                           try-expand-line
-                                           ;; try-complete-lisp-symbol-partially
-                                           ;; try-complete-lisp-symbol
-                                           )))
+  ;; highlight current line
+  :config (global-hl-line-mode 1))
 
 (use-package mic-paren
   ;; highlight contents between braces.
-  :defer 0
+  :init
+  (setq paren-sexp-mode t paren-match-face 'highlight)
   :config
   (paren-activate)
-  (setq paren-sexp-mode  t
-        paren-match-face 'highlight)
-  ;; Fix: Error with multiple-cursors and active mark:
+  ;; Conflict with multiple-cursors and active mark:
   (defadvice mic-paren-highlight (after mic-paren-highlight activate)
     (if (or mark-active (and (boundp 'multiple-cursors-mode)
                              multiple-cursors-mode))
@@ -184,7 +153,6 @@
   (midnight-mode t)
   (midnight-delay-set 'midnight-delay "9:00") ; start time or seconds to 24:00
   (setq clean-buffer-list-delay-general 7)    ; clean buffers exceeding 7 day.
-
   (add-to-list 'clean-buffer-list-kill-buffer-names "*vc-dir*")
   (add-to-list 'clean-buffer-list-kill-regexps "\\*helm")
   (add-to-list 'clean-buffer-list-kill-never-buffer-names "*helm ag* *helm gtags* *helm swoop*"))
@@ -216,7 +184,8 @@
           (forward-line -1))
         (move-to-column column t))))))
 
-(use-package nlinum :disabled
+(use-package nlinum
+  :if (< emacs-major-version 26)
   ;; When file is big, linum-mode is very slow.
   ;; So just display line number when goto line.
   :bind (("M-g g" . goto-line)
@@ -236,20 +205,13 @@
 
 (use-package page-break-lines
   :diminish page-break-lines-mode
-  :defer 0
   :config (global-page-break-lines-mode))
-
-(use-package paradox
-  :commands paradox-list-packages)
 
 (use-package popup
   :commands popup-mode popup-tip
-  :config
-  (custom-set-faces
-   '(popup-tip-face ((t (:background "orange3" :foreground "black"))))))
+  :custom-face (popup-tip-face ((t (:background "orange3" :foreground "black")))))
 
-(use-package rainbow-mode
-  :commands rainbow-mode)
+(use-package rainbow-mode :commands rainbow-mode)
 
 (use-package scratch)
 
@@ -265,15 +227,13 @@
 
 (use-package smart-tab
   :diminish smart-tab-mode
-  :init
+  :config
   ;; NOTICE: Don't manually bind to 'smart-tab, otherwise, dead loop.
   (unbind-key "<tab>")
   (global-smart-tab-mode 1)
-  (setq
-   smart-tab-disabled-major-modes
-   (remove 'org-mode smart-tab-disabled-major-modes)) ; org-mode: yasnippet
+  (setq smart-tab-disabled-major-modes
+        (remove 'org-mode smart-tab-disabled-major-modes)) ; org-mode: yasnippet
   (setq smart-tab-completion-functions-alist nil)
-  :config
   ;; Never use auto-complete and hippie-expand, use yas-expand, so override:
   (defun smart-tab-call-completion-function ()
     "Get a completion function according to current major mode."
@@ -286,17 +246,16 @@
               (call-interactively 'company-yasnippet)))))))
 
 (use-package so-long :ensure nil
-  :init
-  (setq so-long-threshold 500)
-  :config
-  (so-long-enable))
+  ;; When the lines in a buffer are so long that performance could suffer.
+  :init (setq so-long-threshold 500)
+  :config (so-long-enable))
 
-(use-package subword
+(use-package subword :ensure nil
   :diminish subword-mode
   ;; M-f better jump between camel words. C-M-f whole word.
-  :init (add-hook 'prog-mode-hook 'subword-mode))
+  :init (add-hook 'prog-mode-hook #'subword-mode))
 
-(use-package tramp :disabled
+(use-package tramp :ensure nill :disabled
   :config
   (with-eval-after-load 'tramp-cache
     (setq tramp-persistency-file-name
@@ -323,23 +282,21 @@
   )
 
 (use-package simple :ensure nil
-  :diminish visual-line-mode
   ;; visual-line-mode: manipulate lines by visual mode.
-  :defer 0
-  :config (global-visual-line-mode t)
+  :diminish visual-line-mode
+  :init
+  (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
   (add-hook 'visual-line-mode-hook '(lambda () (toggle-word-wrap) (message "")))
-  (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow)))
+  :config (global-visual-line-mode 1))
 
 (use-package highlight-symbol
   :bind (("M-*" . highlight-symbol))
-  :init (add-hook 'prog-mode-hook 'highlight-symbol-nav-mode))
+  :hook (prog-mode . highlight-symbol-nav-mode))
 
 (use-package view :ensure nil
   :init
   ;; view-mode
-  (custom-set-variables
-   '(view-read-only t))
-
+  (custom-set-variables '(view-read-only t))
   (with-eval-after-load 'view
     (define-key view-mode-map (kbd "N") 'View-search-last-regexp-backward)
     (define-key view-mode-map (kbd "?") 'View-search-regexp-backward)
@@ -348,26 +305,25 @@
     (define-key view-mode-map (kbd "W") 'forward-symbol)
     (define-key view-mode-map (kbd "b") 'backward-word)
     (define-key view-mode-map (kbd "h") 'backward-char)
-    (define-key view-mode-map (kbd "j") 'next-line)
-    (define-key view-mode-map (kbd "k") 'previous-line)
+    (define-key view-mode-map (kbd "n") 'next-line)
+    (define-key view-mode-map (kbd "p") 'previous-line)
     (define-key view-mode-map (kbd "l") 'forward-char)
     (define-key view-mode-map (kbd "[") 'backward-paragraph)
     (define-key view-mode-map (kbd "]") 'forward-paragraph))
-
   (with-eval-after-load 'doc-view
-    (define-key doc-view-mode-map (kbd "j") 'doc-view-next-line-or-next-page)
-    (define-key doc-view-mode-map (kbd "k") 'doc-view-previous-line-or-previous-page)))
+    (define-key doc-view-mode-map (kbd "n") 'doc-view-next-line-or-next-page)
+    (define-key doc-view-mode-map (kbd "p") 'doc-view-previous-line-or-previous-page)))
 
 (use-package volatile-highlights
   :diminish volatile-highlights-mode
   ;; highlight when undo or yank
-  :init (volatile-highlights-mode 1))
+  :config (volatile-highlights-mode 1))
 
 (use-package whitespace
+  :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode)
   ;; display special chars, like tabs and trailing whitespace.
   ;; tab-mark lead to freeze Emacs!
   :init
-  (global-whitespace-mode)
   (setq-default show-trailing-whitespace t
                 indicate-empty-lines t
                 indicate-buffer-boundaries 'left)
@@ -377,15 +333,15 @@
         '(;; (newline-mark 10 [172 10]) ; 10 LINE FEED
           ;; (tab-mark 9 [8680 9] [92 9]); 9 TAB
           ))
-  :diminish (global-whitespace-mode whitespace-mode whitespace-newline-mode))
+  :config (global-whitespace-mode 1))
 
-(use-package winner
+(use-package winner :defer 0
   ;; window layout undo/redo
   :bind (("C-," . winner-undo)
          ("C-." . winner-redo))
-  :init
-  (winner-mode 1)
-  (setq winner-ring-size 10))
+  ;; always load
+  :init (setq winner-ring-size 10)
+  :config (winner-mode 1))
 
 (use-package whole-line-or-region
   :diminish whole-line-or-region-mode

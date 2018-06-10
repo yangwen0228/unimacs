@@ -12,6 +12,7 @@
             (lambda ()
               (if (derived-mode-p 'c-mode 'c++-mode)
                   (cppcm-reload-all))))
+  :config
   (require 'init-clang)
   (setq cppcm-include-dirs my-clang-include-directories)
   (setq cppcm-debug t)

@@ -4,15 +4,12 @@
 
 ;;; Code:
 (use-package flycheck
-  :bind* (("C-c ! t" . flycheck-toggle)
-          ("C-c ! l" . helm-flycheck))
+  :bind (("C-c ! t" . flycheck-toggle)
+         ("C-c ! l" . helm-flycheck))
   :commands flycheck-mode
   :preface
-  (defun flycheck-toggle ()
-    (interactive)
-    (flycheck-mode 'toggle))
-  (use-package helm-flycheck
-    :commands helm-flycheck)
+  (defun flycheck-toggle () (interactive) (flycheck-mode 'toggle))
+  (use-package helm-flycheck :commands helm-flycheck)
   :config
   ;; Override default flycheck triggers
   (setq flycheck-check-syntax-automatically '(save idle-change mode-enabled)
@@ -20,7 +17,7 @@
 
   ;; Use pos-tip to show the error messages
   (use-package flycheck-pos-tip
-    :init
+    :config
     (use-package popup)
     (defun flycheck-pos-tip-error-messages-1 (errors)
       (-when-let (messages (remove-duplicates
@@ -80,37 +77,7 @@ string is a package name with an optional version number attached such as `Tcl' 
     (add-to-list 'flycheck-checkers 'tclchecker)
     ))
   (setq flycheck-tclchecker-use-packages '("Tk" "treectrl"))
-  (defun flycheck-fresh-tclchecker ()
-    (interactive)
-    (dolist (filename (directory-files (expand-file-name "~/Library/Application Support/ActiveState/") t ".inf"))
-      (delete-file filename t)))
-
-  ;; Use clang to check c/c++
-  ;; (require 'init-clang)
-
-  ;; (defun my-flycheck-clang-init ()
-  ;;   (setq flycheck-clang-include-path (append '(".") my-clang-include-directories))
-  ;;   )
-
-  ;; (add-hook 'c-mode-common-hook 'my-flycheck-clang-init)
-
-  ;; (defun my-flycheck-irony-init ()
-  ;;   (require 'flycheck-irony)
-  ;;   (set (make-local-variable 'flycheck-checkers) nil)
-  ;;   (flycheck-irony-setup)
-  ;;   )
-
-  ;; (add-hook 'c-mode-hook    'my-flycheck-irony-init)
-  ;; (add-hook 'c++-mode-hook  'my-flycheck-irony-init)
-  ;; (add-hook 'objc-mode-hook 'my-flycheck-irony-init)
-
-  ;; (eval-after-load 'flycheck
-  ;;   '(progn
-  ;;      (require 'flycheck-google-cpplint)
-  ;;      ;; Add Google C++ Style checker.
-  ;;      ;; In default, syntax checked by Clang and Cppcheck.
-  ;;      (flycheck-add-next-checker 'c/c++-clang
-  ;;                                 'c/c++-googlelint 'append)))
   )
+
 (provide 'init-helm-flycheck)
 ;;; init-helm-flycheck.el ends here

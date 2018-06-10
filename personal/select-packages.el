@@ -25,6 +25,7 @@
         init-dired
         init-trees
         init-sr-speedbar
+        init-git
         ;;-------------------------------------------------------------------
         ;; interface
         ;;-------------------------------------------------------------------
@@ -86,11 +87,9 @@
         init-javascript
         init-css
         ;; init-html
-        ;; init-haskell
         ;; init-rails
         ;; init-ruby-mode
         ;; init-csharp-mode
-        ;; init-clojure-cider
         ;; init-cmake-mode
         ;; init-lua-mode
         ;; init-erlang
@@ -109,22 +108,16 @@
         ;;-------------------------------------------------------------------
         init-org
         ;; init-org-mime
-        ;; init-auctex
-        ;; init-darcs
         ;;-------------------------------------------------------------------
         ;; modules not offen used
         ;;-------------------------------------------------------------------
         init-mmm
         init-pomodoro
         ;; init-doxygen
-        ;; init-gist
-        ;; init-git
-        ;; init-gnus
         ;; init-gud
         ;; init-osx-keys
         ;; init-proxies
         ;; init-sr-speedbar
-        ;; init-bbdb
         ;; init-elnode
         ;; init-emms
         ;; init-moz

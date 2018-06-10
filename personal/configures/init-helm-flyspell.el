@@ -11,9 +11,7 @@
   :commands (flyspell-toggle-dwim flyspell-buffer-dwim)
   :preface
   (defun flyspell-toggle-dwim ()
-    "Use `flyspell-mode' for ordinary files, and `flyspell-prog-mode'
-
-for programming files."
+    "Use `flyspell-mode' for ordinary files, and `flyspell-prog-mode' for programming files."
     (interactive)
     (require 'helm-flyspell)
     (if flyspell-mode
@@ -38,8 +36,7 @@ for programming files."
       (flyspell-toggle-dwim)))
 
   :config
-  (use-package flyspell-lazy
-    :init (flyspell-lazy-mode 1))
+  (use-package flyspell-lazy :config (flyspell-lazy-mode 1))
 
   (use-package flyspell :ensure nil
     :init

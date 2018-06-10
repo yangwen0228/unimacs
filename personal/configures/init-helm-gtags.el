@@ -5,8 +5,7 @@
 ;;; Code:
 (use-package helm-gtags
   :diminish helm-gtags-mode
-  :init
-  (add-hook 'prog-mode-hook (lambda () (helm-gtags-mode t)))
+  :hook (prog-mode . helm-gtags-mode)
   :commands helm-gtags-create-tags helm-gtags-update-entire-tags helm-gtags-delete-tags
   :bind-keymap ("C-c g" . helm-gtags-mode-map)
   :bind (("M-t"     . helm-gtags-find-tag-adapter)

@@ -1,7 +1,13 @@
-;; Use cperl-mode instead of the default perl-mode
-(add-to-list 'auto-mode-alist '("\\.\\([pP][Llm]\\|al\\)\\'" . cperl-mode))
-(add-to-list 'interpreter-mode-alist '("perl" . cperl-mode))
-(add-to-list 'interpreter-mode-alist '("perl5" . cperl-mode))
-(add-to-list 'interpreter-mode-alist '("miniperl" . cperl-mode))
+;;; init-cperl-mode.el --- Summary
+;;; Commentary:
+;; comments
+
+;;; Code:
+(use-package cperl-mode :ensure nil
+  :mode ("\\.\\([pP][Llm]\\|al\\)\\'" . cperl-mode)
+  :interpreter (("perl" . cperl-mode)
+                ("perl5" . cperl-mode)
+                ("miniperl" . cperl-mode)))
 
 (provide 'init-cperl-mode)
+;;; init-cperl-mode.el ends here

@@ -1,7 +1,11 @@
-(autoload 'csv-mode "csv-mode" "Major mode for editing comma-separated value files." t)
-(add-to-list 'auto-mode-alist ("\\.[Cc][Ss][Vv]\\'" . 'csv-mode))
-(autoload 'csv-nav-mode "csv-nav-mode" "Major mode for navigating comma-separated value files." t)
+;;; init-csv.el --- Summary
+;;; Commentary:
+;; comments
 
-(setq csv-separators '("," ";" "|" " "))
+;;; Code:
+(use-package csv-mode
+  :mode ("\\.[Cc][Ss][Vv]\\'" . csv-mode)
+  :init (setq csv-separators '("," ";" "|" " ")))
 
 (provide 'init-csv)
+;;; init-csv.el ends here

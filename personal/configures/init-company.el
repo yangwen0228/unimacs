@@ -8,7 +8,6 @@
 ;; TODO: <tab> conflict with yasnippet
 ;;; Code:
 (use-package company
-  :defer 0
   :init
   (setq company-idle-delay            0.1
         company-tooltip-limit         15
@@ -32,12 +31,7 @@
                         ',backends)))
           (add-hook hook func)))))
   :config
-  (global-company-mode t)
-  (unimacs-company-define-backends
-   '((c-mode c++-mode objc-mode) . ((company-irony :with company-yasnippet)
-                                    (company-dabbrev-code :with company-dabbrev company-yasnippet)
-                                    company-c-headers company-files)))
-  ;; (unimacs-company-define-backends '((web-mode) . (company-web-html company-dabbrev-code company-css company-files)))
+  (global-company-mode 1)
 
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "C-j") 'company-show-location)

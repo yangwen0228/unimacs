@@ -6,7 +6,7 @@
 (use-package helm
   :bind (("M-x"     . helm-M-x)
          ("C-x C-f" . helm-find-files)
-         ("C-x b"   . helm-multi-files))
+         ("C-x b"   . helm-mini))
   :config
   (require 'helm-config)
   (helm-mode 1) ;turn helm-mode on, don't turn ido-mode on
@@ -78,9 +78,9 @@ systems."
           (w3m-goto-url               . nil)
           ))
 
-  (defun helm-ff-retrieve-last-expanded ()
-    "Overwrite the origin function. When go up one level, just select the . directory."
-    (setq helm-ff-last-expanded nil))
+  ;; (defun helm-ff-retrieve-last-expanded ()
+  ;;   "Overwrite the origin function. When go up one level, just select the . directory."
+  ;;   (setq helm-ff-last-expanded nil))
 
   ;; pinyin filter
   (setq helm-pinyin-search-p t)

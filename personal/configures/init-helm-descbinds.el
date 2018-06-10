@@ -5,9 +5,7 @@
 ;;; Code:
 (use-package helm-descbinds
   :bind ("C-h b" . helm-descbinds)
-  :commands (helm-descbinds)
-  :config
-  )
+  :commands (helm-descbinds))
 
 (provide 'init-helm-descbinds)
 ;;; init-helm-descbinds.el ends here

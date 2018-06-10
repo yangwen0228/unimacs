@@ -95,6 +95,10 @@
                 (modify-syntax-entry ?_ "w")
                 (my-set-c-style))))
 
+  (unimacs-company-define-backends
+   '((c-mode c++-mode objc-mode) . ((company-irony :with company-yasnippet)
+                                    (company-dabbrev-code :with company-dabbrev company-yasnippet)
+                                    company-c-headers company-files)))
   ;; (use-package google-c-style)
   ;; (add-hook 'c-mode-common-hook 'google-set-c-style)
   ;; (add-hook 'c-mode-common-hook 'google-make-newline-indent)
